@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Folders
+.git\
+.vs\
+Debug\
+x64\
