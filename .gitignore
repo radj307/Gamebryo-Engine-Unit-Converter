@@ -36,3 +36,7 @@
 .vs\
 Debug\
 x64\
+*.db
+*.db-shm
+*.db-wal
+*.opendb
