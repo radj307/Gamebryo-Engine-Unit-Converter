@@ -40,3 +40,14 @@ x64\
 *.db-shm
 *.db-wal
 *.opendb
+.vs/suck/v16/.suo
+*.ipch
+*.tlog
+*.recipe
+*.ilk
+*.pdb
+*.res
+*.log
+*.txt
+*.idb
+*.sln
