@@ -1,8 +1,7 @@
 /* Simple program to convert Gamebryo engine "units" to and from meters.
  * Made by radj307
  */
-#include "user_input.h" // includes "globals.h" & "functions.h"
-//#include <limits> // for extreme cin error checking, replace "cin.ignore(10000, '\n')" with "cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n')"
+#include "functions.h" // includes "globals.h"
 
 /* main()
  * @argc	- Number of arguments included in program call (filepath argument is always included)
