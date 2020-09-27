@@ -1,4 +1,5 @@
-# Skyrim Unit Conversion Kit (S.U.C.K.)
+# Gamebryo Unit Converter Tool
+aka Skyrim Unit Conversion Kit (suck.exe)
 
  Converts Gamebryo (TES, Fallout) measurement units to and from meters using bethesda's supplied values from the Creation Kit.
 
