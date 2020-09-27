@@ -3,95 +3,82 @@
 #pragma once
 #include "globals.h"
 
-/* toMeters(double)	- Convert units into meters
- * @returns double	- Meters Output
- * @param units		- Units Input
- */
-inline d toMeters(d units)
+// Member function of Value: Returns stored value in meters
+inline Value Value::getMeters()
 {
-	// meters = convRatio * units
-	return __cv * units;
+	// switch through input types:
+	switch (_t) 
+	{
+	case type::meters: // if the desired type is the same as the type, return unmodified value
+		return Value(type::meters, _v);
+	case type::units: // units -> meters
+		return Value(type::meters, _v * __ratio_um);
+	case type::feet: // feet -> meters
+		return Value(type::meters, _v / __ratio_mi);
+	default:
+		return Value(type::error, -0.0f);
+	}
 }
-
-/* toUnits(double)	- Convert meters into units
- * @returns double	- Units Output
- * @param units		- Meters Input
- */
-inline d toUnits(d meters)
+// Member function of Value: Returns stored value in units
+inline Value Value::getUnits()
 {
-	// units = meters / convRatio
-	return meters / __cv;
+	// switch through input types:
+	switch (_t) 
+	{
+	case type::units: // if the desired type is the same as the type, return unmodified value
+		return Value(type::units, _v);
+	case type::meters: // meters -> units
+		return Value(type::units, _v / __ratio_um);
+	case type::feet: // feet -> units
+		return Value(type::units, _v / __ratio_ui);
+	default:
+		return Value(type::error, -0.0f);
+	}
 }
-
-// helper for readability
-enum class type { units, meters };
-
-/* printResult(char, double, double) - Prints formatted conversion results to console window.
- * @param iType		- boolean that defines type of input unit (true = meters, false = units)
- * @param input		- Unconverted original value
- * @param result	- Converted result (toMeters() or toUnits())
- */
-inline void printResult(type iType, d input, d result)
+// Member function of Value: Returns stored value in feet
+inline Value Value::getFeet()
 {
-	switch (iType) {
-	case type::meters: // output result in units
-		std::cout << "RESULT:\t" << input << "m = " << result << "u\n\n";
-		break;
-	case type::units: // output result in (c)m
-		std::cout << "RESULT:\t" << input << "u = " << result << "m";
-		if (result < 1.0f) { // if result is less than 1 meter, output result in centimeters as well:
-			result *= 100; // convert result from meters into centimeters
-			std::cout << "\t( " << result << "cm )";
-		}
-		std::cout << "\n\n"; // format
-		break;
+	// switch through input types:
+	switch (_t) 
+	{
+	case type::feet: // if the desired type is the same as the type, return unmodified value
+		return Value(type::feet, _v);
+	case type::meters: // meters -> feet
+		return Value(type::feet, _v * __ratio_mi);
+	case type::units: // units -> feet
+		return Value(type::feet, _v * __ratio_ui);
+	default:
+		return Value(type::error, -0.0f);
 	}
 }
 
-/* proc_user_input() - User input mode processor, prompts user through console for input values
+/* getType(string)	- Converts a string into type
+ * @param arg		- String to convert
  */
-inline void proc_user_input()
+inline type getType(std::string arg)
 {
-	// program header
-	std::cout << "\n--------------------------------------------------\nradj307's Unit-Meter Converter for Gamebryo Engine\n--------------------------------------------------\n\n";
+	// convert string to lowercase:
+	for (unsigned int i = 0; i < arg.size(); i++) {
+		arg[i] = tolower(arg[i]);
+	}
+	// process string:
+	if (arg == "unit" || arg == "units" || arg == "u") {
+		return type::units;
+	}
+	else if (arg == "meter" || arg == "meters" || arg == "m") {
+		return type::meters;
+	}
+	else if (arg == "foot" || arg == "feet" || arg == "ft" || arg == "f") {
+		return type::feet;
+	}
+	return type::error;
+}
 
-	bool exit; // declare next loop exit
-	do { // do once, then check while to continue loop
-		exit = true; // define next loop exit
-		// prompt user for input
-		std::cout << "Select type of input value:\n\t1 - Convert U -> M\n\t2 - Convert M -> U\n\t3 - Exit Now\nuser> ";
-		// receive & process user input
-		int input = 0; // input unit type
-		d number = 0.0f; // input value
-		if (std::cin >> input) {
-			if (input == 1 || input == 'u') {
-				std::cout << "units> ";
-				if (std::cin >> number) {
-					printResult(type::units, number, toMeters(number));
-				}
-			}
-			else if (input == 2 || input == 'm') {
-				std::cout << "meters> ";
-				if (std::cin >> number) {
-					printResult(type::meters, number, toUnits(number));
-				}
-			}
-			else if (input == 3 || input == 'q') {
-				return;
-			}
-			std::cin.clear(); // clear cin failbit
-			std::cin.ignore(10000, '\n'); // clear stream
-		}
-		else { // if cin>> didn't work, print error
-			std::cout << "Invalid Input. <1|2>\n";
-		}
-		std::cout << "Continue? <Y/n>\nuser> ";
-		if (std::cin >> input) {
-			if (tolower(input) == 'y') {
-				exit = false; // don't exit
-				std::cin.clear(); // clear cin failbit
-				std::cin.ignore(10000, '\n'); // clear stream
-			}// else, exit				
-		}
-	} while (!exit);
+/* printResult(Value, Value) - Prints formatted conversion results to console window.
+ * @param input		- Unconverted original value
+ * @param result	- Converted result
+ */
+inline void printResult(Value input, Value result)
+{
+	std::cout << "\t" << input._v << input.sym() << " = " << result._v << result.sym();
 }
