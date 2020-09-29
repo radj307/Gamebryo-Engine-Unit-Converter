@@ -7,8 +7,8 @@
 typedef double d; 
 
 // define colorized console output in ANSI escape sequences:
-static const std::string	cl = "\x1B[92m", // Set console color. (ANSI 92= Bright Green)
-							rs = "\x1B[37m"; // Reset console color. (ANSI 37= White)
+static const std::string	cl = "",//"\x1B[92m", // Set console color. (ANSI 92= Bright Green)
+							rs = "";//"\x1B[37m"; // Reset console color. (ANSI 37= White)
 
 /* units <-> meters
  * METERS	= units * ratio_um
