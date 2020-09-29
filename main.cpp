@@ -1,7 +1,7 @@
 /* Simple program to convert Gamebryo engine "units" to and from meters.
  * Made by radj307
  */
-#include "functions.h" // includes "globals.h"
+#include "functions.cpp" // includes "globals.h"
 
 /* main()
  * @argc	- Number of arguments included in program call (filepath argument is always included)
@@ -24,7 +24,7 @@ int main(int argc = 0, char* argv[] = nullptr) // char * envp[] = {} // omit env
 			printResult(arg, arg.getUnits());
 			break;
 		default:
-			std::cout << "Invalid Arguments.\n\tValid Arguments:\nArg1 = Units | Meters | Feet\nArg2 = Any number\nArg3 = Units | Meters | Feet\n\n";
+			std::cout << "\n\tValid Arguments:\nArg1 = U(Units) | M(Meters) | F(Feet)\nArg2 = Any number (decimal point accuracy is 6 digits)\nArg3 = U(Units) | M(Meters) | F(Feet)\n\n";
 			break;
 		}
 

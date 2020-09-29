@@ -143,7 +143,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="functions.h" />
+    <ClInclude Include="functions.cpp" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

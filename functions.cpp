@@ -68,7 +68,7 @@ inline type getType(std::string arg)
 	else if (arg == "meter" || arg == "meters" || arg == "m") {
 		return type::meters;
 	}
-	else if (arg == "foot" || arg == "feet" || arg == "ft" || arg == "f") {
+	else if (arg == "foot" || arg == "feet" || arg == "ft" || arg == "f" || arg == "i") {
 		return type::feet;
 	}
 	return type::error;
@@ -80,5 +80,20 @@ inline type getType(std::string arg)
  */
 inline void printResult(Value input, Value result)
 {
-	std::cout << "\t" << input._v << input.sym() << " = " << result._v << result.sym();
+	// output result
+	std::cout << "\t" << cl << input._v << rs << input.sym() << " = " << cl << result._v << rs << result.sym();
+	// if value is smaller than 1 and not in units output additional result
+	if (result._v < 1.0f && result._t != type::units) { 
+		switch (result._t) {
+		case type::meters:
+			result._v *= 100; // convert meters to centimeters
+			std::cout << "  ( " << cl << result._v << rs << "cm )";
+			break;
+		case type::feet:
+			result._v *= 12; // convert feet to inches
+			std::cout << "  ( " << cl << result._v << rs << "\" )";
+			break;
+		default:break;
+		}
+	}
 }
