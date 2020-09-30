@@ -11,3 +11,5 @@
 	Open a terminal in the directory where suck.exe is located.
 	
 		.\suck <input unit> <value> <output unit>
+
+(.exe filename can be changed to anything)
