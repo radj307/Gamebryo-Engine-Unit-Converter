@@ -71,8 +71,8 @@ IDI_ICON1               ICON                    "MAINICON.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,1,0,0
- PRODUCTVERSION 2,0,0,0
+ FILEVERSION 0,0,1,0
+ PRODUCTVERSION 0,0,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -89,12 +89,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "radproductions"
             VALUE "FileDescription", "Unit Conversion Tool for Gamebryo Engine"
-            VALUE "FileVersion", "2.1"
+            VALUE "FileVersion", "v2.2"
             VALUE "InternalName", "suck.exe"
             VALUE "LegalCopyright", "N/A"
             VALUE "OriginalFilename", "suck.exe"
             VALUE "ProductName", "Gamebryo Unit Converter"
-            VALUE "ProductVersion", "2.0"
+            VALUE "ProductVersion", "BUILD-2"
         END
     END
     BLOCK "VarFileInfo"

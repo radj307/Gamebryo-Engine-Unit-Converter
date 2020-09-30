@@ -1,5 +1,10 @@
-/* Simple program to convert Gamebryo engine "units" to and from meters.
+/* Simple commandline program to convert between units from the Gamebryo Engine and real-life units
  * Made by radj307
+ * 
+ * Supported conversions as of v2.1:
+ * Units<->Meters
+ * Units<->Feet
+ * Meters<->Feet
  */
 #include "functions.cpp" // includes "globals.h"
 
@@ -9,26 +14,26 @@
  */
 int main(int argc = 0, char* argv[] = nullptr) // char * envp[] = {} // omit environment variables, program does not use them.
 {
-	if (argc > 3) { // if a valid amount of user arguments are detected (3)
+	if (argc == 4) {
+		// Define values & types from arguments:
 		Value arg(getType(argv[1]), atof(argv[2]));
 		type out = getType(argv[3]);
 
+		// Check output type:
 		switch (out) {
-		case type::feet:
+		case type::feet: // output result in feet
 			printResult(arg, arg.getFeet());
 			break;
-		case type::meters:
+		case type::meters: // output result in meters
 			printResult(arg, arg.getMeters());
 			break;
-		case type::units:
+		case type::units: // output result in units
 			printResult(arg, arg.getUnits());
 			break;
-		default:
-			std::cout << "\n\tValid Arguments:\nArg1 = U(Units) | M(Meters) | F(Feet)\nArg2 = Any number (decimal point accuracy is 6 digits)\nArg3 = U(Units) | M(Meters) | F(Feet)\n\n";
-			break;
+		default:break;
 		}
-
-		return 0; // return 0 once args have been processed
 	}
-	return 1; // return 1 if program ends for undefined reason
+	else
+		printHelp();
+	return 0;
 }

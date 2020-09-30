@@ -1,7 +1,17 @@
 /* functions.h contains the processing logic for unit conversions used in main.cpp
  */
 #pragma once
+#include <iostream>
 #include "globals.h"
+
+ /* printHelp() - Outputs titlecard & parameters
+  * Used if user-arguments are incorrect
+  */
+void printHelp()
+{
+	// print help, then flush cout buffer
+	std::cout << " ARGUMENTS:\n\t<input unit> is the unit type you want to convert (Units|Meters|Feet)\n\t<value> is the value to convert (> 0.0)\n\t<output unit> is the converted unit type. (Units|Meters|Feet)" << std::endl;
+}
 
 // Member function of Value: Returns stored value in meters
 inline Value Value::getMeters()
@@ -74,26 +84,49 @@ inline type getType(std::string arg)
 	return type::error;
 }
 
-/* printResult(Value, Value) - Prints formatted conversion results to console window.
- * @param input		- Unconverted original value
- * @param result	- Converted result
+/* (inline) printResult(Value, Value, unsigned int) - Prints conversion results to console in standard notation
+ * @param input		- Original Value
+ * @param result	- Converted Value
+ * @param dec = 8	- Set decimal precision (default is 8)
  */
 inline void printResult(Value input, Value result)
 {
-	// output result
-	std::cout << "\t" << cl << input._v << rs << input.sym() << " = " << cl << result._v << rs << result.sym();
-	// if value is smaller than 1 and not in units output additional result
+	// force standard notation
+	std::cout << std::fixed;
+
+	// round input to whole number and compare to original value
+	if (std::floor(input._v) == input._v)
+		std::cout.precision(0); // don't print decimal values if whole number
+
+	// output input value block
+	std::cout << "\t" << cl << input._v << rs  << input.sym() << " = ";
+
+	// reset precision for next value
+	std::cout.precision(6);
+
+	// round result to whole number and compare to original value
+	if (std::floor(result._v) == result._v)
+		std::cout.precision(0); // don't print decimal values if whole number
+
+	// output result value block
+	std::cout << cl << result._v << rs << result.sym();
+
+	// reset precision for next value
+	std::cout.precision(6);
+	
+	// if result is less than 1, output smaller units as well
 	if (result._v < 1.0f && result._t != type::units) { 
 		switch (result._t) {
 		case type::meters:
 			result._v *= 100; // convert meters to centimeters
-			std::cout << "  ( " << cl << result._v << rs << "cm )";
+			std::cout << "\t( " << cl << result._v << rs << "cm )"; // output centimeters as well
 			break;
 		case type::feet:
 			result._v *= 12; // convert feet to inches
-			std::cout << "  ( " << cl << result._v << rs << "\" )";
+			std::cout << "\t( " << cl << result._v << rs << "\" )"; // output inches as well
 			break;
 		default:break;
 		}
 	}
+	std::cout.flush(); // flush cout buffer
 }

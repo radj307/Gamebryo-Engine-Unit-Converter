@@ -1,32 +1,16 @@
 /* globals.h contains all the global data used throughout the program
  **/
 #pragma once
-#include <iostream>
+
+
+/// GLOBAL VARIABLES AND TYPES
 
 // shortcut for double type
-typedef double d; 
+typedef double d;
 
 // define colorized console output in ANSI escape sequences:
-static const std::string	cl = "",//"\x1B[92m", // Set console color. (ANSI 92= Bright Green)
-							rs = "";//"\x1B[37m"; // Reset console color. (ANSI 37= White)
-
-/* units <-> meters
- * METERS	= units * ratio_um
- * UNITS	= meters / ratio_um
- */
-static const d __ratio_um = 0.01428222656;
-
-/* meters <-> feet
- * METERS	= feet / ratio_mi
- * FEET		= meters * ratio_mi
- */
-static const d __ratio_mi = 3.28086325;
-
-/* units <-> feet
- * FEET		= units * ratio_ui
- * UNITS	= feet / ratio_ui
- */
-static const d __ratio_ui = 0.046875;
+static const std::string	cl = /*"",*/"\x1B[92m", // Set console color. (ANSI 92= Bright Green)
+							rs = /*"";*/"\x1B[37m"; // Reset console color. (ANSI 37= White)
 
 /* enum type - Defines display character for measurement units
  * @type::error	 - !
@@ -36,6 +20,9 @@ static const d __ratio_ui = 0.046875;
  * Note that cm & inches are not included as they are not valid input types.
  */
 enum class type { error = '!', units = 'u', meters = 'm', feet = char(39) };
+
+
+/// GLOBAL STRUCTS
 
 /* Value() - Simple wrapper struct that holds a value and it's type.
  */
@@ -66,3 +53,24 @@ struct Value {
 	// Return stored value in feet
 	inline Value getFeet();
 };
+
+
+/// CONVERSION RATIOS
+
+/* units <-> meters
+ * METERS	= units * ratio_um
+ * UNITS	= meters / ratio_um
+ */
+static const d __ratio_um = 0.01428222656;
+
+/* meters <-> feet
+ * METERS	= feet / ratio_mi
+ * FEET		= meters * ratio_mi
+ */
+static const d __ratio_mi = 3.28086325;
+
+/* units <-> feet
+ * FEET		= units * ratio_ui
+ * UNITS	= feet / ratio_ui
+ */
+static const d __ratio_ui = 0.046875;
