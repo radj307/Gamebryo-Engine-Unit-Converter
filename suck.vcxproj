@@ -24,7 +24,7 @@
     <ProjectGuid>{10ae0de3-509a-4654-af73-16434cef24d7}</ProjectGuid>
     <RootNamespace>SkyrimDistanceConverter</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>SUCK-SkyrimUnitConversionKit</ProjectName>
+    <ProjectName>suck</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
