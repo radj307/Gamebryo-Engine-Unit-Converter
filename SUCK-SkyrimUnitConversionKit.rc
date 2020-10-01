@@ -87,12 +87,12 @@ BEGIN
     BEGIN
         BLOCK "100904b0"
         BEGIN
-            VALUE "CompanyName", "radproductions"
+            VALUE "CompanyName", "tjradj"
             VALUE "FileDescription", "Unit Conversion Tool for Gamebryo Engine"
-            VALUE "FileVersion", "v2.2"
-            VALUE "InternalName", "suck.exe"
-            VALUE "LegalCopyright", "N/A"
-            VALUE "OriginalFilename", "suck.exe"
+            VALUE "FileVersion", "v2.3"
+            VALUE "InternalName", "conv.exe"
+            VALUE "LegalCopyright", "N/A for conv.exe, license included for termcolor library."
+            VALUE "OriginalFilename", "conv.exe"
             VALUE "ProductName", "Gamebryo Unit Converter"
             VALUE "ProductVersion", "BUILD-2"
         END
