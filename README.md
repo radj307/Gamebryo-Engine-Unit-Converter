@@ -6,8 +6,8 @@ As of version 2.3, the termcolor library is used for colored console output.
  Converts between Gamebryo Units, Meters, and Feet.
 
 # Usage
-	Open a terminal in the directory where suck.exe is located.
+	Open a terminal in the directory where conv.exe is located.
 	
-		.\suck <input unit> <value> <output unit>
+		.\conv <input unit> <value> <output unit>
 
 (.exe filename can be changed to anything)
