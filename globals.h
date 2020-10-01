@@ -63,7 +63,7 @@ static const d __ratio_um = 0.01428222656;
  * METERS	= feet / ratio_mi
  * FEET		= meters * ratio_mi
  */
-static const d __ratio_mi = 3.28086325;
+static const d __ratio_mi = 3.281;
 
 /* units <-> feet
  * FEET		= units * ratio_ui

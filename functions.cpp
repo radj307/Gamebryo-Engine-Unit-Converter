@@ -2,6 +2,7 @@
  */
 #pragma once
 #include <iostream>
+#include <string>
 #include "termcolor\termcolor.hpp"
 #include "globals.h"
 
@@ -88,43 +89,34 @@ inline type getType(std::string arg)
 /* (inline) printResult(Value, Value, unsigned int) - Prints conversion results to console in standard notation
  * @param input		- Original Value
  * @param result	- Converted Value
- * @param dec = 8	- Set decimal precision (default is 8)
  */
 inline void printResult(Value input, Value result)
 {
-	// force standard notation
+	// force standard notation to precision of 6 digits
 	std::cout << std::fixed;
-
-	// round input to whole number and compare to original value
-	if (std::floor(input._v) == input._v)
-		std::cout.precision(0); // don't print decimal values if whole number
+	std::cout.precision(6);
 
 	// output input value block
-	std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "  =  ";
-
-	// reset precision for next value
-	std::cout.precision(6);
-
-	// round result to whole number and compare to original value
-	if (std::floor(result._v) == result._v)
-		std::cout.precision(0); // don't print decimal values if whole number
-
-	// output result value block
-	std::cout << termcolor::green << result._v << termcolor::reset << " " << result.sym();
-
-	// reset precision for next value
-	std::cout.precision(6);
+	std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "\t=  " << termcolor::green << result._v << termcolor::reset << " " << result.sym();
 	
 	// if result is less than 1, output smaller units as well
 	if (result._v < 1.0f && result._t != type::units) { 
 		switch (result._t) {
 		case type::meters:
 			result._v *= 100; // convert meters to centimeters
-			std::cout << "\t( " << termcolor::green << result._v << termcolor::reset << " cm )"; // output centimeters as well
+			std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " cm )"; // output centimeters as well
+			if (result._v < 1.0f) {
+				result._v *= 10;
+				std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " mm )"; // output millimeters as well
+				if (result._v < 1.0f) {
+					result._v *= 1000;
+					std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " um )"; // output micrometers as well
+				}
+			}
 			break;
 		case type::feet:
 			result._v *= 12; // convert feet to inches
-			std::cout << "\t( " << termcolor::green << result._v << termcolor::reset << " \" )"; // output inches as well
+			std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " \" )"; // output inches as well
 			break;
 		default:break;
 		}
