@@ -2,6 +2,7 @@
  */
 #pragma once
 #include <iostream>
+#include "termcolor\termcolor.hpp"
 #include "globals.h"
 
  /* printHelp() - Outputs titlecard & parameters
@@ -99,7 +100,7 @@ inline void printResult(Value input, Value result)
 		std::cout.precision(0); // don't print decimal values if whole number
 
 	// output input value block
-	std::cout << "\t" << cl << input._v << rs  << input.sym() << " = ";
+	std::cout << "\t" << termcolor::green << input._v << termcolor::reset  << input.sym() << " = ";
 
 	// reset precision for next value
 	std::cout.precision(6);
@@ -109,7 +110,7 @@ inline void printResult(Value input, Value result)
 		std::cout.precision(0); // don't print decimal values if whole number
 
 	// output result value block
-	std::cout << cl << result._v << rs << result.sym();
+	std::cout << termcolor::green << result._v << termcolor::reset << result.sym();
 
 	// reset precision for next value
 	std::cout.precision(6);
@@ -119,11 +120,11 @@ inline void printResult(Value input, Value result)
 		switch (result._t) {
 		case type::meters:
 			result._v *= 100; // convert meters to centimeters
-			std::cout << "\t( " << cl << result._v << rs << "cm )"; // output centimeters as well
+			std::cout << "\t( " << termcolor::green << result._v << termcolor::reset << "cm )"; // output centimeters as well
 			break;
 		case type::feet:
 			result._v *= 12; // convert feet to inches
-			std::cout << "\t( " << cl << result._v << rs << "\" )"; // output inches as well
+			std::cout << "\t( " << termcolor::green << result._v << termcolor::reset << "\" )"; // output inches as well
 			break;
 		default:break;
 		}

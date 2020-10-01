@@ -1,11 +1,9 @@
-# Skyrim Unit Conversion Kit (S.U.C.K.)
+As of version 2.3, the termcolor library is used for colored console output.
+( https://github.com/ikalnytskyi/termcolor )
+
+# Gamebryo Unit Converter
 
  Converts between Gamebryo Units, Meters, and Feet.
- Supports:
-	Meters 	<-> Feet
-	Meters 	<-> Units
-	Feet 	<-> Units
-
 
 # Usage
 	Open a terminal in the directory where suck.exe is located.
