@@ -71,8 +71,8 @@ IDI_ICON1               ICON                    "MAINICON.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,1,0
- PRODUCTVERSION 0,0,1,0
+ FILEVERSION 2,3
+ PRODUCTVERSION 2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -89,9 +89,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "tjradj"
             VALUE "FileDescription", "Unit Conversion Tool for Gamebryo Engine"
-            VALUE "FileVersion", "v2.3"
             VALUE "InternalName", "conv.exe"
-            VALUE "LegalCopyright", "N/A for conv.exe, license included for termcolor library."
             VALUE "OriginalFilename", "conv.exe"
             VALUE "ProductName", "Gamebryo Unit Converter"
             VALUE "ProductVersion", "BUILD-2"
