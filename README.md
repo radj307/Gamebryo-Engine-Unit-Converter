@@ -9,6 +9,6 @@
 		.\conv <input unit> <value> <output unit>
 
 # Credits & Thanks
-As of version 2.3, the termcolor library is used for colored console output.
+As of version 2.3, ikalnytskyi's termcolor library is used for colored console output.
 ( https://github.com/ikalnytskyi/termcolor )
 This is a great cross-platform wrapper for ANSI color escape sequences.
