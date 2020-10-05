@@ -85,21 +85,51 @@ inline type getType(std::string arg)
 	return type::error;
 }
 
-/* (inline) printResult(Value, Value, unsigned int) - Prints conversion results to console in standard notation
- * @param input		- Original Value
- * @param result	- Converted Value
+/* getResult(Value, type) - Main conversion function
+ * Used by printResult
+ * @param input			- Input value
+ * @param outputType	- Requested result type
+ * @returns double		- Result value, or -0.0 if requested type matches input type.
  */
-inline void printResult(Value input, Value result)
+inline d getResult(Value input, type outputType)
 {
-	// force standard notation to precision of 6 digits
-	std::cout << std::fixed;
+	// check if requested type is the same as current type & return error code
+	if (input._t != outputType) {
+		// select conversion type and return the result
+		switch (outputType) {
+		case type::feet:
+			return input.getFeet()._v;
+			break;
+		case type::meters:
+			return input.getMeters()._v;
+			break;
+		case type::units:
+			return input.getUnits()._v;
+			break;
+		default:break;
+		}
+	}
+	return -0.0f; // undefined behavior returns -0.0f
+}
+
+/* (inline) printResult(Value, type) - Prints conversion results to console in standard notation. Uses getResult()
+ * @param input		 - Original Value
+ * @param outputType - Requested output unit
+ * @returns void
+ */
+inline void printResult(Value input, type outputType)
+{
+	// define result
+	Value result(outputType, getResult(input, outputType));
+
+	// set decimal precision to 6 digits. (xEdit uses 6 digit precision)
 	std::cout.precision(6);
 
-	// output input value block
-	std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "\t=  " << termcolor::green << result._v << termcolor::reset << " " << result.sym();
-	
+	// output text block, and use fixed standard notation values for results only.
+	std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "\t=  " << std::fixed << termcolor::green << result._v << termcolor::reset << " " << result.sym();
+
 	// if result is less than 1, output smaller units as well
-	if (result._v < 1.0f && result._t != type::units) { 
+	if (result._v < 1.0f && result._t != type::units) {
 		switch (result._t) {
 		case type::meters:
 			result._v *= 100; // convert meters to centimeters
@@ -117,8 +147,9 @@ inline void printResult(Value input, Value result)
 			result._v *= 12; // convert feet to inches
 			std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " \" )"; // output inches as well
 			break;
-		default:break;
+		default:break; // else break
 		}
 	}
+	std::cout.unsetf(std::ios_base::floatfield); // unset std::fixed flag
 	std::cout.flush(); // flush cout buffer
 }

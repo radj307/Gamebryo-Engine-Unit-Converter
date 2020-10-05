@@ -16,22 +16,10 @@ int main(int argc = 0, char* argv[] = nullptr) // char * envp[] = {} // omit env
 {
 	if (argc == 4) {
 		// Define values & types from arguments:
-		Value arg(getType(argv[1]), atof(argv[2]));
+		Value in(getType(argv[1]), atof(argv[2]));
 		type out = getType(argv[3]);
 
-		// Check output type:
-		switch (out) {
-		case type::feet: // output result in feet
-			printResult(arg, arg.getFeet());
-			break;
-		case type::meters: // output result in meters
-			printResult(arg, arg.getMeters());
-			break;
-		case type::units: // output result in units
-			printResult(arg, arg.getUnits());
-			break;
-		default:break;
-		}
+		printResult(in, out);
 	}
 	else
 		printHelp();
