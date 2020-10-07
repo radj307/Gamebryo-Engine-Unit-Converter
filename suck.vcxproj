@@ -143,6 +143,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="fileIO.h" />
     <ClInclude Include="functions.cpp" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="resource.h" />

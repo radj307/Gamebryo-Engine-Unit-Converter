@@ -4,6 +4,7 @@
 #include <iostream>
 #include "termcolor\termcolor.hpp"
 #include "globals.h"
+#include "fileIO.h"
 
  /* printHelp() - Outputs titlecard & parameters
   * Used if user-arguments are incorrect
@@ -63,8 +64,11 @@ inline Value Value::getFeet()
 	}
 }
 
-/* getType(string)	- Converts a string into type
+/* getType(string)
+ * Converts a string into type
+ * 
  * @param arg		- String to convert
+ * @returns type	- type::error is returned if string does not match any type
  */
 inline type getType(std::string arg)
 {
@@ -91,7 +95,7 @@ inline type getType(std::string arg)
  * @param outputType	- Requested result type
  * @returns double		- Result value, or -0.0 if requested type matches input type.
  */
-inline d getResult(Value input, type outputType)
+inline d getResult(type outputType, Value input)
 {
 	// check if requested type is the same as current type & return error code
 	if (input._t != outputType) {
@@ -112,6 +116,7 @@ inline d getResult(Value input, type outputType)
 	return -0.0f; // undefined behavior returns -0.0f
 }
 
+
 /* (inline) printResult(Value, type) - Prints conversion results to console in standard notation. Uses getResult()
  * @param input		 - Original Value
  * @param outputType - Requested output unit
@@ -120,7 +125,7 @@ inline d getResult(Value input, type outputType)
 inline void printResult(Value input, type outputType)
 {
 	// define result
-	Value result(outputType, getResult(input, outputType));
+	Value result(outputType, getResult(outputType, input));
 
 	// set decimal precision to 6 digits. (xEdit uses 6 digit precision)
 	std::cout.precision(6);
@@ -152,4 +157,39 @@ inline void printResult(Value input, type outputType)
 	}
 	std::cout.unsetf(std::ios_base::floatfield); // unset std::fixed flag
 	std::cout.flush(); // flush cout buffer
+}
+
+inline std::string formatResult(Value in, Value out)
+{
+	if (out._v == -0) {
+		return "\tLine Error: Invalid";
+	}
+
+	std::stringstream rs;
+	rs << "\t" <<  in._v <<  " " << in.sym() << "\t=  " << out._v << " " << out.sym();
+
+	// if result is less than 1, output smaller units as well
+	if (out._v < 1.0f && out._t != type::units) {
+		switch (out._t) {
+		case type::meters:
+			out._v *= 100; // convert meters to centimeters
+			rs << "  ( " << out._v << " cm )"; // output centimeters as well
+			if (out._v < 1.0f) {
+				out._v *= 10;
+				rs << "  ( " << out._v << " mm )"; // output millimeters as well
+				if (out._v < 1.0f) {
+					out._v *= 1000;
+					rs << "  ( " << out._v << " um )"; // output micrometers as well
+				}
+			}
+			break;
+		case type::feet:
+			out._v *= 12; // convert feet to inches
+			rs << "  ( " << out._v << " \" )"; // output inches as well
+			break;
+		default:break; // else break
+		}
+		rs << std::endl;
+	}
+	return rs.str();
 }

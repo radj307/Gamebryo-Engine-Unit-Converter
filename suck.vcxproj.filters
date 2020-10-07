@@ -26,8 +26,11 @@
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="functions.cpp">
+    <ClInclude Include="fileIO.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="functions.cpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
