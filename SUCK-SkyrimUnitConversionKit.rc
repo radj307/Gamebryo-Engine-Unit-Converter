@@ -1,6 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include "resource.h"
+#include "resource1.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -71,8 +71,8 @@ IDI_ICON1               ICON                    "MAINICON.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,3
- PRODUCTVERSION 2,0
+ FILEVERSION 2,4,0,0
+ PRODUCTVERSION 2,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -89,6 +89,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "tjradj"
             VALUE "FileDescription", "Unit Conversion Tool for Gamebryo Engine"
+            VALUE "FileVersion", "2.4.0.0"
             VALUE "InternalName", "conv.exe"
             VALUE "OriginalFilename", "conv.exe"
             VALUE "ProductName", "Gamebryo Unit Converter"
