@@ -6,7 +6,6 @@
  * Units<->Feet
  * Meters<->Feet
  */
-#include <algorithm>
 #include "functions.cpp" // includes "globals.h"
 
 /* main()
