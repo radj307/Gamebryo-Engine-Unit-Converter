@@ -1,5 +1,6 @@
-/* globals.h contains all the global data used throughout the program
- **/
+/*{{NO_DEPENDENCIES}}
+ * globals.h contains all the global data used throughout the program
+ */
 #pragma once
 
 

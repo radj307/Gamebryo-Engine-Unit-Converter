@@ -147,10 +147,9 @@
     <ClInclude Include="functions.cpp" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="resource1.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SUCK-SkyrimUnitConversionKit.rc" />
+    <ResourceCompile Include="conv.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="MAINICON.ico" />

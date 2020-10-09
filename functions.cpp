@@ -2,17 +2,22 @@
  */
 #pragma once
 #include <iostream>
+#include <conio.h>
 #include "termcolor\termcolor.hpp"
 #include "globals.h"
 #include "fileIO.h"
 
- /* printHelp() - Outputs titlecard & parameters
+ /* printHelp() - Outputs title card & parameters
   * Used if user-arguments are incorrect
   */
 void printHelp()
 {
 	// print help, then flush cout buffer
 	std::cout << " ARGUMENTS:\n\t<input unit> is the unit type you want to convert (Units|Meters|Feet)\n\t<value> is the value to convert (> 0.0)\n\t<output unit> is the converted unit type. (Units|Meters|Feet)\n\tOR\n\t<filepath> to convert a text file.\n" << std::endl;
+	
+	std::cout << termcolor::red << "\n\tPress any key to exit..." << termcolor::reset << std::endl;
+	std::cout.flush();
+	char tmp = _getch();
 }
 
 // Member function of Value: Returns stored value in meters
@@ -159,10 +164,18 @@ inline void printResult(Value input, type outputType)
 	std::cout.flush(); // flush cout buffer
 }
 
+/**
+ * formatResult(Value, Value)
+ * Returns a human-readable string from input & output Values for text file output
+ * 
+ * @param in	- The input stored in a Value
+ * @param out	- The output stored in a Value
+ * @returns string
+ */
 inline std::string formatResult(Value in, Value out)
 {
 	if (out._v == -0) {
-		return "\tLine Error: Invalid";
+		return "\tERROR: Invalid Format";
 	}
 
 	std::stringstream rs;
@@ -192,4 +205,48 @@ inline std::string formatResult(Value in, Value out)
 		rs << std::endl;
 	}
 	return rs.str();
+}
+
+/**
+ * processFile(string)
+ * Mass-converts a correctly formatted text file, then creates an output file to store the result.
+ * 
+ * @param filename			- The full filepath including file name & extension
+ * @returns int to be returned by main()
+ */
+inline int processFile(std::string filename)
+{
+	// Get the contents of file separated by line
+	std::vector<std::string> fileContent = fileRead(filename);
+
+	// Create sstream to hold results, and a buffer for processing each line
+	std::stringstream outputStream;
+
+
+	// iterate through every line in the file
+	for (auto it = fileContent.begin(); it != fileContent.end(); it++) {
+		// use erase-remove idiom to remove all tab characters
+		it->erase(std::remove(it->begin(), it->end(), '\t'), it->end());
+
+		// split the line by spaces & store each word in a vector
+		std::vector<std::string> words_on_line = splitLine(*it);
+
+		// if the line has 3 arguments
+		if (words_on_line.size() == 3) {
+			try {
+				// Create input & output values from arguments
+				Value in(getType(words_on_line[0]), std::stod(words_on_line[1])), out(getType(words_on_line[2]), getResult(getType(words_on_line[2]), in));
+				// Copy result string to stringstream
+				outputStream << formatResult(in, out) + '\n';
+			}
+			catch (...) { // if an exception occurs because of invalid arguments, replace this line with error text
+				outputStream << std::endl;
+			}
+		}
+		else { // if the line does not have 3 arguments, replace it with empty line
+			outputStream << std::endl;
+		}
+	}
+	// write outputStream to file with -conv appended to the name. return inverted bool result for main() return
+	return !fileWrite(fileGetName(filename) + "-conv" + fileGetExtension(filename), outputStream);
 }

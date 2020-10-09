@@ -23,21 +23,18 @@
     <ClInclude Include="globals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
     <ClInclude Include="fileIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="functions.cpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource1.h">
+    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SUCK-SkyrimUnitConversionKit.rc">
+    <ResourceCompile Include="conv.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

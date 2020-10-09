@@ -1,19 +1,22 @@
 /* fileIO.cpp - Header with basic file-related functions
  * By radj307(tjradj)
+ * 
+ * Dependencies:
+ * vector
+ * stringstream
+ * filestream
  */
 #pragma once
-#include <iostream>
 #include <vector>
 #include <fstream>
 #include <sstream>
-//#define DEBUG
 
  /**
   * fileRead(string, char)
   * Opens a file, copies it's contents to a buffer, closes the file, copies the buffer into a vector to format it, then returns the vector.
   *
   * @param filepath	- The full location of the target file, including filename.
-  * @param delim		- Each occurance of this character will be placed at a seperate index in the vector
+  * @param delim		- Each occurrence of this character will be placed at a separate index in the vector
   * @returns vector<string> with file contents.
   */
 inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n')
@@ -49,7 +52,7 @@ inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n'
  *
  * @param filepath	- The full filepath including file name & extension
  * @param data		- sstream ref containing data to write to file
- * @param delim		- Each occurance of this char in the stream will be put on a new line.
+ * @param delim		- Each occurrence of this char in the stream will be put on a new line.
  * @returns bool (true=success | false=fail)
  */
 inline bool fileWrite(std::string filepath, std::stringstream& data, char delim = '\n')
@@ -74,39 +77,9 @@ inline bool fileWrite(std::string filepath, std::stringstream& data, char delim 
 }
 
 /**
- * fileIO_Debug(string) - DEBUG FUNCTION
- * Prompts terminal for input, then writes it to a file & closes it, then reads the file and outputs the contents to the terminal.
- * (Uses writeToFile & readFromFile)
- *
- * @param filepath	- The full filepath including file name & extension
- * @returns bool (true = success | false = failure)
- */#ifdef DEBUG
-inline bool fileIO_Debug(std::string filepath)
-{
-	// create stringstream
-	std::stringstream ss;
-
-	// prompt user, input is only passed to stream if it is not "quit"
-	std::cout << "Type some text, type 'quit' when done." << std::endl;
-	// loop until "quit" is detected as input.
-	for (std::string input = ""; input != "quit"; std::getline(std::cin, input)) {
-		ss << input + '\n';
-	}
-	if (fileWrite(filepath, ss)) {
-		std::vector<std::string> list;
-		list = fileRead(filepath);
-		for (auto it = list.begin(); it != list.end(); it++) {
-			std::cout << *it << std::endl;
-		}
-		return true; // success
-	}
-	return false; // failure
-}
-#endif
-
-/**
  * splitLine(string)
- * Returns a vector of strings with each index representing one word from the input string
+ * Returns a vector of strings with each index representing one word from the input string.
+ * Automatically removes whitespace with no attached characters.
  *
  * @param line				- The string to be split
  * @returns vector<string>	- Each word gets an index
@@ -116,7 +89,7 @@ inline std::vector<std::string> splitLine(std::string line)
 	// create a vector to return words from the line
 	std::vector<std::string> words = {};
 	// create a stringstream for getline
-	std::stringstream ss;
+	std::stringstream ss, ws;
 	// copy the line param to stringstream
 	ss << line;
 	// iterate through sstream, copy each word to vector
@@ -126,21 +99,43 @@ inline std::vector<std::string> splitLine(std::string line)
 }
 
 /**
- * fileRemoveExtension(string)
- * Utility function that returns a filename without the extension.
+ * fileGetExtension(string, char)
+ * Returns the name of a file without the extension
  *
- * @param filepath		- Target filepath/name
- * @returns	string		- Returns filename without extension, or filename if extension couldn't be found.
+ * @param path			- The full filepath including file name & extension
+ * @param delim = '.'	- The last occurrence of this will be treated as the extension mark
+ * @returns string		- The file extension with no name
  */
-inline std::string fileRemoveExtension(std::string filepath)
+inline std::string fileGetExtension(std::string path, char delim = '.')
 {
-	// find the last occurance of '.' in filename, save its index
-	std::string::size_type index = filepath.rfind('.');
+	// find the last occurrence of the delim parameter
+	std::string::size_type delim_index = path.rfind(delim);
 
-	// remove all chars from index to string end
-	if (index != std::string::npos) {
-		filepath.erase(index, filepath.length());
+	// if rfind was successful (returns -1, or string::npos, on fail)
+	if (delim_index != std::string::npos) {
+		// erase the name from copied parameter, and return the extension
+		path.erase(0, delim_index);
 	}
-	// return filename
-	return filepath;
+	return path;
+}
+
+/**
+ * fileGetName(string, char)
+ * Returns the name of a file without the extension
+ *
+ * @param path			- The full filepath including file name & extension
+ * @param delim = '.'	- The last occurrence of this will be treated as the extension mark
+ * @returns string		- The filename with no extension
+ */
+inline std::string fileGetName(std::string path, char delim = '.')
+{
+	// find the last occurrence of the delim parameter
+	std::string::size_type delim_index = path.rfind(delim);
+
+	// if rfind was successful (returns -1, or string::npos, on fail)
+	if (delim_index != std::string::npos) {
+		// erase the extension from copied parameter, and return the name
+		path.erase(delim_index, path.length());
+	}
+	return path;
 }
