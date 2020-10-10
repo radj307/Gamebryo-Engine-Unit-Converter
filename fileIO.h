@@ -53,6 +53,7 @@ inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n'
  * @param filepath	- The full filepath including file name & extension
  * @param data		- sstream ref containing data to write to file
  * @param delim		- Each occurrence of this char in the stream will be put on a new line.
+ * @param fixedNum	- Setting this to true will force all numbers to standard notation
  * @returns bool (true=success | false=fail)
  */
 inline bool fileWrite(std::string filepath, std::stringstream& data, char delim = '\n')
@@ -78,8 +79,7 @@ inline bool fileWrite(std::string filepath, std::stringstream& data, char delim 
 
 /**
  * splitLine(string)
- * Returns a vector of strings with each index representing one word from the input string.
- * Automatically removes whitespace with no attached characters.
+ * Returns a vector of strings with each index representing one word from the input string. Does not perform error correction.
  *
  * @param line				- The string to be split
  * @returns vector<string>	- Each word gets an index

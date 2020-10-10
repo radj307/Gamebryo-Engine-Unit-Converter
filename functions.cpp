@@ -222,7 +222,6 @@ inline int processFile(std::string filename)
 	// Create sstream to hold results, and a buffer for processing each line
 	std::stringstream outputStream;
 
-
 	// iterate through every line in the file
 	for (auto it = fileContent.begin(); it != fileContent.end(); it++) {
 		// use erase-remove idiom to remove all tab characters
@@ -247,6 +246,6 @@ inline int processFile(std::string filename)
 			outputStream << std::endl;
 		}
 	}
-	// write outputStream to file with -conv appended to the name. return inverted bool result for main() return
+	// write outputStream to file with -conv appended to the name. return inverted bool result for main() return. final param true forces standard notation.
 	return !fileWrite(fileGetName(filename) + "-conv" + fileGetExtension(filename), outputStream);
 }
