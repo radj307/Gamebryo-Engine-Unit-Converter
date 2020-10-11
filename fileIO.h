@@ -23,7 +23,7 @@ inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n'
 {
 	// create a vector of strings to return
 	std::vector<std::string> dataReturn = {};
-	// create a readbuffer stringstream
+	// create a read-buffer stringstream
 	std::stringstream rb;
 	// create input filestream
 	std::ifstream file;

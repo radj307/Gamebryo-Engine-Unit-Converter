@@ -28,6 +28,7 @@ struct Value {
 	type _t;
 	// The value in measurement units
 	d _v;
+	// boolean for quick error evaluation. Set at instantiation.
 
 	/* Value(type, double) - CONSTRUCTOR
 	 * @param type	 = The measurement unit of this value
@@ -35,19 +36,19 @@ struct Value {
 	 */
 	Value(type TypeOfValue, d Value) : _t(TypeOfValue), _v(Value) {}
 
-	// converts type to char and returns it
+	// returns type as a char for convenience
 	inline char sym()
 	{
 		return char(_t);
 	}
 
-	// Return stored value in meters
+	// Return a Value with stored value in meters
 	inline Value getMeters();
 
-	// Return stored value in units
+	// Return a Value with stored value in units
 	inline Value getUnits();
 
-	// Return stored value in feet
+	// Return a Value with stored value in feet
 	inline Value getFeet();
 };
 

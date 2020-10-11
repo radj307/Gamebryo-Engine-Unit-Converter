@@ -7,16 +7,27 @@
 #include "globals.h"
 #include "fileIO.h"
 
- /* printHelp() - Outputs title card & parameters
-  * Used if user-arguments are incorrect
-  */
-void printHelp()
+/**
+ * printHelp(bool)
+ * Displays argument syntax in the console.
+ * Flushes the cout buffer before & after printing.
+ * 
+ * @param pause	- If true the function will wait for user to press a key before returning.
+ */
+void printHelp(bool pause = false)
 {
-	// print help, then flush cout buffer
-	std::cout << " ARGUMENTS:\n\t<input unit> is the unit type you want to convert (Units|Meters|Feet)\n\t<value> is the value to convert (> 0.0)\n\t<output unit> is the converted unit type. (Units|Meters|Feet)\n\tOR\n\t<filepath> to convert a text file.\n" << std::endl;
-	
-	std::cout << termcolor::red << "\n\tPress any key to exit..." << termcolor::reset << std::endl;
+	// flush console output buffer
 	std::cout.flush();
+	// display help text
+	std::cout << " ARGUMENTS:\n\t<input unit> is the unit type you want to convert (Units|Meters|Feet)\n\t<value> is the value to convert (> 0.0)\n\t<output unit> is the converted unit type. (Units|Meters|Feet)\n\tOR\n\t<filepath> to convert a text file.\n\n";
+	// check if pause is true before proceeding.
+	if (!pause)
+		return;
+	// prompt user to press a key before exiting.
+	std::cout << termcolor::red << "\tPress any key to exit...\n" << termcolor::reset;
+	// flush console output buffer
+	std::cout.flush();
+	// wait for user to press a key
 	char tmp = _getch();
 }
 
@@ -69,8 +80,9 @@ inline Value Value::getFeet()
 	}
 }
 
-/* getType(string)
- * Converts a string into type
+/** 
+ * getType(string)
+ * Converts a string into class type
  * 
  * @param arg		- String to convert
  * @returns type	- type::error is returned if string does not match any type
@@ -94,15 +106,17 @@ inline type getType(std::string arg)
 	return type::error;
 }
 
-/* getResult(Value, type) - Main conversion function
- * Used by printResult
+/** 
+ * getResult(Value, type)
+ * Converts parameters & returns the result as a double.
+ * 
  * @param input			- Input value
  * @param outputType	- Requested result type
- * @returns double		- Result value, or -0.0 if requested type matches input type.
+ * @returns double		- Result value, or -0.0 if error.
  */
 inline d getResult(type outputType, Value input)
 {
-	// check if requested type is the same as current type & return error code
+	// make sure input type & output type aren't the same
 	if (input._t != outputType) {
 		// select conversion type and return the result
 		switch (outputType) {
@@ -118,19 +132,72 @@ inline d getResult(type outputType, Value input)
 		default:break;
 		}
 	}
-	return -0.0f; // undefined behavior returns -0.0f
+	// return error code:
+	return -0.0f;
 }
 
+/**
+ * formatResult(Value, Value)
+ * Returns a human-readable string from input & output Values
+ * 
+ * @param in	- The input stored in a Value
+ * @param out	- The output stored in a Value
+ * @returns string
+ */
+inline std::string formatResult(Value in, Value out, bool endWithNewLine = true)
+{
+	if (out._v == -0)
+		return "";
 
-/* (inline) printResult(Value, type) - Prints conversion results to console in standard notation. Uses getResult()
+	std::stringstream rs; // result-stream
+
+	// add primary conversion to stream
+	rs << "\t" <<  in._v <<  " " << in.sym() << "\t=  " << out._v << " " << out.sym();
+
+	// if result val is less than 1 & not in units, add smaller unit types for context
+	if (out._v < 1.0f && out._t != type::units) {
+		switch (out._t) {
+		case type::meters: // metric
+			out._v *= 100; // convert meters to centimeters
+			rs << "  ( " << out._v << " cm )";
+			if (out._v < 1.0f) {
+				out._v *= 10; // convert centimeters to millimeters
+				rs << "  ( " << out._v << " mm )";
+				if (out._v < 1.0f) {
+					out._v *= 1000; // convert millimeters to micrometers
+					rs << "  ( " << out._v << " um )";
+				}
+			}
+			break;
+		case type::feet: // imperial
+			out._v *= 12; // convert feet to inches
+			rs << "  ( " << out._v << " \" )"; // output inches as well
+			break;
+		default:break; // undefined break
+		}
+	}
+	if (endWithNewLine)
+		rs << '\n';
+
+	return rs.str();
+}
+
+/**
+ * printResult(Value, type)
+ * Displays conversion and results in console window in human-readable format, with color.
+ * Does not use formatResult as it would take more time to convert back for colorized output
+ *
  * @param input		 - Original Value
  * @param outputType - Requested output unit
- * @returns void
+ * @returns int 0 = success, 1 = error
  */
-inline void printResult(Value input, type outputType)
+inline int printResult(Value input, type outputType)
 {
 	// define result
 	Value result(outputType, getResult(outputType, input));
+
+	if (result._v == -0.0)
+		return 1; // return an error if invalid
 
 	// set decimal precision to 6 digits. (xEdit uses 6 digit precision)
 	std::cout.precision(6);
@@ -162,49 +229,7 @@ inline void printResult(Value input, type outputType)
 	}
 	std::cout.unsetf(std::ios_base::floatfield); // unset std::fixed flag
 	std::cout.flush(); // flush cout buffer
-}
-
-/**
- * formatResult(Value, Value)
- * Returns a human-readable string from input & output Values for text file output
- * 
- * @param in	- The input stored in a Value
- * @param out	- The output stored in a Value
- * @returns string
- */
-inline std::string formatResult(Value in, Value out)
-{
-	if (out._v == -0) {
-		return "\tERROR: Invalid Format";
-	}
-
-	std::stringstream rs;
-	rs << "\t" <<  in._v <<  " " << in.sym() << "\t=  " << out._v << " " << out.sym();
-
-	// if result is less than 1, output smaller units as well
-	if (out._v < 1.0f && out._t != type::units) {
-		switch (out._t) {
-		case type::meters:
-			out._v *= 100; // convert meters to centimeters
-			rs << "  ( " << out._v << " cm )"; // output centimeters as well
-			if (out._v < 1.0f) {
-				out._v *= 10;
-				rs << "  ( " << out._v << " mm )"; // output millimeters as well
-				if (out._v < 1.0f) {
-					out._v *= 1000;
-					rs << "  ( " << out._v << " um )"; // output micrometers as well
-				}
-			}
-			break;
-		case type::feet:
-			out._v *= 12; // convert feet to inches
-			rs << "  ( " << out._v << " \" )"; // output inches as well
-			break;
-		default:break; // else break
-		}
-		rs << std::endl;
-	}
-	return rs.str();
+	return 0;
 }
 
 /**
@@ -236,7 +261,7 @@ inline int processFile(std::string filename)
 				// Create input & output values from arguments
 				Value in(getType(words_on_line[0]), std::stod(words_on_line[1])), out(getType(words_on_line[2]), getResult(getType(words_on_line[2]), in));
 				// Copy result string to stringstream
-				outputStream << formatResult(in, out) + '\n';
+				outputStream << formatResult(in, out);
 			}
 			catch (...) { // if an exception occurs because of invalid arguments, replace this line with error text
 				outputStream << std::endl;
