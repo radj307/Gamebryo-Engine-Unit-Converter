@@ -89,7 +89,7 @@ inline std::vector<std::string> splitLine(std::string line)
 	// create a vector to return words from the line
 	std::vector<std::string> words = {};
 	// create a stringstream for getline
-	std::stringstream ss, ws;
+	std::stringstream ss;
 	// copy the line param to stringstream
 	ss << line;
 	// iterate through sstream, copy each word to vector
