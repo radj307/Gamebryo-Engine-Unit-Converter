@@ -15,7 +15,7 @@
  * 
  * @param argc	- Number of arguments included in program call (file-path argument is always included)
  * @param argv	- Array of arguments included in program call
- * @returns int	- 0 for success, 1 for failure.
+ * @returns int	- 1 for success, 3 for failure.
  */
 int main(int argc, char* argv[]) // char * envp[] = {} // omit environment variables, program does not use them.
 {
@@ -35,15 +35,16 @@ int main(int argc, char* argv[]) // char * envp[] = {} // omit environment varia
 		// break and return 1 for error
 		break;
 	case 2: // user included a single argument
-		if (!processFile(argv[1])) {
+		if (processFile(argv[1])) { // if successful
 			std::cout << termcolor::green << "\tDone processing file." << termcolor::reset << std::endl;
-			return 0;
+			return success();
 		} // else print help
 		printHelp();
-		return 0;
+		return success();
 	default:
+		std::cout << termcolor::red << "\tNo arguments were included!\n" << termcolor::reset;
 		printHelp(1);
 		break;
 	}
-	return 1;
+	return fail();
 }

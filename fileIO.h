@@ -15,16 +15,16 @@
   * fileRead(string, char)
   * Opens a file, copies it's contents to a buffer, closes the file, copies the buffer into a vector to format it, then returns the vector.
   *
-  * @param filepath	- The full location of the target file, including filename.
-  * @param delim		- Each occurrence of this character will be placed at a separate index in the vector
-  * @returns vector<string> with file contents.
+  * @param filepath			- The full location of the target file, including filename.
+  * @param delim			- Each occurrence of this character will be placed at a separate index in the vector. (defaults to newline)
+  * @returns vector<string>	- File contents, indexed by delim param.
   */
 inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n')
 {
 	// create a vector of strings to return
-	std::vector<std::string> dataReturn = {};
+	std::vector<std::string> fileContents = {};
 	// create a read-buffer stringstream
-	std::stringstream rb;
+	std::stringstream readbuffer;
 	// create input filestream
 	std::ifstream file;
 
@@ -35,26 +35,26 @@ inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n'
 	if (file.is_open())
 	{
 		// copy the file contents to the read buffer
-		rb << file.rdbuf();
+		readbuffer << file.rdbuf();
 		// close the file
 		file.close();
 
 		// copy the read buffer into the vector. (the whole process is completed within the for loop declaration)
-		for (std::string line = ""; std::getline(rb, line, delim); dataReturn.push_back(line)) {}
+		for (std::string line = ""; std::getline(readbuffer, line, delim); fileContents.push_back(line)) {}
 	}
 	// return the vector
-	return dataReturn;
+	return fileContents;
 }
 
 /**
  * fileWrite(string, stringstream, char)
- * Creates a new file at target location
+ * Writes a stringstream to target file. Endlines must be included in the stringstream to appear in the file.
  *
  * @param filepath	- The full filepath including file name & extension
  * @param data		- sstream ref containing data to write to file
  * @param delim		- Each occurrence of this char in the stream will be put on a new line.
  * @param fixedNum	- Setting this to true will force all numbers to standard notation
- * @returns bool (true=success | false=fail)
+ * @returns boolean	- ( true = successful ) ( false = failed to write )
  */
 inline bool fileWrite(std::string filepath, std::stringstream& data, char delim = '\n')
 {
@@ -63,28 +63,30 @@ inline bool fileWrite(std::string filepath, std::stringstream& data, char delim 
 	// attempt to open new file for writing
 	file.open(filepath);
 	// check if file is open
-	if (file.is_open())
-	{
-		// iterate through stringstream, insert line with \n appended
-		for (std::string line = ""; std::getline(data, line, delim); file << line + '\n') {}
+	if (file.is_open())	{
+		// write data stream to file
+		file << data.rdbuf() << "\t\\ \\ \\  END  / / /";
 
 		// close the file
 		file.close();
-	}
-	else return false; // error, return false
 
-	// success, return true
-	return true; 
+		// success, return true
+		return true;
+	}
+	// error, return false
+	return false;
+
 }
 
 /**
- * splitLine(string)
+ * splitString(string)
  * Returns a vector of strings with each index representing one word from the input string. Does not perform error correction.
  *
  * @param line				- The string to be split
- * @returns vector<string>	- Each word gets an index
+ * @param delim				- The delimiter to split the string by.
+ * @returns vector<string>	- String contents, indexed by delim param.
  */
-inline std::vector<std::string> splitLine(std::string line)
+inline std::vector<std::string> splitString(std::string line, char delim = ' ')
 {
 	// create a vector to return words from the line
 	std::vector<std::string> words = {};
@@ -116,6 +118,7 @@ inline std::string fileGetExtension(std::string path, char delim = '.')
 		// erase the name from copied parameter, and return the extension
 		path.erase(0, delim_index);
 	}
+	// return the file's extension only
 	return path;
 }
 
@@ -137,5 +140,32 @@ inline std::string fileGetName(std::string path, char delim = '.')
 		// erase the extension from copied parameter, and return the name
 		path.erase(delim_index, path.length());
 	}
+	// return the file's name without the extension
+	return path;
+}
+
+/**
+ * fileExtendName(string, string, char)
+ * Returns the full filename with a string inserted between the extension and the filename. Used for making an alternate name to prevent overwriting the source file.
+ * Ex: "file.txt" & "name" = "filename.txt"
+ * 
+ * @param path		- The string to add to
+ * @param text		- The string to insert into path
+ * @param delim		- Optional delimiter, reverse searches the path param for this character, and inserts the text param at its position.
+ * @returns string	- Returns the path param if delim character wasn't found. Otherwise, returns the path param with the text param inserted.
+ */
+inline std::string fileExtendName(std::string path, std::string text, char delim = '.')
+{
+	// reverse search for delim
+	std::string::size_type delim_index = path.rfind(delim);
+
+	// if rfind didn't throw an error
+	if (delim_index != std::string::npos) {
+		// insert text into path
+		path.insert(delim_index, text);
+		// return processed string
+		return path;
+	}
+	// return default if delim wasn't found
 	return path;
 }

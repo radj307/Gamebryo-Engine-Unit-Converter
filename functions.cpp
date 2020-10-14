@@ -24,11 +24,31 @@ void printHelp(bool pause = false)
 	if (!pause)
 		return;
 	// prompt user to press a key before exiting.
-	std::cout << termcolor::red << "\tPress any key to exit...\n" << termcolor::reset;
+	std::cout << termcolor::red << "\tPress any key to continue...\n" << termcolor::reset;
 	// flush console output buffer
 	std::cout.flush();
 	// wait for user to press a key
 	char tmp = _getch();
+}
+
+/**
+ * Returns the success code for main
+ * 
+ * @param value	- Default: 1
+ */
+inline int success(int value = 1)
+{
+	return value;
+}
+
+/**
+ * Returns the fail code for main
+ * 
+ * @param value	- Default: 3
+ */
+inline int fail(int value = 3)
+{
+	return value;
 }
 
 // Member function of Value: Returns stored value in meters
@@ -197,7 +217,7 @@ inline int printResult(Value input, type outputType)
 	Value result(outputType, getResult(outputType, input));
 
 	if (result._v == -0.0)
-		return 1; // return an error if invalid
+		return fail(); // return an error if invalid
 
 	// set decimal precision to 6 digits. (xEdit uses 6 digit precision)
 	std::cout.precision(6);
@@ -229,17 +249,17 @@ inline int printResult(Value input, type outputType)
 	}
 	std::cout.unsetf(std::ios_base::floatfield); // unset std::fixed flag
 	std::cout.flush(); // flush cout buffer
-	return 0;
+	return success();
 }
 
 /**
  * processFile(string)
  * Mass-converts a correctly formatted text file, then creates an output file to store the result.
  * 
- * @param filename			- The full filepath including file name & extension
- * @returns int to be returned by main()
+ * @param filename	- The full filepath including file name & extension
+ * @returns bool	- ( true = success ) ( false = fail )
  */
-inline int processFile(std::string filename)
+inline bool processFile(std::string filename)
 {
 	// Get the contents of file separated by line
 	std::vector<std::string> fileContent = fileRead(filename);
@@ -252,25 +272,27 @@ inline int processFile(std::string filename)
 		// use erase-remove idiom to remove all tab characters
 		it->erase(std::remove(it->begin(), it->end(), '\t'), it->end());
 
-		// split the line by spaces & store each word in a vector
-		std::vector<std::string> words_on_line = splitLine(*it);
+		if (it->size() > 0) {
+			// split the line by spaces & store each word in a vector
+			std::vector<std::string> words_on_line = splitString(*it);
 
-		// if the line has 3 arguments
-		if (words_on_line.size() == 3) {
-			try {
-				// Create input & output values from arguments
-				Value in(getType(words_on_line[0]), std::stod(words_on_line[1])), out(getType(words_on_line[2]), getResult(getType(words_on_line[2]), in));
-				// Copy result string to stringstream
-				outputStream << formatResult(in, out);
+			// if the line has 3 arguments
+			if (words_on_line.size() == 3) {
+				try {
+					// Create input & output values from arguments
+					Value in(getType(words_on_line[0]), std::stod(words_on_line[1])), out(getType(words_on_line[2]), getResult(getType(words_on_line[2]), in));
+					// Copy result string to stringstream
+					outputStream << formatResult(in, out);
+				}
+				catch (...) { // if an exception occurs because of invalid arguments, replace this line with error text
+					outputStream << "\tinvalid arguments\n";
+				}
 			}
-			catch (...) { // if an exception occurs because of invalid arguments, replace this line with error text
-				outputStream << std::endl;
+			else { // if the line does not have 3 arguments, replace it with empty line
+				outputStream << "\n";
 			}
-		}
-		else { // if the line does not have 3 arguments, replace it with empty line
-			outputStream << std::endl;
-		}
+		}		
 	}
-	// write outputStream to file with -conv appended to the name. return inverted bool result for main() return. final param true forces standard notation.
-	return !fileWrite(fileGetName(filename) + "-conv" + fileGetExtension(filename), outputStream);
+	// write outputStream to file with -conv appended to the name, then return success/fail val from filewrite
+	return fileWrite(fileExtendName(filename, "-conv"), outputStream);
 }
