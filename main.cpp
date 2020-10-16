@@ -8,7 +8,7 @@
  * Units<->Feet
  * Meters<->Feet
  */
-#include "functions.cpp" // includes "globals.h" & "fileIO.h"
+#include "functions.cpp" // includes all headers
 
 /**
  * main()
@@ -19,39 +19,41 @@
  */
 int main(int argc, char* argv[]) // char * envp[] = {} // omit environment variables, program does not use them.
 {
-	bool flag_readable = false;
+	// set human-readable flag to false
+	bool flag_readable = false, pauseTerminal = false;
 	switch (argc) { // argc will always be at least 1 because the filepath is included as first argument
+	case 1: // no arguments, assume user is not using a terminal
+		pauseTerminal = true;
+		break;
 	case 5: // user included 4 arguments
 		// check for readable flag
-		if (*argv[4] == 'r') {
+		if (*argv[4] == 'r')
 			flag_readable = true;
-		}
 	case 4: // user included 3 arguments
 		try { // try to convert arguments to valid variables
 			Value in(getType(argv[1]), atof(argv[2]));
 			type out = getType(argv[3]);
 			// print result & pass return to main
-			return printResult(in, out, flag_readable);
+			if (printResult(in, out, flag_readable)) {
+				return 0;
+			}
 		}
-		catch (...) { // if arguments caused an exception
-			std::cout << termcolor::red << "\tCouldn't process arguments!\n" << termcolor::reset;
-			// display help and do not wait to return - user is already in terminal, or is using a shortcut with arguments
-			printHelp(0);
+		catch (...) {
+			std::cout << termcolor::red << "\tSomething went wrong\n" << termcolor::reset;
 		}
-		// break and return 1 for error
-		break;
-	case 2: // user included a single argument
-		if (processFile(argv[1])) { // if successful
-	case 3: // user included 2 arguments
+	case 3: // user included 2 args
 		// check for readable flag
-		if (*argv[4] == 'r') {
+		if (*argv[4] == 'r')
 			flag_readable = true;
+	case 2: // user included a single argument
+		if (processFile(argv[1])) {
+			return 0;
 		}
 	default:
+		// display invalid warning
 		std::cout << termcolor::red << "\tInvalid Arguments\n" << termcolor::reset;
-		printHelp(1);
+		printHelp(pauseTerminal);
 		break;
-		}
-		return fail();
 	}
+	return 1;
 }

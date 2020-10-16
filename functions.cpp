@@ -63,26 +63,6 @@ void printHelp(bool pause = false)
 	char tmp = _getch();
 }
 
-/**
- * Returns the success code for main
- * 
- * @param value	- Default: 1
- */
-inline int success(int value = 0)
-{
-	return value;
-}
-
-/**
- * Returns the fail code for main
- * 
- * @param value	- Default: 3
- */
-inline int fail(int value = 1)
-{
-	return value;
-}
-
 // Member function of Value: Returns stored value in meters
 inline Value Value::getMeters()
 {
@@ -250,16 +230,16 @@ inline std::string formatResult(Value in, Value out, bool endWithNewLine = true)
  *
  * @param input		 - Original Value
  * @param outputType - Requested output unit
- * @returns int 0 = success, 1 = error
+ * @returns bool	 - ( true = success ) ( false = fail )
  */
-inline int printResult(Value input, type outputType, bool grouping = false)
+inline bool printResult(Value input, type outputType, bool grouping = false)
 {
 	// define result
 	Value result(outputType, getResult(outputType, input));
 
 	// check if result calculation returned an error code, and if so exit the program with error code
 	if (result._v == -0.0)
-		return fail();
+		return false;
 
 	// set decimal precision to 6 digits. (xEdit uses 6 digit precision)
 	std::cout.precision(6);
@@ -268,24 +248,30 @@ inline int printResult(Value input, type outputType, bool grouping = false)
 	case true:
 		// imbue stream with number grouping
 		std::cout.imbue(std::locale(std::cout.getloc(), new NumberGrouping));
+		// continue
 	case false:
 		// output text block, and use fixed standard notation values for results only.
-		std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "\t=  " << std::fixed << termcolor::green << result._v << termcolor::reset << " " << result.sym();
+		std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "     \t=  " << std::fixed << termcolor::green << result._v << termcolor::reset << " " << result.sym();
 
 		// if result is less than 1, output smaller units as well
 		if (result._v < 1.0f && result._t != type::units) {
 			switch (result._t) {
 			case type::meters:
 				result._v *= 100; // convert meters to centimeters
-				std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " cm )"; // output centimeters as well
+				std::cout << "  = " << termcolor::green << result._v << termcolor::reset << " cm"; // output centimeters as well
 				// check if result val is still less than 1
 				if (result._v < 1.0f) {
 					result._v *= 10;
-					std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " mm )"; // output millimeters as well
+					std::cout << "  = " << termcolor::green << result._v << termcolor::reset << " mm"; // output millimeters as well
 					// check if result val is still less than 1
 					if (result._v < 1.0f) {
 						result._v *= 1000;
-						std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " um )"; // output micrometers as well
+						std::cout << "  = " << termcolor::green << result._v << termcolor::reset << " um"; // output micrometers as well
+						// check if result val is still less than 1
+						if (result._v < 1.0f) {
+							result._v *= 1000;
+							std::cout << "  = " << termcolor::green << result._v << termcolor::reset << " nm"; // output nanometers as well
+						}
 					}
 				}
 				break;
@@ -298,9 +284,9 @@ inline int printResult(Value input, type outputType, bool grouping = false)
 		}
 		std::cout.unsetf(std::ios_base::floatfield); // unset cout flags
 		std::cout.flush(); // flush cout buffer
-		return success(); // return success code
+		return true; // return success code
 	}
-	return fail();
+	return false;
 }
 
 /**
