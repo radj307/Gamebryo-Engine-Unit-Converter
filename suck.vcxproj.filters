@@ -26,14 +26,14 @@
     <ClInclude Include="fileIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="fileIO.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inline.cpp">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

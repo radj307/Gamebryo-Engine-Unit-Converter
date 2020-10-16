@@ -1,6 +1,6 @@
 /**
  * main.cpp
- * Execution begins here.
+ * Contains main() logic
  * by radj307(tjradj)
  * 
  * Supported conversions as of v2.1:
@@ -8,7 +8,10 @@
  * Units<->Feet
  * Meters<->Feet
  */
-#include "functions.cpp" // includes all headers
+// Timer:
+//#define CHRONO
+//#include <chrono>
+#include "inline.cpp" // includes all headers
 
 /**
  * main()
@@ -19,41 +22,74 @@
  */
 int main(int argc, char* argv[]) // char * envp[] = {} // omit environment variables, program does not use them.
 {
-	// set human-readable flag to false
-	bool flag_readable = false, pauseTerminal = false;
-	switch (argc) { // argc will always be at least 1 because the filepath is included as first argument
-	case 1: // no arguments, assume user is not using a terminal
-		pauseTerminal = true;
-		break;
-	case 5: // user included 4 arguments
-		// check for readable flag
+	std::ostringstream output;
+
+	// set default flags
+	bool
+		success = false,			// defines if process was successful
+		groupNumbers = false; // defines if large integrals will be grouped or not. set by including an extra argument 'r' after valid terminal or file conversion args.
+
+	#ifdef CHRONO
+		std::chrono::steady_clock::time_point tStart = std::chrono::steady_clock::now(); /// start time
+	#endif
+
+	// switch argument count
+	switch (argc) {
+	case 1:break; // break instantly if no arguments were included
+
+	case 5:
+		// Check if extra argument is the readable flag, if it is, set it
 		if (*argv[4] == 'r')
-			flag_readable = true;
-	case 4: // user included 3 arguments
-		try { // try to convert arguments to valid variables
+			groupNumbers = true;
+	case 4:
+		// try to convert arguments to variables
+		try {
+			// Set input type and value
 			Value in(getType(argv[1]), atof(argv[2]));
+
+			// Set output type
 			type out = getType(argv[3]);
-			// print result & pass return to main
-			if (printResult(in, out, flag_readable)) {
-				return 0;
-			}
+
+			// Convert, and print results to terminal.
+			if (printResult(in, out, groupNumbers))
+				success = true;
+			else
+				output << "[ERROR]\tConversion failed" << std::endl;
 		}
+		// catch all exceptions
 		catch (...) {
-			std::cout << termcolor::red << "\tSomething went wrong\n" << termcolor::reset;
+			output << "[ERROR]\tConversion caused an exception" << std::endl;
 		}
-	case 3: // user included 2 args
-		// check for readable flag
+		break; // break after terminal conversion
+
+	case 3:
+		// Check if extra argument is the readable flag, if it is, set it
 		if (*argv[4] == 'r')
-			flag_readable = true;
-	case 2: // user included a single argument
-		if (processFile(argv[1])) {
-			return 0;
-		}
-	default:
-		// display invalid warning
-		std::cout << termcolor::red << "\tInvalid Arguments\n" << termcolor::reset;
-		printHelp(pauseTerminal);
-		break;
+			groupNumbers = true;
+	case 2:
+		if (processFile(argv[1], groupNumbers)) 
+			success = true;
+		else 
+			output << "[ERROR]\tCouldn't find file '" << argv[1] << "'" << std::endl;
+		break; // break after file conversion
+
+	default:break;
 	}
-	return 1;
+
+	#ifdef CHRONO
+		std::chrono::steady_clock::time_point tEnd = std::chrono::steady_clock::now(); /// end time
+		output << "\n[LOG]\tSwitch completed after " << std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart).count() << "us\t( " << (tEnd - tStart).count() << "ns )\n";
+	#endif
+
+	output << help();
+
+	// display output buffer
+	std::cout << output.str();
+
+	switch (success) {
+	case true:
+		return 0;
+	case false:
+		return 1;
+	}
 }

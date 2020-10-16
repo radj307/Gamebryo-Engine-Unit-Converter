@@ -1,4 +1,6 @@
-/* fileIO.cpp - Header with basic file-related functions
+/**
+ * fileIO.cpp
+ * Header with basic file-related functions
  * By radj307(tjradj)
  * 
  * Dependencies:

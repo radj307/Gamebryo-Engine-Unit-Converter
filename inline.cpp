@@ -1,4 +1,7 @@
-/* functions.h contains the processing logic for unit conversions used in main.cpp
+/**
+ * functions.h
+ * Contains the processing logic for unit conversions used in main.cpp
+ * by radj307(tjradj)
  */
 #pragma once
 #include <iostream>
@@ -8,18 +11,8 @@
 #include "fileIO.h"
 
 /**
- * struct NumberGrouping
- * Used to format large numbers in locale, uses the <xlocale> library.
- * Called by using stream imbue(locale(cout.getloc(), new NumberGrouping))
- */
-struct NumberGrouping : std::numpunct<char>
-{
-	std::string do_grouping() const { return "\3"; }
-};
-
-/**
  * groupNumber(double)
- * Returns a string with commas inserted in the integral, every 3 digits.
+ * Returns value as string with commas inserted in the integral.
  * 
  * @param val		- Floating-point value
  * @return string	- Param val as string with commas inserted in the integral to make values human-readable.
@@ -39,28 +32,9 @@ std::string groupNumber(d val)
 	return ss.str();
 }
 
-/**
- * printHelp(bool)
- * Displays argument syntax in the console.
- * Flushes the cout buffer before & after printing.
- * 
- * @param pause	- If true the function will wait for user to press a key before returning.
- */
-void printHelp(bool pause = false)
+std::string help()
 {
-	// flush console output buffer
-	std::cout.flush();
-	// display help text
-	std::cout << " ARGUMENTS:\n\t<input unit> is the unit type you want to convert (Units|Meters|Feet)\n\t<value> is the value to convert (> 0.0)\n\t<output unit> is the converted unit type. (Units|Meters|Feet)\n\tOR\n\t<filepath> to convert a text file.\n\n";
-	// check if pause is true before proceeding.
-	if (!pause)
-		return;
-	// prompt user to press a key before exiting.
-	std::cout << termcolor::red << "\tPress any key to continue...\n" << termcolor::reset;
-	// flush console output buffer
-	std::cout.flush();
-	// wait for user to press a key
-	char tmp = _getch();
+	return "\n   SYNTAX: '.\\conv <input type> <value> <output type> r'\n\n\t<input unit> is the unit type you want to convert (Units|Meters|Feet)\n\t<value> is the value to convert (> 0.0)\n\t<output unit> is the converted unit type. (Units|Meters|Feet)\n\t'r' (Optional) Enables grouping for large integrals\n\n   FILE SYNTAX: '.\\conv <filename> r'\n\n\t<filepath>' to convert a text file.\n\t'r' (Optional) Enables grouping for large integrals\n\n";
 }
 
 // Member function of Value: Returns stored value in meters

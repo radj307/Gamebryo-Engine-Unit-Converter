@@ -144,12 +144,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fileIO.h" />
-    <ClInclude Include="functions.cpp" />
+    <ClInclude Include="inline.cpp" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="conv.rc" />
+    <ResourceCompile Include="conv.rc">
+      <DeploymentContent>true</DeploymentContent>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="MAINICON.ico" />
