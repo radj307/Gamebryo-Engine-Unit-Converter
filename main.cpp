@@ -39,8 +39,9 @@ int main(int argc, char* argv[]) // char * envp[] = {} // omit environment varia
 
 	case 5:
 		// Check if extra argument is the readable flag, if it is, set it
-		if (*argv[4] == 'r')
+		if (tolower(*argv[4]) == 'r')
 			groupNumbers = true;
+		else output << help();
 	case 4:
 		// try to convert arguments to variables
 		try {
@@ -54,18 +55,19 @@ int main(int argc, char* argv[]) // char * envp[] = {} // omit environment varia
 			if (printResult(in, out, groupNumbers))
 				success = true;
 			else
-				output << "[ERROR]\tConversion failed" << std::endl;
+				output << "[ERROR]\tConversion failed" << help();
 		}
 		// catch all exceptions
 		catch (...) {
-			output << "[ERROR]\tConversion caused an exception" << std::endl;
+			output << "[ERROR]\tConversion caused an exception" << help();
 		}
 		break; // break after terminal conversion
 
 	case 3:
 		// Check if extra argument is the readable flag, if it is, set it
-		if (*argv[4] == 'r')
+		if (tolower(*argv[4]) == 'r')
 			groupNumbers = true;
+		else output << help();
 	case 2:
 		if (processFile(argv[1], groupNumbers)) 
 			success = true;
@@ -80,8 +82,6 @@ int main(int argc, char* argv[]) // char * envp[] = {} // omit environment varia
 		std::chrono::steady_clock::time_point tEnd = std::chrono::steady_clock::now(); /// end time
 		output << "\n[LOG]\tSwitch completed after " << std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart).count() << "us\t( " << (tEnd - tStart).count() << "ns )\n";
 	#endif
-
-	output << help();
 
 	// display output buffer
 	std::cout << output.str();

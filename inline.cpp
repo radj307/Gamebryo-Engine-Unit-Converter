@@ -159,6 +159,9 @@ inline std::string formatResult(Value in, Value out, bool endWithNewLine = true)
 	// create a stringstream for results
 	std::stringstream rs;
 
+	// fixed standard notation for all inputs and outputs
+	rs << std::fixed;
+
 	// pass the main conversion results with formatting to stream
 	rs << "\t" <<  in._v <<  " " << in.sym() << "\t=  " << out._v << " " << out.sym();
 	
@@ -200,7 +203,6 @@ inline std::string formatResult(Value in, Value out, bool endWithNewLine = true)
 /**
  * printResult(Value, type)
  * Displays conversion and results in console window in human-readable format, with color.
- * Does not use formatResult as it would take more time to convert back for colorized output
  *
  * @param input		 - Original Value
  * @param outputType - Requested output unit
@@ -225,7 +227,7 @@ inline bool printResult(Value input, type outputType, bool grouping = false)
 		// continue
 	case false:
 		// output text block, and use fixed standard notation values for results only.
-		std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "     \t=  " << std::fixed << termcolor::green << result._v << termcolor::reset << " " << result.sym();
+		std::cout << std::scientific << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "   \t=  " << std::fixed << termcolor::green << result._v << termcolor::reset << " " << result.sym();
 
 		// if result is less than 1, output smaller units as well
 		if (result._v < 1.0f && result._t != type::units) {
@@ -256,10 +258,11 @@ inline bool printResult(Value input, type outputType, bool grouping = false)
 			default:break; // else break
 			}
 		}
-		std::cout.unsetf(std::ios_base::floatfield); // unset cout flags
+		std::cout.unsetf(std::ios_base::floatfield); // reset ios flags
 		std::cout.flush(); // flush cout buffer
 		return true; // return success code
 	}
+	// if switch breaks for an unhandled reason, return error
 	return false;
 }
 
