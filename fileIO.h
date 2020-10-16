@@ -22,7 +22,8 @@
 inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n')
 {
 	// create a vector of strings to return
-	std::vector<std::string> fileContents = {};
+	std::vector<std::string> fileContents;
+
 	// create a read-buffer stringstream
 	std::stringstream readbuffer;
 	// create input filestream

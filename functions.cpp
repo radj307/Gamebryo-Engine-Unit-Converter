@@ -8,6 +8,38 @@
 #include "fileIO.h"
 
 /**
+ * struct NumberGrouping
+ * Used to format large numbers in locale, uses the <xlocale> library.
+ * Called by using stream imbue(locale(cout.getloc(), new NumberGrouping))
+ */
+struct NumberGrouping : std::numpunct<char>
+{
+	std::string do_grouping() const { return "\3"; }
+};
+
+/**
+ * groupNumber(double)
+ * Returns a string with commas inserted in the integral, every 3 digits.
+ * 
+ * @param val		- Floating-point value
+ * @return string	- Param val as string with commas inserted in the integral to make values human-readable.
+ */
+std::string groupNumber(d val)
+{
+	// create stringstream
+	std::stringstream ss;
+
+	// imbue stringstream with number grouping
+	ss.imbue(std::locale(std::cout.getloc(), new NumberGrouping));
+
+	// pass value to stringstream
+	ss << val;
+
+	// return ss as a string
+	return ss.str();
+}
+
+/**
  * printHelp(bool)
  * Displays argument syntax in the console.
  * Flushes the cout buffer before & after printing.
@@ -36,7 +68,7 @@ void printHelp(bool pause = false)
  * 
  * @param value	- Default: 1
  */
-inline int success(int value = 1)
+inline int success(int value = 0)
 {
 	return value;
 }
@@ -46,7 +78,7 @@ inline int success(int value = 1)
  * 
  * @param value	- Default: 3
  */
-inline int fail(int value = 3)
+inline int fail(int value = 1)
 {
 	return value;
 }
@@ -166,39 +198,48 @@ inline d getResult(type outputType, Value input)
  */
 inline std::string formatResult(Value in, Value out, bool endWithNewLine = true)
 {
+	// check if the output value calculation returned an error code, if so just return a blank string
 	if (out._v == -0)
 		return "";
 
-	std::stringstream rs; // result-stream
+	// create a stringstream for results
+	std::stringstream rs;
 
-	// add primary conversion to stream
+	// pass the main conversion results with formatting to stream
 	rs << "\t" <<  in._v <<  " " << in.sym() << "\t=  " << out._v << " " << out.sym();
-
-	// if result val is less than 1 & not in units, add smaller unit types for context
-	if (out._v < 1.0f && out._t != type::units) {
-		switch (out._t) {
-		case type::meters: // metric
+	
+	// determine output type using switch table
+	switch (out._t) {
+	case type::meters: // metric
+		if (out._v < 1.0f) {
 			out._v *= 100; // convert meters to centimeters
 			rs << "  ( " << out._v << " cm )";
+			// check if result val is still less than 1
 			if (out._v < 1.0f) {
 				out._v *= 10; // convert centimeters to millimeters
 				rs << "  ( " << out._v << " mm )";
+				// check if result val is still less than 1
 				if (out._v < 1.0f) {
 					out._v *= 1000; // convert millimeters to micrometers
 					rs << "  ( " << out._v << " um )";
 				}
 			}
-			break;
-		case type::feet: // imperial
+		}
+		break; // breaks if number is greater than 1
+	case type::feet: // imperial
+		if (out._v < 1.0f) {
 			out._v *= 12; // convert feet to inches
 			rs << "  ( " << out._v << " \" )"; // output inches as well
-			break;
-		default:break; // undefined break
 		}
+		break; // breaks if number is greater than 1
+	default:break; // breaks if output type is units
 	}
-	if (endWithNewLine)
-		rs << '\n';
 
+	// appends a newline character to the stream
+	if (endWithNewLine)
+		rs << std::endl;
+
+	// return the result stream
 	return rs.str();
 }
 
@@ -211,45 +252,55 @@ inline std::string formatResult(Value in, Value out, bool endWithNewLine = true)
  * @param outputType - Requested output unit
  * @returns int 0 = success, 1 = error
  */
-inline int printResult(Value input, type outputType)
+inline int printResult(Value input, type outputType, bool grouping = false)
 {
 	// define result
 	Value result(outputType, getResult(outputType, input));
 
+	// check if result calculation returned an error code, and if so exit the program with error code
 	if (result._v == -0.0)
-		return fail(); // return an error if invalid
+		return fail();
 
 	// set decimal precision to 6 digits. (xEdit uses 6 digit precision)
 	std::cout.precision(6);
 
-	// output text block, and use fixed standard notation values for results only.
-	std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "\t=  " << std::fixed << termcolor::green << result._v << termcolor::reset << " " << result.sym();
+	switch (grouping) {
+	case true:
+		// imbue stream with number grouping
+		std::cout.imbue(std::locale(std::cout.getloc(), new NumberGrouping));
+	case false:
+		// output text block, and use fixed standard notation values for results only.
+		std::cout << "\t" << termcolor::green << input._v << termcolor::reset << " " << input.sym() << "\t=  " << std::fixed << termcolor::green << result._v << termcolor::reset << " " << result.sym();
 
-	// if result is less than 1, output smaller units as well
-	if (result._v < 1.0f && result._t != type::units) {
-		switch (result._t) {
-		case type::meters:
-			result._v *= 100; // convert meters to centimeters
-			std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " cm )"; // output centimeters as well
-			if (result._v < 1.0f) {
-				result._v *= 10;
-				std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " mm )"; // output millimeters as well
+		// if result is less than 1, output smaller units as well
+		if (result._v < 1.0f && result._t != type::units) {
+			switch (result._t) {
+			case type::meters:
+				result._v *= 100; // convert meters to centimeters
+				std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " cm )"; // output centimeters as well
+				// check if result val is still less than 1
 				if (result._v < 1.0f) {
-					result._v *= 1000;
-					std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " um )"; // output micrometers as well
+					result._v *= 10;
+					std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " mm )"; // output millimeters as well
+					// check if result val is still less than 1
+					if (result._v < 1.0f) {
+						result._v *= 1000;
+						std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " um )"; // output micrometers as well
+					}
 				}
+				break;
+			case type::feet:
+				result._v *= 12; // convert feet to inches
+				std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " \" )"; // output inches as well
+				break;
+			default:break; // else break
 			}
-			break;
-		case type::feet:
-			result._v *= 12; // convert feet to inches
-			std::cout << "  ( " << termcolor::green << result._v << termcolor::reset << " \" )"; // output inches as well
-			break;
-		default:break; // else break
 		}
+		std::cout.unsetf(std::ios_base::floatfield); // unset cout flags
+		std::cout.flush(); // flush cout buffer
+		return success(); // return success code
 	}
-	std::cout.unsetf(std::ios_base::floatfield); // unset std::fixed flag
-	std::cout.flush(); // flush cout buffer
-	return success();
+	return fail();
 }
 
 /**
@@ -258,14 +309,26 @@ inline int printResult(Value input, type outputType)
  * 
  * @param filename	- The full filepath including file name & extension
  * @returns bool	- ( true = success ) ( false = fail )
+ * @param grouping	- (OPTIONAL) Groups large integral values by 3. (localization-dependant)
  */
+<<<<<<< Updated upstream
 inline bool processFile(std::string filename)
+=======
+inline bool processFile(std::string filename, bool grouping = false)
+>>>>>>> Stashed changes
 {
 	// Get the contents of file separated by line
 	std::vector<std::string> fileContent = fileRead(filename);
 
-	// Create sstream to hold results, and a buffer for processing each line
+	// If fileRead returned an error (file doesn't exist), return false
+	if (fileContent.empty())
+		return false;
+
+	// Create sstream to hold output
 	std::stringstream outputStream;
+
+	// check if the make readable flag is on, if it is, imbue the stream with number grouping.
+	outputStream.imbue(std::locale(std::cout.getloc(), new NumberGrouping));
 
 	// iterate through every line in the file
 	for (auto it = fileContent.begin(); it != fileContent.end(); it++) {
