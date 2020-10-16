@@ -71,11 +71,7 @@ IDI_ICON1               ICON                    "MAINICON.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
-<<<<<<< Updated upstream
- FILEVERSION 2,5,0,0
-=======
  FILEVERSION 2,6,0,0
->>>>>>> Stashed changes
  PRODUCTVERSION 2,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -93,11 +89,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "tjradj"
             VALUE "FileDescription", "Commandline tool for converting measurement units"
-<<<<<<< Updated upstream
-            VALUE "FileVersion", "2.5.0.0"
-=======
             VALUE "FileVersion", "2.6.0.0"
->>>>>>> Stashed changes
             VALUE "InternalName", "conv.exe"
             VALUE "LegalCopyright", "Copyright (C) 2020"
             VALUE "OriginalFilename", "conv.exe"

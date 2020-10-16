@@ -40,28 +40,18 @@ int main(int argc, char* argv[]) // char * envp[] = {} // omit environment varia
 		}
 		// break and return 1 for error
 		break;
-<<<<<<< Updated upstream
 	case 2: // user included a single argument
 		if (processFile(argv[1])) { // if successful
-=======
 	case 3: // user included 2 arguments
 		// check for readable flag
 		if (*argv[4] == 'r') {
 			flag_readable = true;
 		}
-	case 2: // user included 1 argument
-		if (processFile(argv[1], flag_readable)) { // if successful
->>>>>>> Stashed changes
-			std::cout << termcolor::green << "\tDone processing file." << termcolor::reset << std::endl;
-			return success();
-		} // else print help
-		std::cout << termcolor::red << "\tCouldn't open file '" << argv[1] << "' for reading" << termcolor::reset << std::endl;
-		printHelp();
-		return success();
 	default:
 		std::cout << termcolor::red << "\tInvalid Arguments\n" << termcolor::reset;
 		printHelp(1);
 		break;
+		}
+		return fail();
 	}
-	return fail();
 }

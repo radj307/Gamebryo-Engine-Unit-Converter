@@ -311,11 +311,7 @@ inline int printResult(Value input, type outputType, bool grouping = false)
  * @returns bool	- ( true = success ) ( false = fail )
  * @param grouping	- (OPTIONAL) Groups large integral values by 3. (localization-dependant)
  */
-<<<<<<< Updated upstream
-inline bool processFile(std::string filename)
-=======
 inline bool processFile(std::string filename, bool grouping = false)
->>>>>>> Stashed changes
 {
 	// Get the contents of file separated by line
 	std::vector<std::string> fileContent = fileRead(filename);
