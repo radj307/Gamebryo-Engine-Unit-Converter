@@ -59,7 +59,7 @@ inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n'
  * @param fixedNum	- Setting this to true will force all numbers to standard notation
  * @returns boolean	- ( true = successful ) ( false = failed to write )
  */
-inline bool fileWrite(std::string filepath, std::stringstream& data, char delim = '\n')
+inline bool fileWrite(std::string filepath, std::stringstream& data, std::string end = "\t\\ \\ \\  END  / / /", char delim = '\n')
 {
 	// create the output filestream
 	std::ofstream file;
@@ -68,7 +68,7 @@ inline bool fileWrite(std::string filepath, std::stringstream& data, char delim 
 	// check if file is open
 	if (file.is_open())	{
 		// write data stream to file
-		file << data.rdbuf() << "\t\\ \\ \\  END  / / /";
+		file << data.rdbuf() << end;
 
 		// close the file
 		file.close();
