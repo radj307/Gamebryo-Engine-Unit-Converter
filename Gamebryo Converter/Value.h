@@ -7,6 +7,7 @@
 #include <sstream>
 #include <algorithm>
 #include "factor.h"
+#include "termcolor/termcolor.hpp"
 class Value {
 	/**
 	 * toMetric()
@@ -199,6 +200,30 @@ public:
 		} // else:
 		return *this;
 	}
+	/**
+	 * convert_to(string)
+	 * Returns a converted Value
+	 *
+	 * @param strType	- The requested TYPE as a string
+	 * @returns Value	- Returns *this if param type == this type
+	 */
+	inline Value convert_to(std::string strType)
+	{
+		TYPE type = stot(strType);
+		// check if types don't match
+		if ( _t != type ) {
+			switch ( type ) {
+			case TYPE::unit: // return this in units
+				return toUnit();
+			case TYPE::imperial: // return this in feet
+				return toImperial();
+			case TYPE::metric: // return this in meters
+				return toMetric();
+			default:break;
+			}
+		} // else:
+		return *this;
+	}
 
 	/**
 	 * asString()
@@ -207,7 +232,7 @@ public:
 	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units unit result is >1.0
 	 * @returns string
 	 */
-	std::string asString(bool smallUnits = false)
+	inline std::string asString(bool smallUnits = false)
 	{
 		// create stringstream to force standard notation
 		std::stringstream ss;
@@ -220,15 +245,15 @@ public:
 			case TYPE::metric: // metric
 				if ( _v < 1.0f ) {
 					_v *= 100; // convert meters to centimeters
-					ss << "  ( " << _v << " cm )";
+					ss << "\t ( " << _v << " cm )";
 					// check if result val is still less than 1
 					if ( _v < 1.0f ) {
 						_v *= 10; // convert centimeters to millimeters
-						ss << "  ( " << _v << " mm )";
+						ss << "\t ( " << _v << " mm )";
 						// check if result val is still less than 1
 						if ( _v < 1.0f ) {
 							_v *= 1000; // convert millimeters to micrometers
-							ss << "  ( " << _v << " um )";
+							ss << "\t ( " << _v << " um )";
 						}
 					}
 				}
@@ -236,13 +261,48 @@ public:
 			case TYPE::imperial: // imperial
 				if ( _v < 1.0f ) {
 					_v *= 12; // convert feet to inches
-					ss << "  ( " << _v << " \" )"; // output inches as well
+					ss << "\t ( " << _v << " \" )"; // output inches as well
 				}
 				break;
 			default:break;
 			}
 		}
 		return ss.str();
+	}
+
+	inline void cout(bool smallUnits = false)
+	{
+		std::cout << termcolor::green << _v << termcolor::reset << ' ' << char(_t);
+		switch ( smallUnits ) {
+		case true:
+			switch ( _t ) {
+			case TYPE::metric: // metric
+				if ( _v < 1.0f ) {
+					_v *= 100; // convert meters to centimeters
+					std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " cm )";
+					// check if result val is still less than 1
+					if ( _v < 1.0f ) {
+						_v *= 10; // convert centimeters to millimeters
+						std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " mm )";
+						// check if result val is still less than 1
+						if ( _v < 1.0f ) {
+							_v *= 1000; // convert millimeters to micrometers
+							std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " um )";
+						}
+					}
+				}
+				break;
+			case TYPE::imperial: // imperial
+				if ( _v < 1.0f ) {
+					_v *= 12; // convert feet to inches
+					std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " \" )"; // output inches as well
+				}
+				break;
+			default:break;
+			}
+			break;
+		default:break;
+		}
 	}
 
 protected:
@@ -262,4 +322,11 @@ struct Param {
 		in = Value::TYPE::NONE,		// Input Type
 		out = Value::TYPE::NONE;	// Output Type
 	double val = -0.0f;				// Input Value
+
+	inline bool valid()
+	{
+		if ( in != Value::TYPE::NONE && out != Value::TYPE::NONE && val != -0.0f )
+			return true;
+		return false;
+	}
 };

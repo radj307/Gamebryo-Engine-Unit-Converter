@@ -50,16 +50,15 @@ inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n'
 }
 
 /**
- * fileWrite(string, stringstream, char)
+ * fileWrite(string, stringstream, string, char)
  * Writes a stringstream to target file. Endlines must be included in the stringstream to appear in the file.
  *
  * @param filepath	- The full filepath including file name & extension
  * @param data		- sstream ref containing data to write to file
  * @param delim		- Each occurrence of this char in the stream will be put on a new line.
- * @param fixedNum	- Setting this to true will force all numbers to standard notation
- * @returns boolean	- ( true = successful ) ( false = failed to write )
+ * @returns bool	- ( true = successful ) ( false = failed to write )
  */
-inline bool fileWrite(std::string filepath, std::stringstream& data, std::string end = "\t\\ \\ \\  END  / / /", char delim = '\n')
+inline bool fileWrite(std::string filepath, std::stringstream& data, char delim = '\n')
 {
 	// create the output filestream
 	std::ofstream file;
@@ -68,7 +67,7 @@ inline bool fileWrite(std::string filepath, std::stringstream& data, std::string
 	// check if file is open
 	if (file.is_open())	{
 		// write data stream to file
-		file << data.rdbuf() << end;
+		file << data.rdbuf();
 
 		// close the file
 		file.close();
@@ -78,7 +77,26 @@ inline bool fileWrite(std::string filepath, std::stringstream& data, std::string
 	}
 	// error, return false
 	return false;
+}
 
+/**
+ * fileWrite(string, vector<string>, string, char)
+ * Writes a vector of strings to target file. Each index represents a line.
+ *
+ * @param filepath	- The full filepath including file name & extension
+ * @param data		- vector of strings. Each index will be placed on a new line.
+ * @returns bool	- ( true = successful ) ( false = failed to write )
+ */
+inline bool fileWrite(std::string filepath, std::vector<std::string>& data)
+{
+	// create stringstream
+	std::stringstream ss;
+	// copy contents of vector to stream
+	for ( auto it = data.begin(); it != data.end(); it++ ) {
+		ss << *it << std::endl;
+	}
+	// return result of saving
+	return fileWrite(filepath, ss);
 }
 
 /**

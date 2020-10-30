@@ -6,6 +6,7 @@
 #pragma once
 #include "info.h"
 #include "Value.h"
+#include "file.h"
 
 /**
  * interpret(int, char*[])
@@ -25,8 +26,21 @@ inline bool interpret(int argc, char* argv[])
 		std::string arg = argv[i];
 		// check if arg has at least 1 character
 		if ( arg.size() > 0 ) {
+			if ( arg.at(0) == '/' ) {
+				// remove arg[0], '/'
+				arg = arg.substr(1);
+				// process file
+				File process(arg);
+				switch ( process._success ) {
+				case true:
+					info::msg(info::log, "Successfully processed '" + arg + "'");
+					return true;
+				default:
+					return false;
+				}
+			}
 			// if arg is entirely alphabetical characters
-			if ( std::all_of(arg.begin(), arg.end(), ::isalpha) ) {
+			else if ( std::all_of(arg.begin(), arg.end(), ::isalpha) ) {
 				// check if input type has already been set
 				switch ( p.in ) {
 				case Value::TYPE::NONE: // input type was not set
@@ -51,32 +65,20 @@ inline bool interpret(int argc, char* argv[])
 		}
 		else continue;
 	}
-	// init input Value
-	Value in(p.in, p.val), *out = nullptr;
-	// check if input is valid
-	switch ( in.valid() ) {
-	case true:
-		if ( p.out != Value::TYPE::NONE ) {
-			// init output Value as converted input val
-			out = &in.convert_to(p.out);
-		}
-		else {
-
-		}
-		// check if output is valid
-		switch ( out->valid() ) {
-		case true:
-			// display the result to the console
-			std::cout << "\t" << in.asString() << "\t=  " << out->asString(true) << std::endl;
+	// if valid parameters were found, proceed with conversion
+	if ( p.valid() ) {
+		// init input Value
+		Value in(p.in, p.val), out = in.convert_to(p.out);
+		if ( in.valid() && out.valid() ) { // display the result to the console
+			std::cout << '\t'; in.cout(); std::cout << std::fixed << "\t=  "; out.cout(true); std::cout << std::endl;
+			//std::cout << "\t" << in.asString() << "\t=  " << out.asString(true) << std::endl;
 			return true;
-		default:
-			// display error
-			info::msg(info::error, "There was an error during the conversion.");
-			return false;
 		}
-	default:
-		// display error
-		info::msg(info::error, "There was an error processing the input parameters.");
-		return false;
+		else
+			info::msg(info::error, "Validated parameters caused an invalid result. Report this error to the dev!");
 	}
+	else
+		info::msg(info::error, "Invalid Parameters.");
+	// undefined returns false
+	return false;
 }
