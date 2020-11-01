@@ -28,6 +28,11 @@ inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n'
 
 	// create a read-buffer stringstream
 	std::stringstream readbuffer;
+
+	// fixed precision of 64-bits
+	readbuffer << std::fixed;
+	readbuffer.precision(64);
+
 	// create input filestream
 	std::ifstream file;
 

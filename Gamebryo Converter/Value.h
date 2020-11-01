@@ -8,6 +8,11 @@
 #include <algorithm>
 #include "factor.h"
 #include "termcolor/termcolor.hpp"
+
+/**
+ * class Value
+ * Contains a floating-point number & its unit type, as well as the conversion logic.
+ */
 class Value {
 	/**
 	 * toMetric()
@@ -21,9 +26,9 @@ class Value {
 		switch ( _t )
 		{
 		case TYPE::unit: // units -> meters
-			return Value(TYPE::metric, _v * __ratio_um);
+			return Value(TYPE::metric, _v * __FACTOR_UM);
 		case TYPE::imperial: // feet -> meters
-			return Value(TYPE::metric, _v * __ratio_mi);
+			return Value(TYPE::metric, _v * __FACTOR_MI);
 		default:
 			return *this;
 		}
@@ -41,9 +46,9 @@ class Value {
 		switch ( _t )
 		{
 		case TYPE::metric: // meters -> units
-			return Value(TYPE::unit, _v / __ratio_um);
+			return Value(TYPE::unit, _v / __FACTOR_UM);
 		case TYPE::imperial: // feet -> units
-			return Value(TYPE::unit, _v / __ratio_ui);
+			return Value(TYPE::unit, _v / __FACTOR_UI);
 		default:
 			return *this;
 		}
@@ -62,9 +67,9 @@ class Value {
 		switch ( _t )
 		{
 		case TYPE::metric: // meters -> feet
-			return Value(TYPE::imperial, _v / __ratio_mi);
+			return Value(TYPE::imperial, _v / __FACTOR_MI);
 		case TYPE::unit: // units -> feet
-			return Value(TYPE::imperial, _v * __ratio_ui);
+			return Value(TYPE::imperial, _v * __FACTOR_UI);
 		default:
 			return *this;
 		}
@@ -200,6 +205,7 @@ public:
 		} // else:
 		return *this;
 	}
+
 	/**
 	 * convert_to(string)
 	 * Returns a converted Value
@@ -229,13 +235,14 @@ public:
 	 * asString()
 	 * Returns a string with value (forced standard notation) & type in the format: ("<value> <type>")
 	 * 
-	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units unit result is >1.0
+	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
 	 * @returns string
 	 */
 	inline std::string asString(bool smallUnits = false)
 	{
 		// create stringstream to force standard notation
 		std::stringstream ss;
+		ss.precision(__PRECISION);
 		ss << std::fixed << _v << ' ' << char(_t);
 
 		// check if smallUnits is enabled
@@ -270,8 +277,16 @@ public:
 		return ss.str();
 	}
 
+	/**
+	 * cout(bool)
+	 * Directly outputs value as string to console with termcolor lib
+	 *
+	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
+	 */
 	inline void cout(bool smallUnits = false)
 	{
+		std::cout.precision(__PRECISION);
+		std::cout << std::fixed;
 		std::cout << termcolor::green << _v << termcolor::reset << ' ' << char(_t);
 		switch ( smallUnits ) {
 		case true:

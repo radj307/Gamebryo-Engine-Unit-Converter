@@ -64,8 +64,21 @@ public:
 			// create write buffer
 			std::stringstream toWrite;
 
+			toWrite << std::fixed;
+			toWrite.precision(__PRECISION);
+
 			// iterate through content
 			for ( auto it = _content.begin(); it != _content.end(); it++ ) {
+				// replace all tabs with spaces
+				for ( auto it_ = it->begin(); it_ != it->end(); it_++ ) {
+					switch ( *it_ ) {
+					case '\t':
+						*it_ = ' ';
+						break;
+					default:break;
+					}
+				}
+
 				// create stream for line buffer
 				std::stringstream line;
 				line << *it;
@@ -73,11 +86,12 @@ public:
 				std::vector<std::string> args;
 
 				// parse line with delim ' ', populate vec
-				for ( std::string parse; std::getline(line, parse, ' '); args.push_back(parse) ) {
+				for ( std::string parse; std::getline(line, parse, ' '); ) {
 					// remove spaces
 					parse.erase(std::remove(parse.begin(), parse.end(), ' '), parse.end());
-					// remove tabs
-					parse.erase(std::remove(parse.begin(), parse.end(), '\t'), parse.end());
+
+					if ( parse.size() > 0 )
+						args.push_back(parse);
 				}
 
 				// check if line has 3 arguments

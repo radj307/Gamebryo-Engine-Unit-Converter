@@ -71,7 +71,7 @@ IDI_ICON1               ICON                    "MAINICON.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,1,1,0
+ FILEVERSION 3,1,2,0
  PRODUCTVERSION 3,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -89,7 +89,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "radj307 (tjradj)"
             VALUE "FileDescription", "Converts between Meters, Feet, and Bethesda's Gamebryo Units"
-            VALUE "FileVersion", "3.1.1.0"
+            VALUE "FileVersion", "3.1.2.0"
             VALUE "InternalName", "conv.exe"
             VALUE "LegalCopyright", "Copyright (C) 2020"
             VALUE "OriginalFilename", "conv.exe"

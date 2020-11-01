@@ -16,12 +16,13 @@
  * @param argv		- The argument array from main()
  * @returns bool	- ( true = success ) ( false = failed because: invalid arguments, errors )
  */
-inline bool interpret(int argc, char* argv[])
+inline bool interpret(int argc, char* argv[], const unsigned int startAt = 1)
 {
 	// instantiate Param struct
 	Param p;
-	// iterate from argv[1] until argc
-	for ( int i = 1; i < argc; i++ ) {
+
+	// iterate arguments, skip argv[0]
+	for ( unsigned int i = startAt; i < (unsigned)argc; i++ ) {
 		// convert to string
 		std::string arg = argv[i];
 		// check if arg has at least 1 character
@@ -65,20 +66,23 @@ inline bool interpret(int argc, char* argv[])
 		}
 		else continue;
 	}
+
 	// if valid parameters were found, proceed with conversion
 	if ( p.valid() ) {
-		// init input Value
+		// init Values
 		Value in(p.in, p.val), out = in.convert_to(p.out);
+		// check if Values are valid
 		if ( in.valid() && out.valid() ) { // display the result to the console
-			std::cout << '\t'; in.cout(); std::cout << std::fixed << "\t=  "; out.cout(true); std::cout << std::endl;
+			// colored terminal output
+			std::cout << '\t'; in.cout(); std::cout << "\t=  "; out.cout(true); std::cout << std::endl;
+
+			// raw terminal output
 			//std::cout << "\t" << in.asString() << "\t=  " << out.asString(true) << std::endl;
+
 			return true;
 		}
-		else
-			info::msg(info::error, "Validated parameters caused an invalid result. Report this error to the dev!");
+		else // display critical error: valid input produced invalid output
+			info::msg(info::error, "Critical error occurred within the program - Valid input produced invalid output. (Report this error, including the input values, on github)");
 	}
-	else
-		info::msg(info::error, "Invalid Parameters.");
-	// undefined returns false
 	return false;
 }
