@@ -15,7 +15,7 @@ static double __ratio_mi = 0.3048006096012191857;	// value from the U.S. Survey 
  * METERS	= units * ratio_um
  * UNITS	= meters / ratio_um
  */
-static double __ratio_um = 0.0142822188; // value from converting imperial -> metric, then dividing metric / units. This is necessary as Bethesda's metric conversions are incorrect.
+static double __ratio_um = 0.01428753125;// 0.0142822188; // value from converting imperial -> metric, then dividing metric / units. This is necessary as Bethesda's metric conversions are incorrect.
 
 /* units <-> feet conversion factor
  * FEET		= units * ratio_ui

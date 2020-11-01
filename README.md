@@ -16,7 +16,9 @@
 	 <output unit>	The measurement unit <value> will be converted to
 			Valid entries are the same as <input unit>
 			
-	 /<filename>	The name of the file to convert. If located in the same directory, use: /file.txt
+	 <filename>	The name of the file to convert. If this file is not located in the same directory as conv.exe, 
+	 		you must include the full file path including drive, name, and extension.
+			A new file with "-conv" appended to the name will be created to store the results.
 			
 Additionally, you can add 'r' to the end of the argument list to enable integral grouping, which is disabled by default to allow quick copy/paste for use in xEdit, zEdit, CK, etc.
 (Grouping Disabled: 100000.0000, Grouping Enabled: 100,000.0000)
@@ -43,15 +45,15 @@ The input value is always shown in scientific notation, while the output value i
 # Usage - File Conversion
  Open a terminal in the directory where conv.exe is located, then use:
  
- 	.\conv /<filename>
+ 	.\conv <filename>
 	
 Example: (for cmd prompt syntax, remove the ".\\" prefix)
 
-	.\conv /myFile.txt
+	.\conv myFile.txt
 	
 Creates a result file called:
 
-	myFile-converted.txt
+	myFile-conv.txt
  
  Files must be formatted correctly, one conversion per line, each argument seperated by a single space.
  Example:
