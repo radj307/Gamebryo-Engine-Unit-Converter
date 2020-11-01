@@ -65,6 +65,14 @@ Creates a result file called:
 	m 500 ft
 
 
+# INI Settings
+There are a few INI settings available:
+
+	iPrecision		// Controls how many digits are shown after the decimal point.
+	fRatioMetricImperial	// The conversion factor used by Metric <-> Imperial conversions
+	fRatioMetricGamebryo	// The conversion factor used by Metric <-> Unit conversions
+	fRatioGamebryoImperial	// The conversion factor used by Unit <-> Imperial conversions
+	
 
 # Credits & Thanks
 As of version 2.3, ikalnytskyi's termcolor library is used for colored console output. ( https://github.com/ikalnytskyi/termcolor )
