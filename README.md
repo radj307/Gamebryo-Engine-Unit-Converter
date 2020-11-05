@@ -73,6 +73,10 @@ There are a few INI settings available:
 	fRatioMetricGamebryo	// The conversion factor used by Metric <-> Unit conversions
 	fRatioGamebryoImperial	// The conversion factor used by Unit <-> Imperial conversions
 	
+The program does not need the INI file to operate normally, and will not automatically create one. To generate a fresh .ini file, use the command:
+
+	.\conv /ini
+	
 
 # Credits & Thanks
 As of version 2.3, ikalnytskyi's termcolor library is used for colored console output. ( https://github.com/ikalnytskyi/termcolor )
