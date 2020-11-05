@@ -142,17 +142,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="factor.h" />
+    <ClCompile Include="const_defaults.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="file.h" />
     <ClInclude Include="fileIO.h" />
     <ClInclude Include="info.h" />
-    <ClInclude Include="ini.h" />
     <ClInclude Include="main.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="termcolor\termcolor.hpp" />
     <ClInclude Include="Value.h" />
+    <ClInclude Include="xml.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="conv.rc" />
