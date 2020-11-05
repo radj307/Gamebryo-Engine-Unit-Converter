@@ -36,9 +36,9 @@ Example: (for cmd prompt syntax, remove the ".\\" prefix)
 	
 Outputs:
 
-	1.234568e+03 u          =  17.632378 m
+	1234.567890 u   =  17.638927 m
 	
-The input value is always shown in scientific notation, while the output value is always shown in standard notation with 6 decimal point precision.
+Values are always shown in standard notation with 6 decimal point precision.
 
 
 	
