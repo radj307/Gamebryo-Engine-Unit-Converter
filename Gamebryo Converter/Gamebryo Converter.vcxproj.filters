@@ -32,12 +32,6 @@
     <ClInclude Include="main.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="info.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fileIO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ini.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -45,6 +39,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="termcolor\termcolor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

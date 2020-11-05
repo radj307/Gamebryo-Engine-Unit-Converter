@@ -1,197 +1,318 @@
 /**
- * fileIO.cpp
- * Header with basic file-related functions
- * By radj307(tjradj)
- * 
- * Dependencies:
- * vector
- * stringstream
- * filestream
+ * file.h
+ * Contains the static File class for I/O operations
+ * by radj307
  */
 #pragma once
-#include <vector>
-#include <fstream>
-#include <sstream>
+#include <sstream>  // for stringstream
+#include <fstream>  // for file stream
+#include <vector>   // for vector
 
- /**
-  * fileRead(string, char)
-  * Opens a file, copies it's contents to a buffer, closes the file, copies the buffer into a vector to format it, then returns the vector.
-  *
-  * @param filepath			- The full location of the target file, including filename.
-  * @param delim			- Each occurrence of this character will be placed at a separate index in the vector. (defaults to newline)
-  * @returns vector<string>	- File contents, indexed by delim param.
-  */
-inline std::vector<std::string> fileRead(std::string filepath, char delim = '\n')
-{
-	// create a vector of strings to return
-	std::vector<std::string> fileContents;
-
-	// create a read-buffer stringstream
-	std::stringstream readbuffer;
-
-	// fixed precision of 64-bits
-	readbuffer << std::fixed;
-	readbuffer.precision(64);
-
-	// create input filestream
-	std::ifstream file;
-
-	// attempt to open the file
-	file.open(filepath);
-
-	// check if file is open
-	if (file.is_open())
-	{
-		// copy the file contents to the read buffer
-		readbuffer << file.rdbuf();
-		// close the file
-		file.close();
-
-		// copy the read buffer into the vector. (the whole process is completed within the for loop declaration)
-		for (std::string line = ""; std::getline(readbuffer, line, delim); fileContents.push_back(line)) {}
-	}
-	// return the vector
-	return fileContents;
-}
-
-/**
- * fileWrite(string, stringstream, string, char)
- * Writes a stringstream to target file. Endlines must be included in the stringstream to appear in the file.
- *
- * @param filepath	- The full filepath including file name & extension
- * @param data		- sstream ref containing data to write to file
- * @param delim		- Each occurrence of this char in the stream will be put on a new line.
- * @returns bool	- ( true = successful ) ( false = failed to write )
+/** STATIC **
+ * class File
+ * Static functions for file I/O operations.
  */
-inline bool fileWrite(std::string filepath, std::stringstream& data, char delim = '\n')
-{
-	// create the output filestream
-	std::ofstream file;
-	// attempt to open new file for writing
-	file.open(filepath);
-	// check if file is open
-	if (file.is_open())	{
-		// write data stream to file
-		file << data.rdbuf();
+struct FileIO {
+protected:
+    /** STATIC **
+     * append(string, stringstream&)
+     * Appends a stringstream to target file
+     *
+     * @param filename      - Target file's name
+     * @param data          - Stream content to append to file
+     * @returns bool        - ( true = wrote to file successfully ) ( false = failed )
+     */
+    static inline bool append(std::string filename, std::stringstream& data)
+    {
+        std::ofstream f(filename, std::ios_base::app);
+        if ( f.is_open() ) {
+            // write to file & return true
+            f << std::endl << data.rdbuf();
+            return true; // closes ofstream
+        }
+        // else return false
+        return false; // closes ofstream
+    }
 
-		// close the file
-		file.close();
+    /** STATIC **
+     * append(string, string&)
+     * Appends a string to target file
+     *
+     * @param filename      - Target file's name
+     * @param data          - string content to append to file
+     * @returns bool        - ( true = wrote to file successfully ) ( false = failed )
+     */
+    static inline bool append(std::string filename, std::string& data)
+    {
+        std::ofstream f(filename, std::ios_base::app);
+        if ( f.is_open() ) {
+            // write to file & return true
+            f << std::endl << data;
+            return true; // closes ofstream
+        }
+        // else return false
+        return false; // closes ofstream
+    }
 
-		// success, return true
-		return true;
-	}
-	// error, return false
-	return false;
-}
+    /** STATIC **
+     * overwrite(string, stringstream&)
+     * Overwrites the contents of target file with a stringstream
+     *
+     * @param filename      - Target file's name
+     * @param data          - Stream content to append to file
+     * @returns bool        - ( true = wrote to file successfully ) ( false = failed )
+     */
+    static inline bool overwrite(std::string filename, std::stringstream& data)
+    {
+        std::ofstream f(filename);
+        if ( f.is_open() ) {
+            // write to file & return true
+            f << data.rdbuf();
+            return true; // closes ofstream
+        }
+        // else return false
+        return false; // closes ofstream
+    }
 
-/**
- * fileWrite(string, vector<string>, string, char)
- * Writes a vector of strings to target file. Each index represents a line.
- *
- * @param filepath	- The full filepath including file name & extension
- * @param data		- vector of strings. Each index will be placed on a new line.
- * @returns bool	- ( true = successful ) ( false = failed to write )
- */
-inline bool fileWrite(std::string filepath, std::vector<std::string>& data)
-{
-	// create stringstream
-	std::stringstream ss;
-	// copy contents of vector to stream
-	for ( auto it = data.begin(); it != data.end(); it++ ) {
-		ss << *it << std::endl;
-	}
-	// return result of saving
-	return fileWrite(filepath, ss);
-}
+    /** STATIC **
+     * overwrite(string, string&)
+     * Overwrites the contents of target file with a string
+     *
+     * @param filename      - Target file's name
+     * @param data          - string content to append to file
+     * @returns bool        - ( true = wrote to file successfully ) ( false = failed )
+     */
+    static inline bool overwrite(std::string filename, std::string& data)
+    {
+        std::ofstream f(filename);
+        if ( f.is_open() ) {
+            // write to file & return true
+            f << data;
+            return true; // closes ofstream
+        }
+        // else return false
+        return false; // closes ofstream
+    }
 
-/**
- * splitString(string)
- * Returns a vector of strings with each index representing one word from the input string. Does not perform error correction.
- *
- * @param line				- The string to be split
- * @param delim				- The delimiter to split the string by.
- * @returns vector<string>	- String contents, indexed by delim param.
- */
-inline std::vector<std::string> splitString(std::string line, char delim = ' ')
-{
-	// create a vector to return words from the line
-	std::vector<std::string> words = {};
-	// create a stringstream for getline
-	std::stringstream ss;
-	// copy the line param to stringstream
-	ss << line;
-	// iterate through sstream, copy each word to vector
-	for (std::string word = ""; std::getline(ss, word, ' '); words.push_back(word)) {}
-	// return vector
-	return words;
-}
+public:
+    /** STATIC **
+     * save_type
+     * List of valid save operations
+     *
+     * @member append       - Used to append to file
+     * @member overwrite    - Used to overwrite a file
+     */
+    const enum class save_type {
+        append,     // appends data to the end of file
+        overwrite   // overwrites the entire file with data
+    };
 
-/**
- * fileGetExtension(string, char)
- * Returns the name of a file without the extension
- *
- * @param path			- The full filepath including file name & extension
- * @param delim = '.'	- The last occurrence of this will be treated as the extension mark
- * @returns string		- The file extension with no name
- */
-inline std::string fileGetExtension(std::string path, char delim = '.')
-{
-	// find the last occurrence of the delim parameter
-	std::string::size_type delim_index = path.rfind(delim);
+    /** STATIC **
+     * write(string, stringstream, save_type)
+     * Writes a stringstream to file.
+     *
+     * @param filename  - Name & Location of save file
+     * @param content   - Stringstream ref to be saved & cleared
+     * @param saveAs    - Determines whether data will overwrite file, or be appended.
+     * @returns bool    - Success state ( true = success ) ( false = fail )
+     */
+    static inline bool write(std::string filename, std::stringstream& data, save_type saveAs = save_type::append)
+    {
+        bool toReturn = false;
+        // switch save type
+        switch ( saveAs ) {
+        case save_type::append: // append content to file
+            toReturn = append(filename, data);
+            data.clear();
+            break;
+        case save_type::overwrite: // overwrite file with content
+            toReturn = overwrite(filename, data);
+            data.clear();
+            break;
+        default:break;
+        }
+        return toReturn;
+    }
 
-	// if rfind was successful (returns -1, or string::npos, on fail)
-	if (delim_index != std::string::npos) {
-		// erase the name from copied parameter, and return the extension
-		path.erase(0, delim_index);
-	}
-	// return the file's extension only
-	return path;
-}
+    /** STATIC **
+     * write(string, vector<string>, save_type)
+     * Writes a vector of strings to file.
+     *
+     * @param filename  - Name & Location of save file
+     * @param content   - vector of strings ref to be saved & cleared
+     * @param saveAs    - Determines whether data will overwrite file, or be appended.
+     * @returns bool    - Success state ( true = success ) ( false = fail )
+     */
+    static inline bool write(std::string filename, std::vector<std::string>& data, save_type saveAs = save_type::append)
+    {
+        bool toReturn = false;
+        std::stringstream ss;
 
-/**
- * fileGetName(string, char)
- * Returns the name of a file without the extension
- *
- * @param path			- The full filepath including file name & extension
- * @param delim = '.'	- The last occurrence of this will be treated as the extension mark
- * @returns string		- The filename with no extension
- */
-inline std::string fileGetName(std::string path, char delim = '.')
-{
-	// find the last occurrence of the delim parameter
-	std::string::size_type delim_index = path.rfind(delim);
+        for ( auto it = data.begin(); it != data.end(); it++ ) {
+            size_t index_of_newline = (*it).rfind('\n');
+            if ( index_of_newline != std::string::npos )
+                ss << *it;
+            else
+                ss << *it << std::endl;
+        }
 
-	// if rfind was successful (returns -1, or string::npos, on fail)
-	if (delim_index != std::string::npos) {
-		// erase the extension from copied parameter, and return the name
-		path.erase(delim_index, path.length());
-	}
-	// return the file's name without the extension
-	return path;
-}
+        // switch save type
+        switch ( saveAs ) {
+        case save_type::append: // append content to file
+            toReturn = append(filename, ss);
+            data.clear();
+            break;
+        case save_type::overwrite: // overwrite file with content
+            toReturn = overwrite(filename, ss);
+            data.clear();
+            break;
+        default:break;
+        }
+        return toReturn;
+    }
 
-/**
- * fileExtendName(string, string, char)
- * Returns the full filename with a string inserted between the extension and the filename. Used for making an alternate name to prevent overwriting the source file.
- * Ex: "file.txt" & "name" = "filename.txt"
- * 
- * @param path		- The string to add to
- * @param text		- The string to insert into path
- * @param delim		- Optional delimiter, reverse searches the path param for this character, and inserts the text param at its position.
- * @returns string	- Returns the path param if delim character wasn't found. Otherwise, returns the path param with the text param inserted.
- */
-inline std::string fileExtendName(std::string path, std::string text, char delim = '.')
-{
-	// reverse search for delim
-	std::string::size_type delim_index = path.rfind(delim);
+    /** STATIC **
+     * write(string, string, save_type)
+     * Writes a string to file.
+     *
+     * @param filename  - Name & Location of save file
+     * @param content   - vector of strings ref to be saved & cleared
+     * @param saveAs    - Determines whether data will overwrite file, or be appended.
+     * @returns bool    - Success state ( true = success ) ( false = fail )
+     */
+    static inline bool write(std::string filename, std::string& data, save_type saveAs = save_type::append)
+    {
+        bool toReturn = false;
+        // switch save type
+        switch ( saveAs ) {
+        case save_type::append: // append content to file
+            toReturn = append(filename, data);
+            data.clear();
+            break;
+        case save_type::overwrite: // overwrite file with content
+            toReturn = overwrite(filename, data);
+            data.clear();
+            break;
+        default:break;
+        }
+        return toReturn;
+    }
 
-	// if rfind didn't throw an error
-	if (delim_index != std::string::npos) {
-		// insert text into path
-		path.insert(delim_index, text);
-		// return processed string
-		return path;
-	}
-	// return default if delim wasn't found
-	return path;
-}
+    /** STATIC **
+     * readToStream(string)
+     * Returns the contents of target file as a stringstream
+     *
+     * @param filename  - The name/location of the target file.
+     * @returns stringstream
+     */
+    static inline std::stringstream readToStream(std::string filename)
+    {
+        std::stringstream ss;
+        // open file
+        std::ifstream f(filename);
+        // check if file opened successfully
+        if ( f.is_open() ) {
+            // copy file content to stream
+            f >> ss.rdbuf();
+            return ss;
+        }
+        else return ss;
+    }
+
+    /** STATIC **
+     * readToString(string)
+     * Returns File::readToStream() as a string
+     *
+     * @param filename  - The name/location of the target file.
+     * @returns string
+     */
+    static inline std::string readToString(std::string filename)
+    {
+        return readToStream(filename).str();
+    }
+
+    /** STATIC **
+     * readToVector(string)
+     * Returns File::readToStream() as a vector of strings
+     *
+     * @param filename  - The name/location of the target file.
+     * @returns string
+     */
+    static inline std::vector<std::string> readToVector(std::string filename)
+    {
+        std::stringstream ss = readToStream(filename);
+        std::vector<std::string> vec;
+        for ( std::string parse; std::getline(ss, parse); vec.push_back(parse) ) {}
+        return vec;
+    }
+
+    /**
+     * fileGetExtension(string, char)
+     * Returns the name of a file without the extension
+     *
+     * @param path			- The full filepath including file name & extension
+     * @param delim = '.'	- The last occurrence of this will be treated as the extension mark
+     * @returns string		- The file extension with no name
+     */
+    static inline std::string getExtension(std::string path, char delim = '.')
+    {
+        // find the last occurrence of the delim parameter
+        std::string::size_type delim_index = path.rfind(delim);
+
+        // if rfind was successful (returns -1, or string::npos, on fail)
+        if ( delim_index != std::string::npos ) {
+            // erase the name from copied parameter, and return the extension
+            path.erase(0, delim_index);
+        }
+        // return the file's extension only
+        return path;
+    }
+
+    /**
+     * fileGetName(string, char)
+     * Returns the name of a file without the extension
+     *
+     * @param path			- The full filepath including file name & extension
+     * @param delim = '.'	- The last occurrence of this will be treated as the extension mark
+     * @returns string		- The filename with no extension
+     */
+    static inline std::string getName(std::string path, char delim = '.')
+    {
+        // find the last occurrence of the delim parameter
+        std::string::size_type delim_index = path.rfind(delim);
+
+        // if rfind was successful (returns -1, or string::npos, on fail)
+        if ( delim_index != std::string::npos ) {
+            // erase the extension from copied parameter, and return the name
+            path.erase(delim_index, path.length());
+        }
+        // return the file's name without the extension
+        return path;
+    }
+
+    /**
+     * fileExtendName(string, string, char)
+     * Returns the full filename with a string inserted between the extension and the filename. Used for making an alternate name to prevent overwriting the source file.
+     * Ex: "file.txt" & "name" = "filename.txt"
+     *
+     * @param path		- The string to add to
+     * @param text		- The string to insert into path
+     * @param delim		- Optional delimiter, reverse searches the path param for this character, and inserts the text param at its position.
+     * @returns string	- Returns the path param if delim character wasn't found. Otherwise, returns the path param with the text param inserted.
+     */
+    static inline std::string extendName(std::string path, std::string text, char delim = '.')
+    {
+        // reverse search for delim
+        std::string::size_type delim_index = path.rfind(delim);
+
+        // if rfind didn't throw an error
+        if ( delim_index != std::string::npos ) {
+            // insert text into path
+            path.insert(delim_index, text);
+            // return processed string
+            return path;
+        }
+        // return default if delim wasn't found
+        return path;
+    }
+};

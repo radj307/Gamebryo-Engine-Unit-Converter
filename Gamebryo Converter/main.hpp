@@ -4,7 +4,7 @@
  * by radj307
  */
 #pragma once
-#include "info.h"
+#include "sys.h"
 #include "Value.h"
 #include "file.h"
 
@@ -30,14 +30,20 @@ inline bool interpret(int argc, char* argv[], const unsigned int startAt = 1)
 			if ( arg.at(0) == '/' ) {
 				// remove arg[0], '/'
 				arg = arg.substr(1);
-				// process file
-				File process(arg);
-				switch ( process._success ) {
-				case true:
-					info::msg(info::log, "Successfully processed '" + arg + "'");
-					return true;
-				default:
-					return false;
+
+				if ( arg == "ini" ) {
+					create_ini(__INI_NAME);
+				}
+				else {
+					// process file
+					File process(arg);
+					switch ( process._success ) {
+					case true:
+						sys::msg(sys::log, "Successfully processed '" + arg + "'");
+						return true;
+					default:
+						return false;
+					}
 				}
 			}
 			// if arg is entirely alphabetical characters
@@ -82,7 +88,7 @@ inline bool interpret(int argc, char* argv[], const unsigned int startAt = 1)
 			return true;
 		}
 		else // display critical error: valid input produced invalid output
-			info::msg(info::error, "Critical error occurred within the program - Valid input produced invalid output. (Report this error, including the input values, on github)");
+			sys::msg(sys::error, "Critical error occurred within the program - Valid input produced invalid output. (Report this error, including the input values, on github)");
 	}
 	return false;
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "fileIO.h"
 #include "factor.h"
-#include "info.h"
+#include "sys.h"
 
 static const std::string // INI setting names:
 	__NAME_PRECISION = "iPrecision",		// Decimal precision
@@ -19,7 +19,7 @@ static const std::string // INI setting names:
 inline bool init_factor(std::string filename)
 {
 	// read file content
-	std::vector<std::string> content = fileRead(filename);
+	std::vector<std::string> content = FileIO::readToVector(filename);
 	if ( !content.empty() ) {
 		// iterate through content
 		for ( auto it = content.begin(); it != content.end(); it++ ) {
@@ -46,7 +46,7 @@ inline bool init_factor(std::string filename)
 							__FACTOR_MI = std::stod(it->substr(index_of_equal + 1, index_of_comment));
 						}
 						catch ( std::exception const & ex ) {
-							info::msg(info::error, "INI file setting '" + __NAME_MI + "' couldn't be read, exception thrown: " + std::string(ex.what()));
+							sys::msg(sys::error, "INI file setting '" + __NAME_MI + "' couldn't be read, exception thrown: " + std::string(ex.what()));
 						}
 					}
 					// "fRatioMetricGamebryo"
@@ -55,7 +55,7 @@ inline bool init_factor(std::string filename)
 							__FACTOR_UM = std::stod(it->substr(index_of_equal + 1, index_of_comment));
 						}
 						catch ( std::exception const& ex ) {
-							info::msg(info::error, "INI file setting '" + __NAME_UM + "' couldn't be read, exception thrown: " + std::string(ex.what()));
+							sys::msg(sys::error, "INI file setting '" + __NAME_UM + "' couldn't be read, exception thrown: " + std::string(ex.what()));
 						}
 					}
 					// "fRatioGamebryoImperial"
@@ -64,7 +64,7 @@ inline bool init_factor(std::string filename)
 							__FACTOR_UI = std::stod(it->substr(index_of_equal + 1, index_of_comment));
 						}
 						catch ( std::exception const& ex ) {
-							info::msg(info::error, "INI file setting '" + __NAME_UI + "' couldn't be read, exception thrown: " + std::string(ex.what()));
+							sys::msg(sys::error, "INI file setting '" + __NAME_UI + "' couldn't be read, exception thrown: " + std::string(ex.what()));
 						}
 					}
 					break;
@@ -74,7 +74,7 @@ inline bool init_factor(std::string filename)
 							__PRECISION = std::stoi(it->substr(index_of_equal + 1, index_of_comment));
 						}
 						catch ( std::exception const& ex ) {
-							info::msg(info::error, "INI file setting '" + __NAME_PRECISION + "' couldn't be read, exception thrown: " + std::string(ex.what()));
+							sys::msg(sys::error, "INI file setting '" + __NAME_PRECISION + "' couldn't be read, exception thrown: " + std::string(ex.what()));
 						}
 					}
 					break;
@@ -114,5 +114,5 @@ inline bool create_ini(std::string filename)
 		<< "\n\n; Factor used for (Gamebryo Unit <-> Imperial) conversions:\n" << __NAME_UI << "\t=\t" << __FACTOR_UI;
 
 	// return the result of writing to file
-	return fileWrite(filename, ss);
+	return FileIO::write(filename, ss);
 }

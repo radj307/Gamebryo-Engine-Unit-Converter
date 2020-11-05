@@ -2,7 +2,7 @@
 #include "fileIO.h"
 #include "factor.h"
 #include "Value.h"
-#include "info.h"
+#include "sys.h"
 
 class Content {
 protected: // accessible in children
@@ -17,7 +17,7 @@ protected: // accessible in children
 	 */
 	inline bool getFrom(std::string filename)
 	{
-		_content = fileRead(filename);
+		_content = FileIO::readToVector(filename);
 		return valid();
 	}
 
@@ -31,7 +31,7 @@ protected: // accessible in children
 	inline bool saveTo(std::string filename)
 	{
 		if ( valid() )
-			return fileWrite(filename, _content);
+			return FileIO::write(filename, _content);
 		return false;
 	}
 
@@ -57,7 +57,7 @@ public:
 	std::string _savename;
 	bool _success = false;
 
-	File(std::string file) : _filename(file), _savename(fileExtendName(_filename, "-converted"))
+	File(std::string file) : _filename(file), _savename(FileIO::extendName(_filename, "-converted"))
 	{
 		// check if file was read to content successfully
 		if ( getFrom(_filename) ) {
@@ -112,9 +112,9 @@ public:
 				} // else add a newline
 				else toWrite << std::endl;
 			}
-			_success = fileWrite(_savename, toWrite);
+			_success = FileIO::write(_savename, toWrite);
 		}
-		else info::msg(info::error, "Couldn't open '" + _filename + "'");
+		else sys::msg(sys::error, "Couldn't open '" + _filename + "'");
 	}
 
 	~File() {}
