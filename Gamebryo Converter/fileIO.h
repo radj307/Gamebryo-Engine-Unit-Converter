@@ -106,7 +106,7 @@ inline bool fileWrite(std::string filepath, std::vector<std::string>& data)
 
 /**
  * splitString(string)
- * Parses a string and returns it as a vector of strings with each index holding 1 word, seperated by the delim parameter.
+ * Returns a vector of strings with each index representing one word from the input string. Does not perform error correction.
  *
  * @param line				- The string to be split
  * @param delim				- The delimiter to split the string by.

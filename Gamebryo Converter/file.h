@@ -1,6 +1,6 @@
 #pragma once
 #include "fileIO.h"
-#include "xml.h"
+#include "factor.h"
 #include "Value.h"
 #include "info.h"
 
@@ -65,7 +65,7 @@ public:
 			std::stringstream toWrite;
 
 			toWrite << std::fixed;
-			toWrite.precision(__CFG.getPrecision());
+			toWrite.precision(__PRECISION);
 
 			// iterate through content
 			for ( auto it = _content.begin(); it != _content.end(); it++ ) {
