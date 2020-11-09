@@ -4,8 +4,6 @@
  * by radj307
  */
 #pragma once
-#include "sys.h"
-#include "Value.h"
 #include "file.h"
 
 /**
@@ -16,7 +14,7 @@
  * @param argv		- The argument array from main()
  * @returns bool	- ( true = success ) ( false = failed because: invalid arguments, errors )
  */
-inline bool interpret(int argc, char* argv[], const unsigned int startAt = 1)
+inline bool interpret(const int argc, const char* argv[], const unsigned int startAt = 1)
 {
 	// instantiate Param struct
 	Param p;
@@ -32,7 +30,7 @@ inline bool interpret(int argc, char* argv[], const unsigned int startAt = 1)
 				arg = arg.substr(1);
 
 				if ( arg == "ini" ) {
-					create_ini(__INI_NAME);
+					cfg.write();
 				}
 				else {
 					// process file

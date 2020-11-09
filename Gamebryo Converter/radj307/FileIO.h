@@ -1,6 +1,6 @@
 /**
- * file.h
- * Contains the static File class for I/O operations
+ * FileIO.h
+ * Contains class FileIO, and static functions for various file i/o operations
  * by radj307
  */
 #pragma once
@@ -102,7 +102,7 @@ public:
      * @member append       - Used to append to file
      * @member overwrite    - Used to overwrite a file
      */
-    const enum class save_type {
+    enum class save_type {
         append,     // appends data to the end of file
         overwrite   // overwrites the entire file with data
     };
@@ -244,6 +244,33 @@ public:
         std::vector<std::string> vec;
         for ( std::string parse; std::getline(ss, parse); vec.push_back(parse) ) {}
         return vec;
+    }
+
+    /** STATIC **
+     * readToCStr(string)
+     * Returns File::readToStream() as a const char*
+     *
+     * @param filename  - The name/location of the target file.
+     * @returns const char*
+     */
+    static inline const char* readToCStr(std::string filename)
+    {
+        return readToStream(filename).str().c_str();
+    }
+
+    /** STATIC **
+     * exists(string)
+     * Checks if a file exists at the specified location.
+     * 
+     * @param filename  - The name/location of the target file.
+     * @returns bool    - ( true = file exists ) ( false = file does not exist )
+     */
+    static inline bool exists(std::string filename)
+    {
+        std::ifstream f(filename);
+        if ( f.is_open() )
+            return true;
+        return false;
     }
 
     /**

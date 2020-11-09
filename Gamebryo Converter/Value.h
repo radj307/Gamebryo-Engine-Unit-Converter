@@ -6,7 +6,7 @@
 #pragma once
 #include <sstream>
 #include <algorithm>
-#include "factor.h"
+#include "INI/INI.h"
 #include "termcolor/termcolor.hpp"
 
 /**
@@ -26,9 +26,9 @@ class Value {
 		switch ( _t )
 		{
 		case TYPE::unit: // units -> meters
-			return Value(TYPE::metric, _v * __FACTOR_UM);
+			return Value(TYPE::metric, _v * cfg.fGet("Factor_UM"));
 		case TYPE::imperial: // feet -> meters
-			return Value(TYPE::metric, _v * __FACTOR_MI);
+			return Value(TYPE::metric, _v * cfg.fGet("Factor_MI"));
 		default:
 			return *this;
 		}
@@ -46,9 +46,9 @@ class Value {
 		switch ( _t )
 		{
 		case TYPE::metric: // meters -> units
-			return Value(TYPE::unit, _v / __FACTOR_UM);
+			return Value(TYPE::unit, _v / cfg.fGet("Factor_UM"));
 		case TYPE::imperial: // feet -> units
-			return Value(TYPE::unit, _v / __FACTOR_UI);
+			return Value(TYPE::unit, _v / cfg.fGet("Factor_UI"));
 		default:
 			return *this;
 		}
@@ -67,9 +67,9 @@ class Value {
 		switch ( _t )
 		{
 		case TYPE::metric: // meters -> feet
-			return Value(TYPE::imperial, _v / __FACTOR_MI);
+			return Value(TYPE::imperial, _v / cfg.fGet("Factor_MI"));
 		case TYPE::unit: // units -> feet
-			return Value(TYPE::imperial, _v * __FACTOR_UI);
+			return Value(TYPE::imperial, _v * cfg.fGet("Factor_UI"));
 		default:
 			return *this;
 		}
@@ -242,7 +242,7 @@ public:
 	{
 		// create stringstream to force standard notation
 		std::stringstream ss;
-		ss.precision(__PRECISION);
+		ss.precision(cfg.iGet("Precision"));
 		ss << std::fixed << _v << ' ' << char(_t);
 
 		// check if smallUnits is enabled
@@ -285,7 +285,7 @@ public:
 	 */
 	inline void cout(bool smallUnits = false)
 	{
-		std::cout.precision(__PRECISION);
+		std::cout.precision(cfg.iGet("Precision"));
 		std::cout << std::fixed;
 		std::cout << termcolor::green << _v << termcolor::reset << ' ' << char(_t);
 		switch ( smallUnits ) {

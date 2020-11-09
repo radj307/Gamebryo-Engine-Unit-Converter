@@ -142,15 +142,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="factor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="file.h" />
-    <ClInclude Include="FileIO.h" />
-    <ClInclude Include="ini.h" />
+    <ClInclude Include="INI\INI.h" />
+    <ClInclude Include="INI\INI_Defaults.h" />
+    <ClInclude Include="INI\INI_Setting.h" />
     <ClInclude Include="main.hpp" />
+    <ClInclude Include="radj307\FileIO.h" />
+    <ClInclude Include="radj307\sys.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="sys.h" />
     <ClInclude Include="termcolor\termcolor.hpp" />
     <ClInclude Include="Value.h" />
   </ItemGroup>

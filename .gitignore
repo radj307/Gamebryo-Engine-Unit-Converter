@@ -57,3 +57,7 @@ Debug/Docs/README.md
 Debug/Docs/termcolorlib-LICENSE
 *.ini
 *.zip
+*.iobj
+*.iobj
+.vs/Gamebryo Converter/v16/.suo
+Gamebryo Converter/Gamebryo Converter.vcxproj.user

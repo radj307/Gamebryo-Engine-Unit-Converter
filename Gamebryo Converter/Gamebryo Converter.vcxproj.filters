@@ -13,13 +13,16 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="INI">
+      <UniqueIdentifier>{20997c06-30e2-43fb-8651-04362acae8b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="termcolor">
+      <UniqueIdentifier>{977a84b1-9078-48be-b0db-8b4e8657f4ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="factor.h">
-      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -32,19 +35,25 @@
     <ClInclude Include="main.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ini.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="INI\INI.h">
+      <Filter>INI</Filter>
+    </ClInclude>
+    <ClInclude Include="INI\INI_Defaults.h">
+      <Filter>INI</Filter>
+    </ClInclude>
+    <ClInclude Include="INI\INI_Setting.h">
+      <Filter>INI</Filter>
+    </ClInclude>
     <ClInclude Include="termcolor\termcolor.hpp">
+      <Filter>termcolor</Filter>
+    </ClInclude>
+    <ClInclude Include="radj307\FileIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileIO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sys.h">
+    <ClInclude Include="radj307\sys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

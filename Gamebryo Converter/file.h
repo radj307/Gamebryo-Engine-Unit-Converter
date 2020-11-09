@@ -1,8 +1,7 @@
 #pragma once
-#include "fileIO.h"
-#include "factor.h"
+#include "radj307/FileIO.h"
+#include "radj307/sys.h"
 #include "Value.h"
-#include "sys.h"
 
 class Content {
 protected: // accessible in children
@@ -65,7 +64,7 @@ public:
 			std::stringstream toWrite;
 
 			toWrite << std::fixed;
-			toWrite.precision(__PRECISION);
+			toWrite.precision(cfg.iGet("Precision"));
 
 			// iterate through content
 			for ( auto it = _content.begin(); it != _content.end(); it++ ) {
