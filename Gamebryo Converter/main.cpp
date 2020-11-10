@@ -3,7 +3,7 @@
  * Contains main()
  * by radj307
  */
-#include "INI/INI.h"
+#include "INI.h"
 INI cfg("conv.ini"); // init INI
 #include "main.hpp"
 

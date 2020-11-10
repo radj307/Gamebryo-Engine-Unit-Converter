@@ -16,54 +16,75 @@
  */
 inline bool interpret(const int argc, const char* argv[], const unsigned int startAt = 1)
 {
-	// instantiate Param struct
-	Param p;
+	bool canSet = true;
+	// input types
+	ValType *in = nullptr, *out = nullptr;
+	// value
+	double val = -0.0f;
 
 	// iterate arguments, skip argv[0]
 	for ( unsigned int i = startAt; i < (unsigned)argc; i++ ) {
+		// if valid parameters were found, proceed with conversion
+		if ( (in != nullptr && in->_t != ValType::TYPE::NONE) && (out != nullptr && out->_t != ValType::TYPE::NONE) && (val != -0.0f) ) {
+			// init Values
+			Value input(in->_t, val), output = input.convert_to(out->_t);
+
+		#ifndef WSL // Non-virtual architecture
+			// ANSI color codes from termcolor
+			std::cout << '\t'; input.cout(); std::cout << "\t=  "; output.cout(true); std::cout << std::endl;
+		#else // WSL console doesn't appear to support ANSI so disable it
+			std::cout << '\t' << input.asString() << "\t=  " << output.asString(true) << std::endl;
+		#endif
+			in = nullptr;
+			out = nullptr;
+			val = -0.0f;
+		}
+
 		// convert to string
 		std::string arg = argv[i];
+		
 		// check if arg has at least 1 character
 		if ( arg.size() > 0 ) {
 			if ( arg.at(0) == '/' ) {
+				std::stringstream ss;
 				// remove arg[0], '/'
-				arg = arg.substr(1);
-
-				if ( arg == "ini" ) {
-					cfg.write();
-				}
-				else {
-					// process file
-					File process(arg);
-					switch ( process._success ) {
-					case true:
-						sys::msg(sys::log, "Successfully processed '" + arg + "'");
-						return true;
-					default:
-						return false;
-					}
+				ss << arg.substr(1) << ',';
+				for (std::string parse; std::getline(ss, parse, ','); parse.clear()) {
+					if ( parse.size() > 2 ) {
+						if ( parse == "ini" )
+							cfg.write();
+						else if ( parse.at(0) == 'f' && parse.at(1) == '=' ) {
+							File proc(parse.substr(2));
+							switch ( proc._success ) {
+							case true:
+								sys::msg(sys::log, "Successfully processed file: \"" + parse.substr(2) + "\"");
+								break;
+							default:
+								sys::msg(sys::error, "Failed to process file: \"" + parse.substr(2) + "\"");
+								break;
+							}
+						}
+					} // else continue
 				}
 			}
 			// if arg is entirely alphabetical characters
 			else if ( std::all_of(arg.begin(), arg.end(), ::isalpha) ) {
-				// check if input type has already been set
-				switch ( p.in ) {
-				case Value::TYPE::NONE: // input type was not set
-					p.in = Value::stot(arg);
-					break;
-				default: // input type was set
-					p.out = Value::stot(arg);
-					break;
-				}
+				// check if input type was already set
+				if (in != nullptr)
+					out = new ValType(Value::stot(arg));
+				else // else set input type
+					in = new ValType(Value::stot(arg));
 			}
 			// if arg is entirely digits
 			else {
 				std::string tmp = arg;
 				tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
 				if ( std::all_of(tmp.begin(), tmp.end(), ::isdigit) ) {
-					try { p.val = std::stod(arg); }
-					catch ( std::exception const& error ) { // catch possible exception from std::stod()
-						std::cout << "[ERROR]\t\"" << error.what() << "\" was thrown while interpreting the value! (Value too large?)" << std::endl;
+					try {
+						val = std::stod(arg);
+					}
+					catch (std::exception & exc) { // catch stod exceptions
+						sys::msg(sys::error, "\"" + std::string(exc.what()) + "\" was thrown while interpreting the value!");
 					}
 				}
 			}
@@ -72,17 +93,18 @@ inline bool interpret(const int argc, const char* argv[], const unsigned int sta
 	}
 
 	// if valid parameters were found, proceed with conversion
-	if ( p.valid() ) {
+	if ( (in != nullptr && in->_t != ValType::TYPE::NONE) && (out != nullptr && out->_t != ValType::TYPE::NONE) && (val != -0.0f) ) {
 		// init Values
-		Value in(p.in, p.val), out = in.convert_to(p.out);
-		// check if Values are valid
-		if ( in.valid() && out.valid() ) { // display the result to the console
-			// colored terminal output
-			std::cout << '\t'; in.cout(); std::cout << "\t=  "; out.cout(true); std::cout << std::endl;
-			return true;
-		}
-		else // display critical error: valid input produced invalid output
-			sys::msg(sys::error, "Critical error occurred within the program - Valid input produced invalid output.\n(Report this error, including the input values, at https://github.com/tjradj/Gamebryo-Engine-Unit-Converter/issues)");
+		Value input(in->_t, val), output = input.convert_to(out->_t);
+		
+	#ifndef WSL // Non-virtual architecture
+		// ANSI color codes from termcolor
+		std::cout << '\t'; input.cout(); std::cout << "\t=  "; output.cout(true); std::cout << std::endl;
+	#else // WSL console doesn't appear to support ANSI so disable it
+		std::cout << '\t' << input.asString() << "\t=  " << output.asString(true) << std::endl;
+	#endif
+
+		return true;
 	}
 	return false;
 }

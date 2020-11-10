@@ -20,7 +20,7 @@ struct INI_Setting {
 	 * @param b	- Boolean value, stored as a bool
 	 * @param n	- No value, exclusively for error-handling
 	 */
-	const enum class type {
+	enum class type {
 		f,	// float
 		i,	// int
 		b,	// bool

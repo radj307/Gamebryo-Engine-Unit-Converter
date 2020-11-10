@@ -17,7 +17,7 @@
 
 #if _WIN32 || _WIN64
 #define CROSS_PLATFORM  // Works on Windows & Linux
-#define ARCH_WIN        // Only works on Windows
+#define ARCH_WINNT        // Only works on Windows
 // Windows-Only libs:
 #include <conio.h>      // for _getch()
 #include <Windows.h>    // for windows console API
@@ -104,7 +104,7 @@ struct sys {
     template <class EnumType>
     static void msg(const EnumType msg_type, const char* msg_content, const char* pressKeyPrompt = "")
     {
-        if (msg_content != "" && msg_type != log || (msg_content != "" && __SHOW_LOGS && msg_type == log))
+        if ((msg_content != "" && msg_type != log) || (msg_content != "" && __SHOW_LOGS && msg_type == log))
             std::cout << msg_prefix(msg_type) << msg_content << std::endl;
         // check if a string was included for the wait prompt
         if (pressKeyPrompt != "")
@@ -128,7 +128,7 @@ struct sys {
     }
 
 #endif
-#if defined(ARCH_WIN)
+#if defined(ARCH_WINNT)
 
     /** STATIC **
      * exec(const char*)
@@ -296,8 +296,9 @@ struct sys {
      */
     static inline void pause(std::string show_message = "Enter any character to continue....")
     {
+        std::stringstream ss;
         std::cout << show_message << std::endl; // print message to console
-        std::getline(std::cin, show_message); // pause to get user input
+        std::cin.ignore();
         std::cout << std::endl; // print newline character
     }
 

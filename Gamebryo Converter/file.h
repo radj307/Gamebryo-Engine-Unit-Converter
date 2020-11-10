@@ -1,6 +1,6 @@
 #pragma once
-#include "radj307/FileIO.h"
-#include "radj307/sys.h"
+#include "FileIO.h"
+#include "sys.h"
 #include "Value.h"
 
 class Content {
@@ -68,6 +68,9 @@ public:
 
 			// iterate through content
 			for ( auto it = _content.begin(); it != _content.end(); it++ ) {
+			#ifdef __GNUC__ // delete extra char from windows line endings if using linux to prevent problems with parsing
+				(*it).erase(std::remove((*it).begin(), (*it).end(), '\r'), (*it).end());
+			#endif
 				// replace all tabs with spaces
 				for ( auto it_ = it->begin(); it_ != it->end(); it_++ ) {
 					switch ( *it_ ) {

@@ -6,8 +6,8 @@
  ! Requires "INI_Setting.h", "INI_Defaults.h", "FileIO.h", and for Debug "sys.h"
  */
 #pragma once
-#include "radj307/FileIO.h"	// for file i/o operations
-#include "radj307/sys.h"	// for cross-platform system API functions
+#include "FileIO.h"	// for file i/o operations
+#include "sys.h"	// for cross-platform system API functions
 #include "INI_Defaults.h"	// Required to set default values if ini wasn't found. (_OVERRIDE_DEFAULTS=true disables this.)
 
 /**
@@ -51,8 +51,8 @@ class INI {
 		if ( !ss.str().empty() ) {
 			// PARSE FILE CONTENT
 			for ( std::string parse; std::getline(ss, parse); ) {
-				parse.erase(std::remove(parse.begin(), parse.end(), ' '), parse.end());// remove spaces
-				parse.erase(std::remove(parse.begin(), parse.end(), '\t'), parse.end());// remove tabs
+		//		parse.erase(std::remove(parse.begin(), parse.end(), ' '), parse.end());// remove spaces
+		//		parse.erase(std::remove(parse.begin(), parse.end(), '\t'), parse.end());// remove tabs
 				
 				// find index of '=' and either ';'/'#' or line ending
 				int index_comment = find_comment(parse), index_equal = parse.find('=');

@@ -141,18 +141,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="file.h" />
-    <ClInclude Include="INI\INI.h" />
-    <ClInclude Include="INI\INI_Defaults.h" />
-    <ClInclude Include="INI\INI_Setting.h" />
+    <ClInclude Include="FileIO.h" />
+    <ClInclude Include="INI.h" />
+    <ClInclude Include="INI_Defaults.h" />
+    <ClInclude Include="INI_Setting.h" />
     <ClInclude Include="main.hpp" />
-    <ClInclude Include="radj307\FileIO.h" />
-    <ClInclude Include="radj307\sys.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="termcolor\termcolor.hpp" />
+    <ClInclude Include="sys.h" />
+    <ClInclude Include="termcolor.hpp" />
     <ClInclude Include="Value.h" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +157,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="MAINICON.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

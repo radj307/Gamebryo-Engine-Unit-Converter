@@ -6,14 +6,87 @@
 #pragma once
 #include <sstream>
 #include <algorithm>
-#include "INI/INI.h"
-#include "termcolor/termcolor.hpp"
+#include "INI.h"
+#include "termcolor.hpp"
+
+/**
+ * struct ValType
+ * Wrapper for Value Unit Types, used by the Value class below.
+ * NOT FOR DIRECT USE
+ * 
+ * @param none		( ! )	- No type/Error type.
+ * @param all		( @ )	- All types
+ * @param unit		( u )	- Gamebryo Units
+ * @param imperial	( ' )	- Feet & inches
+ * @param metric	( m )	- Meters & subunits
+ */
+struct ValType {
+	// Enumerate valid types
+	enum class TYPE {
+		NONE = '!',			// ! for none/error
+		ALL = '@',			// @ for output type: all
+		unit = 'u',			// u for units
+		imperial = '\'',	// ' for feet
+		metric = 'm'		// m for meter
+	};
+
+	/** CONSTRUCTOR **
+	 * ValType(enum type)
+	 * Instantiate a new Value Type
+	 */
+	ValType(TYPE myType) : _t(myType) {}
+
+#pragma region OPERATORS
+	/**
+	 * operator==
+	 * Comparison operator.
+	 * 
+	 * @param compare	- Another ValType to compare against
+	 * @returns bool	- ( true = types match ) ( false = types do not match )
+	 */
+	inline bool operator==(ValType& compare)
+	{
+		if (compare._t == _t)
+			return true;
+		return false;
+	}
+	/**
+	 * operator!=
+	 * Comparison operator.
+	 *
+	 * @param compare	- Another ValType to compare against
+	 * @returns bool	- ( true = types do not match ) ( false = types match )
+	 */
+	inline bool operator!=(ValType::TYPE& compare)
+	{
+		if (_t != compare)
+			return true;
+		return false;
+	}
+	/**
+	 * operator!=
+	 * Comparison operator.
+	 *
+	 * @param compare	- Another ValType to compare against
+	 * @returns bool	- ( true = types do not match ) ( false = types match )
+	 */
+	inline bool operator!=(ValType& compare)
+	{
+		if (_t != compare._t)
+			return true;
+		return false;
+	}
+#pragma endregion OPERATORS
+
+	// This instance's type
+	const TYPE _t;
+};
 
 /**
  * class Value
  * Contains a floating-point number & its unit type, as well as the conversion logic.
  */
-class Value {
+class Value : public ValType {
 	/**
 	 * toMetric()
 	 * Returns member value converted to metric meters
@@ -76,20 +149,6 @@ class Value {
 	}
 
 public:
-	/**
-	 * enum TYPE::
-	 * NONE		- ! - Invalid Type
-	 * unit		- u - Gamebryo Unit
-	 * imperial	- ' - Imperial Foot
-	 * metric	- m - Metric Meter
-	 */
-	const enum class TYPE {
-		NONE = '!',			// ! for error/no type
-		ALL = '@',			// @ for output type: all
-		unit = 'u',			// u for units
-		imperial = '\'',	// ' for feet
-		metric = 'm'		// m for meter
-	};
 
 	/** STATIC **
 	 * stot(string)
@@ -133,7 +192,7 @@ public:
 	 * @param myType	- Unit type
 	 * @param myValue	- Value in units of myType
 	 */
-	Value(TYPE myType, double myValue) : _t(myType), _v(myValue) {}
+	Value(ValType::TYPE myType, double myValue) : ValType(myType), _v(myValue) {}
 
 	/** CONSTRUCTOR **
 	 * Value(string, string)
@@ -141,7 +200,7 @@ public:
 	 * @param myType	- Unit type
 	 * @param myValue	- Value in units of myType
 	 */
-	Value(std::string myType, std::string myValue) : _t(stot(myType)), _v(Value::stod(myValue)) {}
+	Value(std::string myType, std::string myValue) : ValType(stot(myType)), _v(Value::stod(myValue)) {}
 
 	/**
 	 * invalid()
@@ -189,7 +248,7 @@ public:
 	 * @param type		- The requested TYPE
 	 * @returns Value	- Returns *this if param type == this type
 	 */
-	inline Value convert_to(TYPE type)
+	inline Value convert_to(ValType::TYPE type)
 	{
 		// check if types don't match
 		if ( _t != type ) {
@@ -322,26 +381,4 @@ public:
 
 protected:
 	double _v;	// value as a double float
-	TYPE _t;	// unit as a type
-};
-/**
- * struct Param
- * Contains the required variables to perform a single conversion.
- *
- * @member in
- * @member out
- * @member var
- */
-struct Param {
-	Value::TYPE
-		in = Value::TYPE::NONE,		// Input Type
-		out = Value::TYPE::NONE;	// Output Type
-	double val = -0.0f;				// Input Value
-
-	inline bool valid()
-	{
-		if ( in != Value::TYPE::NONE && out != Value::TYPE::NONE && val != -0.0f )
-			return true;
-		return false;
-	}
 };
