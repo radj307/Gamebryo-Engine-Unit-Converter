@@ -63,7 +63,7 @@ inline bool interpret(const int argc, const char* argv[], const unsigned int sta
 				if ( std::all_of(tmp.begin(), tmp.end(), ::isdigit) ) {
 					try { p.val = std::stod(arg); }
 					catch ( std::exception const& error ) { // catch possible exception from std::stod()
-						std::cout << "[ERROR]\t'" << error.what() << "' was thrown while interpreting the value!" << std::endl;
+						std::cout << "[ERROR]\t\"" << error.what() << "\" was thrown while interpreting the value! (Value too large?)" << std::endl;
 					}
 				}
 			}
@@ -79,14 +79,10 @@ inline bool interpret(const int argc, const char* argv[], const unsigned int sta
 		if ( in.valid() && out.valid() ) { // display the result to the console
 			// colored terminal output
 			std::cout << '\t'; in.cout(); std::cout << "\t=  "; out.cout(true); std::cout << std::endl;
-
-			// raw terminal output
-			//std::cout << "\t" << in.asString() << "\t=  " << out.asString(true) << std::endl;
-
 			return true;
 		}
 		else // display critical error: valid input produced invalid output
-			sys::msg(sys::error, "Critical error occurred within the program - Valid input produced invalid output. (Report this error, including the input values, on github)");
+			sys::msg(sys::error, "Critical error occurred within the program - Valid input produced invalid output.\n(Report this error, including the input values, at https://github.com/tjradj/Gamebryo-Engine-Unit-Converter/issues)");
 	}
 	return false;
 }

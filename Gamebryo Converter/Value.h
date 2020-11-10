@@ -105,7 +105,7 @@ public:
 			return TYPE::unit;
 		else if ( s == "m" || s == "meter" || s == "meters" || s == "metric" || s == "met" )
 			return TYPE::metric;
-		else if ( s == "i" || s == "f" || s == "ft" || s == "feet" || s == "foot" || s == "\'" || s == "imperial" || s == "imp" )
+		else if ( s == "i" || s == "f" || s == "ft" || s == "feet" || s == "foot" || s == "imperial" || s == "imp" )
 			return TYPE::imperial;
 		else
 			return TYPE::NONE;
