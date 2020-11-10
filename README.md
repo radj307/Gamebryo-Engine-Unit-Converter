@@ -36,7 +36,7 @@ Example:
 	conv /ini,f=file.txt
 
 
-IN-TERMINAL CONVERSIONS
+# IN-TERMINAL CONVERSIONS
 
 	conv <input unit> <value> <output unit>
 	
@@ -53,7 +53,7 @@ As of (v3.1.5) you can perform multiple conversions on the same line:
 	conv <input unit> <value> <output unit> <input unit> <value> <output unit>
 	
 
-FILE CONVERSIONS
+# FILE CONVERSIONS
 
 Create a text file in the directory where conv.exe is located, or include the path when using command:
 (PRE-v3.1.5)
@@ -75,7 +75,7 @@ Create a text file in the directory where conv.exe is located, or include the pa
 	m	5000	ft
 
 
-INI CONFIGURATION
+# INI CONFIGURATION
 
 To generate a new INI file with the default values, use this command:
 
