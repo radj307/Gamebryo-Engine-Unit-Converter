@@ -62,7 +62,7 @@ class INI {
 				int index_comment = find_comment(parse), index_equal = parse.find('=');
 				
 				// CHECK IF LINE IS NOT A COMMENT AND NOT BLANK
-				if ( index_comment == parse.size() - 1 && !parse.empty()) {
+				if ( ((unsigned)index_comment == parse.size() - 1) && !parse.empty()) {
 					// set name
 					std::string name = parse.substr(0, index_equal);
 

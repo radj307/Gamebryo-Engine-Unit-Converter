@@ -98,7 +98,7 @@ struct sys {
         #endif
         }
         // other message type
-        else if ( msg_content != "" && msg_type != log || (msg_content != "" && __SHOW_LOGS && msg_type == log) ) {
+        else if ( (msg_content != "" && msg_type != log) || (msg_content != "" && __SHOW_LOGS && msg_type == log) ) {
         #ifdef TERMCOLOR_HPP_ // 
             if ( msg_type == error )
                 std::cout << termcolor::red << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
