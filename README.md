@@ -2,8 +2,7 @@
 
  Commandline tool that can convert between Gamebryo Units, Meters, and Feet.
  It can convert values directly from the terminal, or a text file.
- 
- Currently only Windows is supported, however I plan on releasing a Linux version with v3.1.5
+ Linux beta version is available as of (v3.1.5)
 
 
 # Arguments
@@ -31,8 +30,13 @@
 # Installation & Usage
 Extract .zip file to a location of your choice, then open a terminal in that directory.
 
+You can chain command arguments by seperating them with commas (,). 
+Currently the only commands available are /ini and /f=<filename>
+Example:
+	conv /ini,f=file.txt
 
-IN-TERMINAL CONVERSIONS
+
+# Inline Conversions
 
 	conv <input unit> <value> <output unit>
 	
@@ -44,12 +48,21 @@ Converts 1234.56789 gamebryo units to meters, this will output:
 
 	1234.567890 u   =  17.638927 m
 
+As of (v3.1.5) you can perform multiple conversions on the same line:
 
-FILE CONVERSIONS
+	conv <input unit> <value> <output unit> <input unit> <value> <output unit>
+	
+
+# File Conversions
 
 Create a text file in the directory where conv.exe is located, or include the path when using command:
+(PRE-v3.1.5)
 
- 	conv <filename>
+ 	conv /<filename>
+	
+(v3.1.5+)
+
+	conv /f=<filename>
 	
  Files must be formatted correctly, one conversion per line, each argument seperated by a single space.
  Example:
@@ -62,7 +75,7 @@ Create a text file in the directory where conv.exe is located, or include the pa
 	m	5000	ft
 
 
-INI CONFIGURATION
+# INI Configuration
 
 To generate a new INI file with the default values, use this command:
 
