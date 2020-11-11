@@ -3,6 +3,10 @@
 #include "sys.h"
 #include "Value.h"
 
+/**
+ * class Content
+ * Stores the contents of target file in local memory.
+ */
 class Content {
 protected: // accessible in children
 	std::vector<std::string> _content;
@@ -50,6 +54,10 @@ public:	// accessible anywhere
 	}
 };
 
+/** 
+ * class File : public Content
+ * Processes a file, then saves the contents.
+ */
 class File : public Content {
 	std::string _filename;
 public:
@@ -68,9 +76,8 @@ public:
 
 			// iterate through content
 			for ( auto it = _content.begin(); it != _content.end(); it++ ) {
-			#ifdef __GNUC__ // delete extra char from windows line endings if using linux to prevent problems with parsing
+				// delete extra char from windows line endings if present
 				(*it).erase(std::remove((*it).begin(), (*it).end(), '\r'), (*it).end());
-			#endif
 				// replace all tabs with spaces
 				for ( auto it_ = it->begin(); it_ != it->end(); it_++ ) {
 					switch ( *it_ ) {
@@ -118,6 +125,4 @@ public:
 		}
 		else sys::msg(sys::error, "Couldn't open '" + _filename + "'");
 	}
-
-	~File() {}
 };

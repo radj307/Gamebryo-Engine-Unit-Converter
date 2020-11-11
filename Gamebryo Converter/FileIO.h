@@ -183,7 +183,6 @@ public:
     static inline bool write(std::string filename, std::string& data, save_type saveAs = save_type::append)
     {
         bool toReturn = false;
-        // switch save type
         switch ( saveAs ) {
         case save_type::append: // append content to file
             toReturn = append(filename, data);

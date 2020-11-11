@@ -24,17 +24,41 @@ struct ValType {
 	// Enumerate valid types
 	enum class TYPE {
 		NONE = '!',			// ! for none/error
-		ALL = '@',			// @ for output type: all
+		ALL = 'a',			// @ for output type: all
 		unit = 'u',			// u for units
 		imperial = '\'',	// ' for feet
 		metric = 'm'		// m for meter
 	};
+
+	// This instance's type
+	const TYPE _t;
 
 	/** CONSTRUCTOR **
 	 * ValType(enum type)
 	 * Instantiate a new Value Type
 	 */
 	ValType(TYPE myType) : _t(myType) {}
+
+	/**
+	 * asString()
+	 * Returns this type as a string.
+	 * 
+	 * @returns string
+	 */
+	inline std::string asString()
+	{
+		switch ( _t ) {
+		case TYPE::ALL:
+			return "(All)";
+		case TYPE::unit:
+			return "(Units)";
+		case TYPE::metric:
+			return "(Meters)";
+		case TYPE::imperial:
+			return "(Feet)";
+		default:return "(ERROR_TYPE)";
+		}
+	}
 
 #pragma region OPERATORS
 	/**
@@ -78,8 +102,6 @@ struct ValType {
 	}
 #pragma endregion OPERATORS
 
-	// This instance's type
-	const TYPE _t;
 };
 
 /**
@@ -160,7 +182,9 @@ public:
 	{
 		// convert to lowercase
 		for ( unsigned int i = 0; i < s.length() - 1; i++ ) { s[i] = std::tolower(s[i]); }
-		if ( s == "u" || s == "unit" || s == "units" || s == "beth" || s == "bethesda" || s == "gamebryo" || s == "game" )
+		if ( s == "a" || s == "all" )
+			return TYPE::ALL;
+		else if ( s == "u" || s == "unit" || s == "units" || s == "beth" || s == "bethesda" || s == "gamebryo" || s == "game" )
 			return TYPE::unit;
 		else if ( s == "m" || s == "meter" || s == "meters" || s == "metric" || s == "met" )
 			return TYPE::metric;
@@ -346,22 +370,38 @@ public:
 	{
 		std::cout.precision(cfg.iGet("Precision"));
 		std::cout << std::fixed;
+	#ifndef WSL
 		std::cout << termcolor::green << _v << termcolor::reset << ' ' << char(_t);
+	#else
+		std::cout << _v << ' ' << char(_t);
+	#endif
 		switch ( smallUnits ) {
 		case true:
 			switch ( _t ) {
 			case TYPE::metric: // metric
 				if ( _v < 1.0f ) {
 					_v *= 100; // convert meters to centimeters
+				#ifndef WSL
 					std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " cm )";
+				#else
+					std::cout << "  ( " << _v << " cm )";
+				#endif
 					// check if result val is still less than 1
 					if ( _v < 1.0f ) {
 						_v *= 10; // convert centimeters to millimeters
+					#ifndef WSL
 						std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " mm )";
+					#else
+						std::cout << "  ( " << _v << " cm )";
+					#endif
 						// check if result val is still less than 1
 						if ( _v < 1.0f ) {
 							_v *= 1000; // convert millimeters to micrometers
+						#ifndef WSL
 							std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " um )";
+						#else
+							std::cout << "  ( " << _v << " cm )";
+						#endif
 						}
 					}
 				}
@@ -370,6 +410,48 @@ public:
 				if ( _v < 1.0f ) {
 					_v *= 12; // convert feet to inches
 					std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " \" )"; // output inches as well
+				}
+				break;
+			default:break;
+			}
+			break;
+		default:break;
+		}
+	}
+	/**
+	 * cout(bool)
+	 * Directly outputs value as string to console with termcolor lib
+	 *
+	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
+	 */
+	inline void cout_all(bool smallUnits = false)
+	{
+		std::cout.precision(cfg.iGet("Precision"));
+		std::cout << std::fixed;
+		std::cout << termcolor::yellow << _v << termcolor::reset << ' ' << char(_t);
+		switch ( smallUnits ) {
+		case true:
+			switch ( _t ) {
+			case TYPE::metric: // metric
+				if ( _v < 1.0f ) {
+					_v *= 100; // convert meters to centimeters
+					std::cout << "  ( " << termcolor::yellow << _v << termcolor::reset << " cm )";
+					// check if result val is still less than 1
+					if ( _v < 1.0f ) {
+						_v *= 10; // convert centimeters to millimeters
+						std::cout << "  ( " << termcolor::yellow << _v << termcolor::reset << " mm )";
+						// check if result val is still less than 1
+						if ( _v < 1.0f ) {
+							_v *= 1000; // convert millimeters to micrometers
+							std::cout << "  ( " << termcolor::yellow << _v << termcolor::reset << " um )";
+						}
+					}
+				}
+				break;
+			case TYPE::imperial: // imperial
+				if ( _v < 1.0f ) {
+					_v *= 12; // convert feet to inches
+					std::cout << "  ( " << termcolor::yellow << _v << termcolor::reset << " \" )"; // output inches as well
 				}
 				break;
 			default:break;

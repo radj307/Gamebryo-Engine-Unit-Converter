@@ -1,25 +1,29 @@
-/**
- * INI.h
- * Contains the INI class.
- * by radj307
- * 
- ! Requires "INI_Setting.h", "INI_Defaults.h", "FileIO.h", and for Debug "sys.h"
- */
+/****************************************************************************************
+ *									    INI.h											*
+ *					Contains the INI class and all member functions.					*
+ *								 	 by radj307											*
+ *																						*
+ *			  Include this header in your project to use the INI parser.				*
+ *			(This file is not intended to be modified, see INI_Defaults.h)				*
+ ****************************************************************************************/
 #pragma once
 #include "FileIO.h"	// for file i/o operations
-#include "sys.h"	// for cross-platform system API functions
-#include "INI_Defaults.h"	// Required to set default values if ini wasn't found. (_OVERRIDE_DEFAULTS=true disables this.)
+#include "INI_Defaults.h"	// includes INI_Setting.h, required to set default values if ini wasn't found.
+
+#include "sys.h"			// for sys::msg()
+
+#define INI_H
 
 /**
  * class INI
  * Parses data from an .ini file, and stores it for later use in the program.
  */
 class INI {
+	// the INI file name given at instantiation time.
+	const std::string _filename;
 	// contains all INI settings for use during runtime.
 	std::vector<INI_Setting*> _vec;
-	// Name of INI file.
-	const std::string _filename;
-	// When true, loads all settings found in the INI file even if they aren't on the default list.
+	// When true, does not validate loaded settings against the default vector. Causes undefined behavior!
 	const bool _OVERRIDE_DEFAULTS;
 
 	/**
@@ -51,8 +55,8 @@ class INI {
 		if ( !ss.str().empty() ) {
 			// PARSE FILE CONTENT
 			for ( std::string parse; std::getline(ss, parse); ) {
-		//		parse.erase(std::remove(parse.begin(), parse.end(), ' '), parse.end());// remove spaces
-		//		parse.erase(std::remove(parse.begin(), parse.end(), '\t'), parse.end());// remove tabs
+				parse.erase(std::remove(parse.begin(), parse.end(), ' '), parse.end());// remove spaces
+				parse.erase(std::remove(parse.begin(), parse.end(), '\t'), parse.end());// remove tabs
 				
 				// find index of '=' and either ';'/'#' or line ending
 				int index_comment = find_comment(parse), index_equal = parse.find('=');
@@ -84,59 +88,36 @@ class INI {
 						case 'f': // float
 							try {
 								_vec.push_back(new fINI_Setting(name, std::stod(parse.substr(index_equal + 1, index_comment))));
-								#ifdef _DEBUG // Only active on Debug configuration.
-									sys::msg(sys::log, "Loaded " + name + " from " + _filename);
-								#endif
+								sys::msg(sys::debug, "Loaded '" + _filename + "' -> " + name + " = " + parse.substr(index_equal + 1, index_comment));
 							}
 							catch ( std::exception const& ex ) {  // catch stod exceptions
-								#ifdef _DEBUG // Only active on Debug configuration.
-									sys::msg(sys::warning, "Invalid INI setting '" + name + "' was not loaded because of " + ex.what());
-								#endif 
+								sys::msg(sys::debug, "Invalid INI setting '" + name + "' was not loaded because of " + ex.what());
 							}
 							break;
 						case 'i': // integer
 							try {
 								_vec.push_back(new iINI_Setting(name, std::stoi(parse.substr(index_equal + 1, index_comment))));
-								#ifdef _DEBUG // Only active on Debug configuration.
-									sys::msg(sys::log, "Loaded " + name + " from " + _filename);
-								#endif
+								sys::msg(sys::debug, "Loaded '" + _filename + "' -> " + name + " = " + parse.substr(index_equal + 1, index_comment));
 							}
 							catch ( std::exception const& ex ) { // catch stoi exceptions
-								#ifdef _DEBUG // Only active on Debug configuration. 
-									sys::msg(sys::warning, "Invalid INI setting '" + name + "' was not loaded because of " + ex.what());
-								#endif
+								sys::msg(sys::debug, "Invalid INI setting '" + name + "' was not loaded because of " + ex.what());
 							}
 							break;
 						case 'b': // boolean
-							if ( parse.substr(index_equal + 1, index_comment) == "true" ) {
+							if ( parse.substr(index_equal + 1, index_comment) == "true" || parse.substr(index_equal + 1, index_comment) == "1" ) {
 								_vec.push_back(new bINI_Setting(name, true));
-								#ifdef _DEBUG // Only active on Debug configuration.
-									sys::msg(sys::log, "Loaded " + name + " from " + _filename);
-								#endif
+								sys::msg(sys::debug, "Loaded '" + _filename + "' -> " + name + " = " + parse.substr(index_equal + 1, index_comment));
 							}
-							else if ( parse.substr(index_equal + 1, index_comment) == "false" ) {
+							else if ( parse.substr(index_equal + 1, index_comment) == "false" || parse.substr(index_equal + 1, index_comment) == "0" ) {
 								_vec.push_back(new bINI_Setting(name, false));
-								#ifdef _DEBUG // Only active on Debug configuration.
-									sys::msg(sys::log, "Loaded " + name + " from " + _filename);
-								#endif
+								sys::msg(sys::debug, "Loaded '" + _filename + "' -> " + name + " = " + parse.substr(index_equal + 1, index_comment));
 							}
-							else {
-								#ifdef _DEBUG // Only active on Debug configuration.
-									sys::msg(sys::warning, "Invalid INI setting '" + name + "' was not loaded.");
-								#endif
-							}
+							else sys::msg(sys::debug, "Invalid INI setting '" + name + "' was not loaded.");
 							break;
 						default:break;
 						}
 					}
-					else {
-						#ifdef _DEBUG // Only active on Debug configuration.
-							sys::msg(sys::warning, "Unexpected INI setting '" + name + "' was not loaded.");
-							continue;
-						#else
-							continue;
-						#endif
-					}
+					else sys::msg(sys::debug, "Unexpected INI setting '" + name + "' was not loaded.");
 				} // else ignore comment line & continue
 			}
 			switch ( _OVERRIDE_DEFAULTS ) {
@@ -154,9 +135,7 @@ class INI {
 					// if a default setting wasn't found in the file, add it to member vector
 					if ( !exists ) {
 						_vec.push_back(*it);
-						#ifdef _DEBUG // Only active on Debug configuration.
-							sys::msg(sys::log, "INI setting '" + (*it)->_name + "' was loaded from default list.");
-						#endif
+						sys::msg(sys::debug, "Loaded 'DEFAULTS' -> " + (*it)->_name);
 					}
 				}
 				break;
@@ -168,77 +147,92 @@ class INI {
 
 public:
 	/** CONSTRUCTOR **
-	 * INI(string, bool, bool)
+	 * INI(string)
 	 *
-	 * @param filename				- The name/location of the target INI file
+	 * @param _filename				- The name/location of the target INI file
+	 * @param writeNew				- (Default: false) When true, overwrites/creates INI file from defaults before loading it.
 	 * @param override_default_list	- (Default: false) When true, the defaults list is not checked. This allows unexpected INI settings to be loaded & used. Recommended to disable.
 	 */
-	INI(std::string filename, const bool override_default_list = false) : _filename(filename), _OVERRIDE_DEFAULTS(override_default_list)
+	INI(const std::string filename, const bool writeNew = false, const bool override_default_list = false) : _filename(filename), _OVERRIDE_DEFAULTS(override_default_list)
 	{
+		// if write new flag is enabled, create a new INI file before attempting to load it.
+		if ( writeNew )
+			write();
 		// if file did not load successfully
 		if ( !load() ) {
-			sys::msg(sys::warning, "INI::load(" + _filename + ") failed! Using default values!");
+			sys::msg(sys::debug, "INI::load(" + _filename + ") failed, using default values.");
 			// set setting vector to default
 			_vec = _DEF;
 		}
-		else {
-		#ifdef _DEBUG // Only active on Debug configuration.
-			sys::msg(sys::log, "Successfully loaded settings from " + _filename);
-		#endif
-		}
-	}
-
-	/**
-	 * reload()
-	 * Attempts to reload the INI file from filename given at instantiation time.
-	 * 
-	 * @returns bool success state
-	 */
-	bool reload()
-	{
-		// load from filename, check if successful
-		if (load()) 
-			return true;
-		return false;
+		else sys::msg(sys::debug, "Successfully loaded settings from " + _filename);
 	}
 
 	/**
 	 * write()
-	 * Writes a new INI file with default values to disk using the filename given at instantiation time.
-	 *
-	 * @returns bool
+	 * Creates a new INI file with all default values.
+	 * 
+	 * @param header			- (Default: none) When not empty, this string appears as a comment at the beginning of the file.
+	 *							  If a newline is included, make sure to include a semicolon to indicate the line as a comment.
+	 * @param suppress_output	- (Default: false) When true, does not display confirmation/error when saving INI file to disk.
+	 * @returns bool success state
 	 */
-	bool write()
+	bool write(std::string header = "", bool suppress_output = false)
 	{
-		bool rc = false; // return code
-		if (!_vec.empty()) {
-			// create stringstream
-			std::stringstream ss;
-			// iterate through vec, populate stream
-			for (auto it = _vec.begin(); it != _vec.end(); it++) {
-				switch ((*it)->_type) { // switch setting type
-				case INI_Setting::type::f: // add floating-point value
-					ss << static_cast<fINI_Setting*>(*it)->_name << "\t=\t" << static_cast<fINI_Setting*>(*it)->value() << std::endl;
-					break;
-				case INI_Setting::type::i: // add integer value
-					ss << static_cast<iINI_Setting*>(*it)->_name << "\t=\t" << static_cast<iINI_Setting*>(*it)->value() << std::endl;
-					break;
-				case INI_Setting::type::b: // add boolean value
-					ss << static_cast<bINI_Setting*>(*it)->_name << "\t=\t" << static_cast<bINI_Setting*>(*it)->value() << std::endl;
-					break;
-				default:break;
-				}
-			} // reached end of vec
-			// attempt to write stream to file, set return code to result
-			rc = FileIO::write(_filename, ss, FileIO::save_type::overwrite);
-			// inform user of result
-			if (rc)	sys::msg(sys::log, "Successfully created new INI file: \"" + _filename + "\"");
-			else	sys::msg(sys::error, "Failed to create new INI file -- Check write permissions.");
-		}
-		return rc;
+		// create stream to save to file
+		std::stringstream ss;
+		if ( header != "" )
+			ss << "; " << header << std::endl << std::endl;
+		// iterate through default settings vec
+		for ( auto it = _DEF.begin(); it != _DEF.end(); it++ ) {
+			// check if setting is a float
+			if ( (*it)->_type == INI_Setting::type::f ) {
+				fINI_Setting *ptr = static_cast<fINI_Setting*>(*it);
+				if ( !ptr->_desc.empty() )
+					ss << "; " << ptr->_desc << std::endl;
+				ss << ptr->_name;
+					if ( ptr->_name.size() - 1 < 15 )
+						ss << "\t\t";
+				ss << "\t=\t" << ptr->value() << std::endl;
+			}
+			// check if setting is an int
+			else if ( (*it)->_type == INI_Setting::type::i ) {
+				iINI_Setting *ptr = static_cast<iINI_Setting*>(*it);
+				if ( !ptr->_desc.empty() )
+					ss << "; " << ptr->_desc << std::endl;
+				ss << ptr->_name;
+				if ( ptr->_name.size() - 1 < 15 )
+					ss << "\t\t";
+				ss << "\t=\t" << ptr->value() << std::endl;
+			}
+			// check if setting is a boolean
+			else if ( (*it)->_type == INI_Setting::type::b ) {
+				bINI_Setting *ptr = static_cast<bINI_Setting*>(*it);
+				if ( !ptr->_desc.empty() ) // If description is not empty, add description to line
+					ss << "; " << ptr->_desc << std::endl;
+				ss << ptr->_name;
+				if ( ptr->_name.size() - 1 < 15 )
+					ss << "\t\t";
+				ss << "\t=\t";
+				if ( ptr->value() == true )
+					ss << "true" << std::endl;
+				else if ( ptr->value() == false )
+					ss << "false" << std::endl;
+			}
+			else sys::msg(sys::debug, "Invalid INI setting \"" + (*it)->_name + "\" was not added to the write list. (Check setting type)");
+		} // end of default settings vec
+		// write to file & determine return code
+		if ( !suppress_output ) { // inform user:
+			switch ( FileIO::write(_filename, ss, FileIO::save_type::overwrite) ) {
+			case true: // successfully saved to file
+				sys::msg(sys::log, "Successfully created \"" + _filename + "\" with default values.");
+				return true;
+			default: // failed to save to file
+				sys::msg(sys::error, "Failed to save \"" + _filename + "\" -- Check write permissions.");
+				return false;
+			}
+		} // else don't inform user:
+		else return FileIO::write(_filename, ss, FileIO::save_type::overwrite);
 	}
-
-#pragma region GETTERS
 
 	/**
 	 * fGet(string)
@@ -250,13 +244,10 @@ public:
 	double fGet(std::string name)
 	{
 		for ( auto it = _vec.begin(); it != _vec.end(); it++ ) {
-			if ( (name == (*it)->_name || name == (*it)->_name.substr(1)) && (*it)->_type == INI_Setting::type::f ) {
+			if ( (name == (*it)->_name || name == (*it)->_name.substr(1)) && (*it)->_type == INI_Setting::type::f )
 				return static_cast<double>(static_cast<fINI_Setting*>(*it)->value());
-			}
 		}
-		#ifdef _DEBUG // Only active on Debug configuration.
-			sys::msg(sys::error, "Request for value of '" + name + "' failed because it doesn't exist.");
-		#endif
+		sys::msg(sys::debug, "Request for value of '" + name + "' failed because it doesn't exist.");
 		return NULL;
 	}
 	/**
@@ -280,13 +271,10 @@ public:
 	long int iGet(std::string name)
 	{
 		for ( auto it = _vec.begin(); it != _vec.end(); it++ ) {
-			if ( (name == (*it)->_name || name == (*it)->_name.substr(1)) && (*it)->_type == INI_Setting::type::i ) {
+			if ( (name == (*it)->_name || name == (*it)->_name.substr(1)) && (*it)->_type == INI_Setting::type::i )
 				return static_cast<long int>(static_cast<iINI_Setting*>(*it)->value());
-			}
 		}
-		#ifdef _DEBUG // Only active on Debug configuration.
-			sys::msg(sys::error, "Request for value of '" + name + "' failed because it doesn't exist.");
-		#endif
+		sys::msg(sys::debug, "Request for value of '" + name + "' failed because it doesn't exist.");
 		return NULL;
 	}
 	/**
@@ -310,13 +298,10 @@ public:
 	bool bGet(std::string name)
 	{
 		for ( auto it = _vec.begin(); it != _vec.end(); it++ ) {
-			if ( (name == (*it)->_name || name == (*it)->_name.substr(1)) && (*it)->_type == INI_Setting::type::b ) {
+			if ( (name == (*it)->_name || name == (*it)->_name.substr(1)) && (*it)->_type == INI_Setting::type::b )
 				return static_cast<bool>(static_cast<bINI_Setting*>(*it)->value());
-			}
 		}
-		#ifdef _DEBUG // Only active on Debug configuration.
-			sys::msg(sys::error, "Request for value of '" + name + "' failed because it doesn't exist.");
-		#endif
+		sys::msg(sys::debug, "Request for value of '" + name + "' failed because it doesn't exist.");
 		return NULL;
 	}
 	/**
@@ -330,26 +315,20 @@ public:
 		return val.value();
 	}
 
-#pragma endregion GETTERS
-
 	/**
 	 * list()
-	 * Displays a list of all INI settings currently loaded. Only works in Debug configuration, unless override is specified.
-	 * 
-	 * @param override_debug	- (Default: false) Forces list to display when not in debug configuration
+	 * Lists all loaded INI settings in the console.
+	 * Only functions in Debug configuration, else does nothing.
 	 */
-	inline void list(bool override_debug = false)
+	inline void list()
 	{
-	#ifdef _DEBUG
-		if (true) {
-	#else
-		if (override_debug) {
-	#endif
+		#ifdef _DEBUG // auto-enable list in debug config
 			const unsigned int maxNameLength = 24;
-			for (auto it = _vec.begin(); it != _vec.end(); it++) {
+			std::cout << "(DEBUG) Currently loaded INI settings:" << std::endl;
+			for ( auto it = _vec.begin(); it != _vec.end(); it++ ) {
 				// concatenate long names, and format normal/short names with the correct-ish amount of tabs.
 				std::cout << (((*it)->_name.size() < maxNameLength) ? (((*it)->_name.size() < maxNameLength / 4) ? ((*it)->_name + "\t\t\t") : ((*it)->_name + "\t\t")) : (((*it)->_name.size() > maxNameLength) ? ((*it)->_name.substr(0, maxNameLength - 4) + "...\t") : ((*it)->_name + "\t"))) << "=  ";
-				switch ((*it)->_type) {
+				switch ( (*it)->_type ) {
 				case INI_Setting::type::f: // float
 					std::cout << static_cast<fINI_Setting*>(*it)->value() << std::endl;
 					break;
@@ -362,6 +341,6 @@ public:
 				default:break;
 				}
 			}
-		}
+		#endif
 	}
 };

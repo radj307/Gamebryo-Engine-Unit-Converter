@@ -1,44 +1,52 @@
-/**
- * INI_Setting.h
- * Contains struct/classes for individual INI settings of various types.
- * by radj307
- */
+/****************************************************************************************
+ *								    INI_Setting.h										*
+ *				Contains the INI_Setting classes used by the INI parser.				*
+ *									 by radj307											*
+ *																						*
+ *			(This file is not intended to be modified, see INI_Defaults.h)				*
+ ****************************************************************************************/
 #pragma once
 #include <string>	// for std::string type
 
 /**
  * struct INI_Setting
- * Parent class for INI Setting types.
- * Does not contain a value, use one of the below classes for objects.
+ * Parent class for INI_Setting types.
+ * NOT FOR DIRECT USAGE
  */
 struct INI_Setting {
 	/** ENUM **
 	 * type
-	 * 
+	 *
 	 * @param f	- Floating-Point value, stored as a double
 	 * @param i	- Integer value, stored as a long int
 	 * @param b	- Boolean value, stored as a bool
-	 * @param n	- No value, exclusively for error-handling
 	 */
 	enum class type {
-		f,	// float
-		i,	// int
-		b,	// bool
-		n,	// none
+		f = 'f',	// float
+		i = 'i',	// int
+		b = 'b',	// bool
 	};
+
+	/** CONSTRUCTOR **
+	 * INI_Setting(enum type, string, string)
+	 * 
+	 * @param myType	- This INI Setting's value type
+	 * @param myName	- This INI Setting's name
+	 * @param myDesc	- (Default: disabled) A brief description of this INI setting's purpose, displayed as a comment in the INI file. 
+	 */
+	INI_Setting(type myType, std::string myName, std::string myDesc) : _type(myType), _name(myName), _desc(myDesc) 
+	{
+		// add type prefix to name if it doesn't exist
+		if ( _name.at(0) != char(_type) )
+			_name = char(_type) + _name;
+	}
 
 	// _name	- The unique name of this INI Setting. This should be descriptive of its function
 	std::string _name;
+	// _desc	- A short description of this INI setting's function. This will appear as a comment in the INI file.
+	std::string _desc;
 	// _type	- The type of this INI Setting. Valid: (f | i | b)
-	type _type;
-
-	/** CONSTRUCTOR **
-	 * INI_Setting(string, type)
-	 * 
-	 * @param myName	- This INI Setting's name
-	 * @param myType	- This INI Setting's value type
-	 */
-	INI_Setting(std::string myName, type myType) : _name(myName), _type(myType) {};
+	const type _type;
 };
 
 /**
@@ -57,7 +65,7 @@ public:
 	 * @param myName	- This INI Setting's name
 	 * @param myVal		- This INI Setting's value
 	 */
-	fINI_Setting(std::string myName, double myVal) : INI_Setting(myName, type::f), _value(myVal) {}
+	fINI_Setting(std::string myName, double myVal, std::string myDesc = "") : INI_Setting(type::f, myName, myDesc), _value(myVal) {}
 
 	/**
 	 * value()
@@ -87,7 +95,7 @@ public:
 	 * @param myName	- This INI Setting's name
 	 * @param myVal		- This INI Setting's value
 	 */
-	iINI_Setting(std::string myName, long int myVal) : INI_Setting(myName, type::i), _value(myVal) {}
+	iINI_Setting(std::string myName, long int myVal, std::string myDesc = "") : INI_Setting(type::i, myName, myDesc), _value(myVal) {}
 
 	/**
 	 * value()
@@ -117,7 +125,7 @@ public:
 	 * @param myName	- This INI Setting's name
 	 * @param myVal		- This INI Setting's value
 	 */
-	bINI_Setting(std::string myName, bool myVal) : INI_Setting(myName, type::b), _value(myVal) {}
+	bINI_Setting(std::string myName, bool myVal, std::string myDesc = "") : INI_Setting(type::b, myName, myDesc), _value(myVal) {}
 
 	/**
 	 * value()

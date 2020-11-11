@@ -4,17 +4,17 @@
  * by radj307
  */
 #pragma once
-    // Global libs:
-
+// Global libs:
 #include <iostream>     // for cout
 #include <sstream>      // for stringstream
 #include <chrono>       // for time units       Used in sleep()
 #include <thread>       // for thread           Used in sleep()
 #include <array>        // for std::array
 
+// Optional libs:
+#include "termcolor.hpp"
 
-    // Determine Platform: (Windows/Linux support only)
-
+// Determine Platform:
 #if _WIN32 || _WIN64
 #define CROSS_PLATFORM  // Works on Windows & Linux
 #define ARCH_WINNT        // Only works on Windows
@@ -26,14 +26,12 @@
 #define ARCH_UNIX       // Only works on Linux
 #endif
 
-
-    // Global Vars:
+// Global Vars:
 
 // when false, all messages flagged as logs will not be displayed to the console
 static bool __SHOW_LOGS = true;
 
-
-    // Objects:
+// Objects:
 
 /**
  * struct sys
@@ -57,6 +55,7 @@ struct sys {
         case message:   return "[MSG]\t";
         case warning:   return "[WARN]\t";
         case error:     return "[ERROR]\t";
+        case debug:     return "[DEBUG]\t";
         default:        return "[???]\t";
         }
     }
@@ -73,6 +72,8 @@ struct sys {
         warning,    // [WARN]
         // Used for critical errors
         error,      // [ERROR]
+        // Used for debug messages, only shown in Debug configuration.
+        debug,      // [DEBUG]
     };
 
     /** STATIC **
@@ -86,10 +87,31 @@ struct sys {
     template <class EnumType>
     static void msg(const EnumType msg_type, const std::string msg_content, const std::string pressKeyPrompt = "")
     {
-        if (msg_content != "" && msg_type != log || (msg_content != "" && __SHOW_LOGS && msg_type == log))
+        // debug message type
+        if ( msg_type == debug ) {
+        #ifdef _DEBUG // If in debug configuration
+            #ifdef TERMCOLOR_HPP_
+                std::cout << termcolor::on_magenta << msg_prefix(msg_type) << msg_content << termcolor::reset << std::endl;
+            #else
+                std::cout << msg_prefix(msg_type) << msg_content << std::endl;
+            #endif
+        #endif
+        }
+        // other message type
+        else if ( msg_content != "" && msg_type != log || (msg_content != "" && __SHOW_LOGS && msg_type == log) ) {
+        #ifdef TERMCOLOR_HPP_ // 
+            if ( msg_type == error )
+                std::cout << termcolor::red << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+            else if ( msg_type == warning )
+                std::cout << termcolor::yellow << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+            else
+                std::cout << termcolor::grey << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+        #else
             std::cout << msg_prefix(msg_type) << msg_content << std::endl;
-        // check if a string was included for the wait prompt
-        if (pressKeyPrompt != "")
+        #endif
+        }
+        // check for wait prompt
+        if ( pressKeyPrompt != "" )
             pause(pressKeyPrompt);
     }
 
