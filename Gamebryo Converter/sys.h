@@ -11,13 +11,10 @@
 #include <thread>       // for thread           Used in sleep()
 #include <array>        // for std::array
 
-// Optional libs:
-#include "termcolor.hpp"
-
 // Determine Platform:
 #if _WIN32 || _WIN64
 #define CROSS_PLATFORM  // Works on Windows & Linux
-#define ARCH_WINNT        // Only works on Windows
+#define ARCH_WINNT      // Only works on Windows
 // Windows-Only libs:
 #include <conio.h>      // for _getch()
 #include <Windows.h>    // for windows console API
@@ -76,8 +73,10 @@ struct sys {
         debug,      // [DEBUG]
     };
 
+#pragma region MESSAGE
+
     /** STATIC **
-     * info::msg(template EnumType, string, string)
+     * info::msg(template EnumType, string, string, bool)
      * Wrapper for prefixed console output. Displays a given string in the format: [???]\t<msg_content>\n<pressKeyPrompt>
      *
      * @param msg_type          - The type of message, displayed in a tag at the beginning of the line
@@ -89,27 +88,13 @@ struct sys {
     {
         // debug message type
         if ( msg_type == debug ) {
-        #ifdef _DEBUG // If in debug configuration
-            #ifdef TERMCOLOR_HPP_
-                std::cout << termcolor::on_magenta << msg_prefix(msg_type) << msg_content << termcolor::reset << std::endl;
-            #else
-                std::cout << msg_prefix(msg_type) << msg_content << std::endl;
-            #endif
-        #endif
-        }
-        // other message type
-        else if ( (msg_content != "" && msg_type != log) || (msg_content != "" && __SHOW_LOGS && msg_type == log) ) {
-        #ifdef TERMCOLOR_HPP_ // 
-            if ( msg_type == error )
-                std::cout << termcolor::red << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
-            else if ( msg_type == warning )
-                std::cout << termcolor::yellow << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
-            else
-                std::cout << termcolor::grey << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
-        #else
+        #ifdef _DEBUG
             std::cout << msg_prefix(msg_type) << msg_content << std::endl;
         #endif
         }
+        // other message type
+        else if ( (msg_content != "" && msg_type != log) || (msg_content != "" && __SHOW_LOGS && msg_type == log) )
+            std::cout << msg_prefix(msg_type) << msg_content << std::endl;
         // check for wait prompt
         if ( pressKeyPrompt != "" )
             pause(pressKeyPrompt);
@@ -126,12 +111,88 @@ struct sys {
     template <class EnumType>
     static void msg(const EnumType msg_type, const char* msg_content, const char* pressKeyPrompt = "")
     {
-        if ((msg_content != "" && msg_type != log) || (msg_content != "" && __SHOW_LOGS && msg_type == log))
+        // debug message type
+        if ( msg_type == debug ) {
+        #ifdef _DEBUG
+            std::cout << msg_prefix(msg_type) << msg_content << std::endl;
+        #endif
+        }
+        // other message type
+        else if ( (msg_content != "" && msg_type != log) || (msg_content != "" && __SHOW_LOGS && msg_type == log) )
             std::cout << msg_prefix(msg_type) << msg_content << std::endl;
         // check if a string was included for the wait prompt
-        if (pressKeyPrompt != "")
+        if ( pressKeyPrompt != "" )
             pause(pressKeyPrompt);
     }
+
+#ifdef TERMCOLOR_HPP_ // if termcolor header was found in the project (loaded before sys.h)
+
+    /** STATIC **
+     * info::cmsg(template EnumType, string, string, bool)
+     * Wrapper for prefixed console output with colors. Displays a given string in the format: [???]\t<msg_content>\n<pressKeyPrompt>
+     * This function uses colorized output from termcolor.
+     *
+     * @param msg_type          - The type of message, displayed in a tag at the beginning of the line
+     * @param msg_content       - The message to display
+     * @param pressKeyPrompt    - (Default: disabled) Replace with any string to call the sys::pause(pressKeyPrompt) command after displaying the message.
+     */
+    template <class EnumType>
+    static void cmsg(const EnumType msg_type, const std::string msg_content, const std::string pressKeyPrompt = "")
+    {
+        // debug message type
+        if ( msg_type == debug ) {
+        #ifdef _DEBUG
+            std::cout << termcolor::magenta << msg_prefix(msg_type) << msg_content << termcolor::reset << std::endl;
+        #endif
+        }
+        // other message type
+        else if ( (msg_content != "" && msg_type != log) || (msg_content != "" && __SHOW_LOGS && msg_type == log) ) {
+            if ( msg_type == error )
+                std::cout << termcolor::red << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+            else if ( msg_type == warning )
+                std::cout << termcolor::yellow << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+            else
+                std::cout << termcolor::grey << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+        }
+        // check for wait prompt
+        if ( pressKeyPrompt != "" )
+            pause(pressKeyPrompt);
+    }
+
+    /** STATIC **
+     * info::msg(template EnumType, const char*, const char*)
+     * Wrapper for prefixed console output. Displays a given const char* in the format: [???]\t<msg_content>\n<pressKeyPrompt>
+     * This function uses colorized output from termcolor.
+     *
+     * @param msg_type          - The type of message, displayed in a tag at the beginning of the line
+     * @param msg_content       - The message to display
+     * @param pressKeyPrompt    - (Default: disabled) Replace with any const char* to call the sys::pause(pressKeyPrompt) command after displaying the message.
+     */
+    template <class EnumType>
+    static void cmsg(const EnumType msg_type, const char* msg_content, const std::string pressKeyPrompt = "")
+    {
+        // debug message type
+        if ( msg_type == debug ) {
+        #ifdef _DEBUG
+            std::cout << termcolor::magenta << msg_prefix(msg_type) << msg_content << termcolor::reset << std::endl;
+        #endif
+        }
+        // other message type
+        else if ( (msg_content != "" && msg_type != log) || (msg_content != "" && __SHOW_LOGS && msg_type == log) ) {
+            if ( msg_type == error )
+                std::cout << termcolor::red << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+            else if ( msg_type == warning )
+                std::cout << termcolor::yellow << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+            else
+                std::cout << termcolor::grey << msg_prefix(msg_type) << msg_content << std::endl << termcolor::reset;
+        }
+        // check if a string was included for the wait prompt
+        if ( pressKeyPrompt != "" )
+            pause(pressKeyPrompt);
+    }
+
+#endif
+#pragma endregion MESSAGE
 
     /** STATIC **
      * sleep(time_t)
@@ -162,7 +223,7 @@ struct sys {
     static inline std::string exec(const char* cmd)
     {
         // create an array of 256 chars to receive output
-        std::array<char, 256> buffer;
+        std::array<char, 256> buffer{};
         // create a stringstream to store results
         std::string result = "";
         // create pipe to terminal
@@ -186,7 +247,7 @@ struct sys {
     static inline std::string exec(const char* cmd, int& returnCode)
     {
         // create an array of 256 chars to receive output
-        std::array<char, 256> buffer;
+        std::array<char, 256> buffer{};
         // create a stringstream to store results
         std::string result = "";
         // create pipe to terminal:

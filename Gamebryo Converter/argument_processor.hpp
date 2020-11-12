@@ -22,7 +22,10 @@ inline void convert(ValType* in, ValType* out, double* val)
 		// if types don't match, and neither types are TYPE::ALL, convert to target type
 		if ( (in->_t != ValType::TYPE::ALL && out->_t != ValType::TYPE::ALL) && (in->_t != out->_t) ) {
 			Value output = input.convert_to(out->_t);
-			std::cout << '\t'; input.cout(); std::cout << "\t=  "; output.cout(true); std::cout << std::endl;
+			if ( !cfg.bGet("DisableColors") ) {
+				std::cout << '\t'; input.cout(); std::cout << "\t=  "; output.cout(true); std::cout << std::endl;
+			}
+			else std::cout << '\t' << input.asString() << "\t=  " << output.asString(true) << std::endl;
 		}
 		// if types don't match, and only output type is TYPE::ALL, convert to all types
 		else if ( (in->_t != ValType::TYPE::ALL && out->_t == ValType::TYPE::ALL) && (in->_t != out->_t) ) {
@@ -31,54 +34,85 @@ inline void convert(ValType* in, ValType* out, double* val)
 
 			// if input type is not units, convert to units
 			if ( input._t != ValType::TYPE::unit ) {
-				// show input
 				std::cout << '\t';
-				if ( !display_short || cfg.bGet("AlwaysShowInput") )
-					input.cout();
+
+				// show input
+				// check if input val has already been displayed, or if forced on from INI
+				if ( !display_short || cfg.bGet("AlwaysShowInput") ) {
+					if ( !cfg.bGet("DisableColors") ) // check if INI disable color is on
+						input.cout();
+					else std::cout << input.asString();
+				}
 				else { // show blank space instead
 					for ( unsigned int i = 0; i < input.asString().size() - 1; i++ )
 						std::cout << ' ';
 				}
+
 				// show output
-				std::cout << termcolor::cyan << "\t=  " << termcolor::reset;
-				input.convert_to(ValType::TYPE::unit).cout(true); 
-				std::cout << std::endl;
+				if ( !cfg.bGet("DisableColors") ) { // check if INI disable color is on
+					std::cout << termcolor::cyan << "\t=  " << termcolor::reset;
+					input.convert_to(ValType::TYPE::unit).cout(true);
+					std::cout << std::endl;
+				}
+				else {
+					std::cout << "\t=  " << input.convert_to(ValType::TYPE::unit).asString(true) << std::endl;
+				}
 				// set flag
 				display_short = true;
 			}
 
 			// if input type is not metric, convert to metric
 			if ( input._t != ValType::TYPE::metric ) {
-				// show input
 				std::cout << '\t';
-				if ( !display_short || cfg.bGet("AlwaysShowInput") )
-					input.cout();
+
+				// show input
+				// check if input val has already been displayed, or if forced on from INI
+				if ( !display_short || cfg.bGet("AlwaysShowInput") ) {
+					if ( !cfg.bGet("DisableColors") ) // check if INI disable color is on
+						input.cout();
+					else std::cout << input.asString();
+				}
 				else { // show blank space instead
 					for ( unsigned int i = 0; i < input.asString().size() - 1; i++ )
 						std::cout << ' ';
 				}
+
 				// show output
-				std::cout << termcolor::cyan << "\t=  " << termcolor::reset;
-				input.convert_to(ValType::TYPE::metric).cout(true); 
-				std::cout << std::endl;
+				if ( !cfg.bGet("DisableColors") ) { // check if INI disable color is on
+					std::cout << termcolor::cyan << "\t=  " << termcolor::reset;
+					input.convert_to(ValType::TYPE::metric).cout(true); 
+					std::cout << std::endl;
+				}
+				else std::cout << "\t=  " << input.convert_to(ValType::TYPE::unit).asString(true) << std::endl;
 				// set flag
 				display_short = true;
 			}
 
 			// if input type is not imperial, convert to imperial
 			if ( input._t != ValType::TYPE::imperial ) {
-				// show input
 				std::cout << '\t';
-				if ( !display_short || cfg.bGet("AlwaysShowInput") )
-					input.cout();
+
+				// show input
+				// check if input val has already been displayed, or if forced on from INI
+				if ( !display_short || cfg.bGet("AlwaysShowInput") ) {
+					if ( !cfg.bGet("DisableColors") ) // check if INI disable color is on
+						input.cout();
+					else std::cout << input.asString();
+				}
 				else { // show blank space instead
 					for ( unsigned int i = 0; i < input.asString().size() - 1; i++ )
 						std::cout << ' ';
 				}
+
 				// show output
-				std::cout << termcolor::cyan << "\t=  " << termcolor::reset;
-				input.convert_to(ValType::TYPE::imperial).cout(true);
-				std::cout << std::endl;
+				if ( !cfg.bGet("DisableColors") ) { // check if INI disable color is on
+					std::cout << termcolor::cyan << "\t=  " << termcolor::reset;
+					input.convert_to(ValType::TYPE::imperial).cout(true);
+					std::cout << std::endl;
+				}
+				else {
+					std::cout << "\t=  " << input.convert_to(ValType::TYPE::unit).asString(true) << std::endl;
+				}
 				// set flag
 				display_short = true;
 			}
@@ -142,7 +176,7 @@ inline int interpret(const int argc, const char* argv[], const unsigned int star
 						// ensure checking arg won't cause exception
 						if ( parse.size() > 2 ) {
 							if ( parse == "ini" )
-								cfg.write("Gamebryo Engine Unit Converter Settings\n; Changing the conversion factors is not recommended.");
+								cfg.write(/*File Header: */"Gamebryo Engine Unit Converter Settings\n; Changing the conversion factors is not recommended.");
 							else if ( parse.at(0) == 'f' && parse.at(1) == '=' ) {
 								File proc(parse.substr(2));
 								// check if file conversion succeeded
@@ -154,7 +188,6 @@ inline int interpret(const int argc, const char* argv[], const unsigned int star
 									sys::msg(sys::error, "Failed to process file: \"" + parse.substr(2) + "\"");
 									break;
 								}
-								// File instance is deleted when out of scope
 							}
 						} // else continue
 					}

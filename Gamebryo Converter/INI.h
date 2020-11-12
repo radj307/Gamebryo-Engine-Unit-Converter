@@ -57,12 +57,12 @@ class INI {
 			for ( std::string parse; std::getline(ss, parse); ) {
 				parse.erase(std::remove(parse.begin(), parse.end(), ' '), parse.end());// remove spaces
 				parse.erase(std::remove(parse.begin(), parse.end(), '\t'), parse.end());// remove tabs
-				
+
 				// find index of '=' and either ';'/'#' or line ending
 				int index_comment = find_comment(parse), index_equal = parse.find('=');
-				
+
 				// CHECK IF LINE IS NOT A COMMENT AND NOT BLANK
-				if ( ((unsigned)index_comment == parse.size() - 1) && !parse.empty()) {
+				if ( ((unsigned)index_comment == parse.size() - 1) && !parse.empty() ) {
 					// set name
 					std::string name = parse.substr(0, index_equal);
 
@@ -170,7 +170,7 @@ public:
 	/**
 	 * write()
 	 * Creates a new INI file with all default values.
-	 * 
+	 *
 	 * @param header			- (Default: none) When not empty, this string appears as a comment at the beginning of the file.
 	 *							  If a newline is included, make sure to include a semicolon to indicate the line as a comment.
 	 * @param suppress_output	- (Default: false) When true, does not display confirmation/error when saving INI file to disk.
@@ -190,8 +190,17 @@ public:
 				if ( !ptr->_desc.empty() )
 					ss << "; " << ptr->_desc << std::endl;
 				ss << ptr->_name;
-					if ( ptr->_name.size() - 1 < 15 )
-						ss << "\t\t";
+				if ( ptr->_name.size() - 1 < 15 ) {
+					ss << "\t";
+					if ( ptr->_name.size() - 1 < 11 ) {
+						ss << "\t";
+						if ( ptr->_name.size() - 1 < 7 ) {
+							ss << "\t";
+							if ( ptr->_name.size() - 1 < 3 )
+								ss << "\t";
+						}
+					}
+				}
 				ss << "\t=\t" << ptr->value() << std::endl;
 			}
 			// check if setting is an int
@@ -200,8 +209,17 @@ public:
 				if ( !ptr->_desc.empty() )
 					ss << "; " << ptr->_desc << std::endl;
 				ss << ptr->_name;
-				if ( ptr->_name.size() - 1 < 15 )
-					ss << "\t\t";
+				if ( ptr->_name.size() - 1 < 15 ) {
+					ss << "\t";
+					if ( ptr->_name.size() - 1 < 11 ) {
+						ss << "\t";
+						if ( ptr->_name.size() - 1 < 7 ) {
+							ss << "\t";
+							if ( ptr->_name.size() - 1 < 3 )
+								ss << "\t";
+						}
+					}
+				}
 				ss << "\t=\t" << ptr->value() << std::endl;
 			}
 			// check if setting is a boolean
@@ -210,8 +228,17 @@ public:
 				if ( !ptr->_desc.empty() ) // If description is not empty, add description to line
 					ss << "; " << ptr->_desc << std::endl;
 				ss << ptr->_name;
-				if ( ptr->_name.size() - 1 < 15 )
-					ss << "\t\t";
+				if ( ptr->_name.size() - 1 < 15 ) {
+					ss << "\t";
+					if ( ptr->_name.size() - 1 < 11 ) {
+						ss << "\t";
+						if ( ptr->_name.size() - 1 < 7 ) {
+							ss << "\t";
+							if ( ptr->_name.size() - 1 < 3 )
+								ss << "\t";
+						}
+					}
+				}
 				ss << "\t=\t";
 				if ( ptr->value() == true )
 					ss << "true" << std::endl;
@@ -234,6 +261,25 @@ public:
 		else return FileIO::write(_filename, ss, FileIO::save_type::overwrite);
 	}
 
+	template <class returntype = double>
+	returntype getValOf(std::string name)
+	{
+		for ( auto it = _vec.begin(); it != _vec.end(); it++ ) {
+			if ( name == (*it)->_name || name == (*it)->_name.substr(1) ) {
+				switch ( (*it)->_type ) {
+				case INI_Setting::type::f:
+					return static_cast<double>(static_cast<fINI_Setting*>(*it)->value());
+				case INI_Setting::type::i:
+					return static_cast<long int>(static_cast<iINI_Setting*>(*it)->value());
+				case INI_Setting::type::b:
+					return static_cast<bool>(static_cast<bINI_Setting*>(*it)->value());
+				default:return NULL;
+				}
+			}
+		}
+		return NULL;
+	}
+
 	/**
 	 * fGet(string)
 	 * Returns the float value of an INI setting with a given name
@@ -244,6 +290,7 @@ public:
 	double fGet(std::string name)
 	{
 		for ( auto it = _vec.begin(); it != _vec.end(); it++ ) {
+			// check if name matches name of member at current iterator pos
 			if ( (name == (*it)->_name || name == (*it)->_name.substr(1)) && (*it)->_type == INI_Setting::type::f )
 				return static_cast<double>(static_cast<fINI_Setting*>(*it)->value());
 		}
