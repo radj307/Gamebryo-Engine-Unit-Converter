@@ -6,10 +6,13 @@
 
 //#define WSL // Disable termcolor when using Windows Subsystem for Linux
 
-#include "termcolor.hpp"
-#include "INI.h"					// For INI settings
-INI cfg("conv.ini");				// init INI
-#include "argument_processor.hpp"	// For all functions
+#include "termcolor.hpp"	// for colored terminal output
+#include "INI.h"			// For INI settings
+
+INI cfg("conv.ini");		// init INI to be used in interpret.hpp
+
+#include "interpret.hpp"	// For all functions
+
 
 /** MAIN **
  * main(const int, const char*[])

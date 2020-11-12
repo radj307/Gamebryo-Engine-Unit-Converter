@@ -146,7 +146,7 @@
     <ClInclude Include="INI.h" />
     <ClInclude Include="INI_Defaults.h" />
     <ClInclude Include="INI_Setting.h" />
-    <ClInclude Include="argument_processor.hpp" />
+    <ClInclude Include="interpret.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="sys.h" />
     <ClInclude Include="termcolor.hpp" />

@@ -27,7 +27,15 @@ struct ValType {
 		ALL = 'a',			// @ for output type: all
 		unit = 'u',			// u for units
 		imperial = '\'',	// ' for feet
-		metric = 'm'		// m for meter
+		metric = 'm',		// m for meter
+	};
+	// Enumerate extra types allowed for input only
+	enum class IN_TYPE {
+		NONE,
+		in,	// Imperial Inches
+		cm,	// Metric Centimeters
+		mm,	// Metric Millimeters
+		um,	// Metric Micrometers
 	};
 
 	// This instance's type
@@ -61,6 +69,7 @@ struct ValType {
 	}
 
 #pragma region OPERATORS
+
 	/**
 	 * operator==
 	 * Comparison operator.
@@ -100,8 +109,8 @@ struct ValType {
 			return true;
 		return false;
 	}
-#pragma endregion OPERATORS
 
+#pragma endregion OPERATORS
 };
 
 /**
@@ -188,10 +197,31 @@ public:
 			return TYPE::unit;
 		else if ( s == "m" || s == "meter" || s == "meters" || s == "metric" || s == "met" )
 			return TYPE::metric;
-		else if ( s == "i" || s == "f" || s == "ft" || s == "feet" || s == "foot" || s == "imperial" || s == "imp" )
+		else if ( s == "f" || s == "ft" || s == "feet" || s == "foot" || s == "imperial" || s == "imp" )
 			return TYPE::imperial;
 		else
 			return TYPE::NONE;
+	}
+
+	/** STATIC **
+	 * stost(string)
+	 * (String TO Sub Type) converts string to IN_TYPE
+	 *
+	 * @returns IN_TYPE
+	 */
+	static inline IN_TYPE stost(std::string s)
+	{
+		for ( unsigned int i = 0; i < s.size() - 1; i++ ) { s[i] = std::tolower(s[i]); }
+		if ( s == "i" || s == "in" || s == "inc" || s == "inch" || s == "inches" )
+			return IN_TYPE::in;
+		else if ( s == "cm" || s == "centimeter" || s == "centimeters" )
+			return IN_TYPE::cm;
+		else if ( s == "mm" || s == "millimeter" || s == "millimeters" )
+			return IN_TYPE::mm;
+		else if ( s == "um" || s == "micrometer" || s == "micrometers" )
+			return IN_TYPE::um;
+		else
+			return IN_TYPE::NONE;
 	}
 
 	/** STATIC **

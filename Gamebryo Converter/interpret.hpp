@@ -14,8 +14,31 @@
  * @param out	- Ptr to output type
  * @param val	- Ptr to value
  */
-inline void convert(ValType* in, ValType* out, double* val)
+inline void convert(ValType* in, ValType* out, double* val, std::string& arg)
 {
+	// if input type is invalid, check if it is a valid subunit
+	if ( in->_t == ValType::TYPE::NONE ) {
+		switch ( Value::stost(arg) ) {
+		case ValType::IN_TYPE::in: // inches -> feet
+			*val /= 12;
+			in = new ValType(ValType::TYPE::imperial);
+			break;
+		case ValType::IN_TYPE::cm: // centimeters -> meters
+			*val /= 100;
+			in = new ValType(ValType::TYPE::metric);
+			break;
+		case ValType::IN_TYPE::mm: // millimeters -> meters
+			*val /= 1000;
+			in = new ValType(ValType::TYPE::metric);
+			break;
+		case ValType::IN_TYPE::um: // micrometers -> meters
+			*val /= 1000000;
+			in = new ValType(ValType::TYPE::metric);
+			break;
+		default:break;
+		}
+	} // proceed with conversion
+	// check if input & output types are valid, and if value has changed from default
 	if ( (in != nullptr && in->_t != ValType::TYPE::NONE) && (out != nullptr && out->_t != ValType::TYPE::NONE) && (*val != -0.0f) ) {
 		// init Value
 		Value input((*in)._t, *val);
@@ -124,6 +147,9 @@ inline void convert(ValType* in, ValType* out, double* val)
 
 // holds the needed arguments for one conversion
 struct Param {
+	// argument given as input, used if input type is not a primary type & requires conversion to primary in convert()
+	// ex: ( inches, cm, mm, um )
+	std::string inputArg;
 	// input types
 	ValType *in, *out;
 	// value
@@ -195,11 +221,13 @@ inline int interpret(const int argc, const char* argv[], const unsigned int star
 				// if arg is entirely alphabetical characters
 				else if ( std::all_of(arg.begin(), arg.end(), ::isalpha) ) {
 					// check if input type has not been set
-					if ( p.in == nullptr )
+					if ( p.in == nullptr ) {
 						p.in = new ValType(Value::stot(arg));
+						p.inputArg = arg;
+					}
 					else { // else set output type & begin conversion
 						p.out = new ValType(Value::stot(arg));
-						convert(p.in, p.out, &p.val);
+						convert(p.in, p.out, &p.val, p.inputArg);
 						p.clear(); // reset arguments for next conversion
 					}
 				}
