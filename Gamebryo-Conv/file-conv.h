@@ -1,5 +1,5 @@
 #pragma once
-#include "FileIO.h"
+#include "file.h"
 #include "sys.h"
 #include "Value.h"
 
@@ -20,7 +20,7 @@ protected: // accessible in children
 	 */
 	inline bool getFrom(std::string filename)
 	{
-		_content = FileIO::readToVector(filename);
+		_content = file::readToVector(filename);
 		return valid();
 	}
 
@@ -34,7 +34,7 @@ protected: // accessible in children
 	inline bool saveTo(std::string filename)
 	{
 		if ( valid() )
-			return FileIO::write(filename, _content);
+			return file::write(filename, _content);
 		return false;
 	}
 
@@ -64,7 +64,7 @@ public:
 	std::string _savename;
 	bool _success = false;
 
-	File(std::string file) : _filename(file), _savename(FileIO::extendName(_filename, "-converted"))
+	File(std::string file) : _filename(file), _savename(file::extendName(_filename, "-converted"))
 	{
 		// check if file was read to content successfully
 		if ( getFrom(_filename) ) {
@@ -121,7 +121,7 @@ public:
 				} // else add a newline
 				else toWrite << std::endl;
 			}
-			_success = FileIO::write(_savename, toWrite);
+			_success = file::write(_savename, toWrite);
 		}
 		else sys::msg(sys::error, "Couldn't open '" + _filename + "'");
 	}

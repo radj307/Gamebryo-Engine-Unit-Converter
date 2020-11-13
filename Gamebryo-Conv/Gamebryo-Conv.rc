@@ -44,16 +44,6 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (United States) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (Canada) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENC)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_CAN
-#pragma code_page(1252)
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -71,8 +61,8 @@ IDI_ICON1               ICON                    "MAINICON.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,1,7,0
- PRODUCTVERSION 3,0,0,0
+ FILEVERSION 4,0,0,0
+ PRODUCTVERSION 4,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -88,13 +78,13 @@ BEGIN
         BLOCK "100904b0"
         BEGIN
             VALUE "CompanyName", "radj307 (tjradj)"
-            VALUE "FileDescription", "Converts between Meters, Feet, and Bethesda's Gamebryo Units"
-            VALUE "FileVersion", "3.1.7.0"
-            VALUE "InternalName", "conv.exe"
+            VALUE "FileDescription", "Convert Bethesda's ""Units"" to and from feet & meters."
+            VALUE "FileVersion", "4.0.0.0"
+            VALUE "InternalName", "Gamebryo.exe"
             VALUE "LegalCopyright", "Copyright (C) 2020"
-            VALUE "OriginalFilename", "conv.exe"
-            VALUE "ProductName", "Gamebryo Unit Converter"
-            VALUE "ProductVersion", "3"
+            VALUE "OriginalFilename", "Gamebryo.exe"
+            VALUE "ProductName", "Gamebryo Engine Unit Converter"
+            VALUE "ProductVersion", "4.0.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -103,7 +93,7 @@ BEGIN
     END
 END
 
-#endif    // English (Canada) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

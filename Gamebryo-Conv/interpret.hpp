@@ -4,7 +4,7 @@
  * by radj307
  */
 #pragma once
-#include "file.h"
+#include "file-conv.h"
 
 /**
  * convert(ValType*, ValType*, double*)
@@ -179,24 +179,21 @@ struct Param {
  * @param argv		- The argument array from main()
  * @returns int		- ( 0 = success ) ( 1 = failed because: invalid arguments, errors )
  */
-inline int interpret(const int argc, const char* argv[], const unsigned int startAt = 1)
+inline int interpret(std::vector<std::string> arg)
 {
 	// check if arg count is valid
-	if ( argc > 1 ) {
+	if ( !arg.empty() ) {
 		Param p; // hold conversion arguments so they can be properly reset 
 
 		// iterate arguments, skip argv[0]
-		for ( unsigned int i = startAt; i < (unsigned)argc; i++ ) {
-			// convert to string
-			std::string arg = argv[i];
-
+		for ( auto it = arg.begin(); it != arg.end(); it++ ) {
 			// check if arg has at least 1 character
-			if ( arg.size() > 0 ) {
+			if ( (*it).size() > 0 ) {
 				// check if first char is a slash
-				if ( arg.at(0) == '/' ) {
+				if ( (*it).at(0) == '/' ) {
 					std::stringstream ss;
 					// remove the slash
-					ss << arg.substr(1) << ',';
+					ss << (*it).substr(1) << ',';
 					// parse command argument
 					for ( std::string parse; std::getline(ss, parse, ','); parse.clear() ) {
 						// ensure checking arg won't cause exception
@@ -219,35 +216,35 @@ inline int interpret(const int argc, const char* argv[], const unsigned int star
 					}
 				}
 				// if arg is entirely alphabetical characters
-				else if ( std::all_of(arg.begin(), arg.end(), ::isalpha) ) {
+				else if ( std::all_of((*it).begin(), (*it).end(), ::isalpha) ) {
 					// check if input type has not been set
 					if ( p.in == nullptr ) {
-						p.in = new ValType(Value::stot(arg));
-						p.inputArg = arg;
+						p.in = new ValType(Value::stot(*it));
+						p.inputArg = *it;
 					}
 					else { // else set output type & begin conversion
-						p.out = new ValType(Value::stot(arg));
+						p.out = new ValType(Value::stot(*it));
 						convert(p.in, p.out, &p.val, p.inputArg);
 						p.clear(); // reset arguments for next conversion
 					}
 				}
 				else {
 					// copy arg to temp string
-					std::string tmp = arg;
+					std::string tmp = *it;
 					// remove all decimal points from temp string
 					tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
 
 					// check if temp string is entirely digits
 					if ( std::all_of(tmp.begin(), tmp.end(), ::isdigit) ) {
 						// set val to arg as type double
-						try { p.val = std::stod(arg); }
+						try { p.val = std::stod(*it); }
 						catch ( std::exception & exc ) { // catch stod exceptions
 							sys::msg(sys::error, "\"" + std::string(exc.what()) + "\" was thrown while interpreting the value!");
 						}
 					}
 
 					// else show invalid argument warning
-					else sys::msg(sys::warning, "Invalid argument: " + arg);
+					else sys::msg(sys::warning, "Invalid argument: " + *it);
 				}
 			}
 			else continue;

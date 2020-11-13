@@ -13,47 +13,28 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="termcolor">
-      <UniqueIdentifier>{977a84b1-9078-48be-b0db-8b4e8657f4ee}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="INI">
-      <UniqueIdentifier>{134812cb-fa8e-42b2-98ee-fb587b8cfffa}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="file.h">
+    <ClInclude Include="file-conv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileIO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sys.h">
+    <ClInclude Include="interpret.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Value.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="termcolor.hpp">
-      <Filter>termcolor</Filter>
-    </ClInclude>
-    <ClInclude Include="INI.h">
-      <Filter>INI</Filter>
-    </ClInclude>
-    <ClInclude Include="INI_Defaults.h">
-      <Filter>INI</Filter>
-    </ClInclude>
-    <ClInclude Include="INI_Setting.h">
-      <Filter>INI</Filter>
-    </ClInclude>
-    <ClInclude Include="interpret.hpp">
+    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="conv.rc">
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Gamebryo-Conv.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -61,10 +42,5 @@
     <Image Include="MAINICON.ico">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

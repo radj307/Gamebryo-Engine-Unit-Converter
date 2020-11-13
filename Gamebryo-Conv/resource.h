@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by conv.rc
+// Used by Gamebryo-Conv.rc
 //
 #define IDI_ICON1                       101
 
