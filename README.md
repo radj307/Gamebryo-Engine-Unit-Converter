@@ -12,14 +12,19 @@
  
 	 <input unit>	The measurement unit of <value>
 	 		Valid entries:
-			Units:	( u, unit, units, beth, bethesda, gamebryo, game )
-			Meters:	( m, meter, meters, metric, met 		 )
-			Feet:	( f, ft, feet, foot, imperial, imp, i 		 )
+			Units:		( u, unit, units, beth, bethesda, gamebryo, game )
+			Meters:		( m, meter, meters, metric, met 		 )
+		(v4.1+)	Centimeters:	( cm, centimeter, centimeters	 		 )
+		(v4.1+)	Millimeters:	( mm, millimeter, millimeters	 		 )
+		(v4.1+)	Micrometers:	( um, micrometer, micrometers	 		 )
+			Feet:		( f, ft, feet, foot, imperial, imp 		 )
+		(v4.1+)	Inches:		( i, in, inch, inches		 		 )
 			
 	 <value>	Any integer or real number under 
 			
-	 <output unit>	The measurement unit <value> will be converted to
-			Valid entries are the same as <input unit>
+	 <output unit>	Defines the converted unit type.
+	 		Valid entries are the same as <input type>, with an additional option:
+		(v4.0+)	All Possible:	( a, all 					)
 			
  File Conversion:
 			
