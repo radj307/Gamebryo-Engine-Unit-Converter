@@ -6,52 +6,52 @@
 #pragma once
 #include "file-conv.h"
 
+// holds the needed arguments for one conversion
+struct Param {
+	// input & output types
+	ValType in, out;
+
+	// value
+	double val;
+
+	/** CONSTRUCTOR **
+	 */
+	Param() : val(-0.0f) {}
+
+	/**
+	 * clear()
+	 * Resets all member values.
+	 */
+	inline void clear()
+	{
+		in._t = ValType::TYPE::NONE;
+		out._t = ValType::TYPE::NONE;
+		val = -0.0f;
+	}
+};
+
 /**
- * convert(ValType*, ValType*, double*)
+ * convert(Param&)
  * Performs a single conversion
  * 
- * @param in	- Ptr to input type
- * @param out	- Ptr to output type
- * @param val	- Ptr to value
+ * @param p	- Parameter struct containing all conversion arguments.
  */
-inline void convert(ValType* in, ValType* out, double* val, std::string& arg)
+inline void convert(Param& p)
 {
-	// if input type is invalid, check if it is a valid subunit
-	if ( in->_t == ValType::TYPE::NONE ) {
-		switch ( Value::stost(arg) ) {
-		case ValType::IN_TYPE::in: // inches -> feet
-			*val /= 12;
-			in = new ValType(ValType::TYPE::imperial);
-			break;
-		case ValType::IN_TYPE::cm: // centimeters -> meters
-			*val /= 100;
-			in = new ValType(ValType::TYPE::metric);
-			break;
-		case ValType::IN_TYPE::mm: // millimeters -> meters
-			*val /= 1000;
-			in = new ValType(ValType::TYPE::metric);
-			break;
-		case ValType::IN_TYPE::um: // micrometers -> meters
-			*val /= 1000000;
-			in = new ValType(ValType::TYPE::metric);
-			break;
-		default:break;
-		}
-	} // proceed with conversion
 	// check if input & output types are valid, and if value has changed from default
-	if ( (in != nullptr && in->_t != ValType::TYPE::NONE) && (out != nullptr && out->_t != ValType::TYPE::NONE) && (*val != -0.0f) ) {
+	if ( (p.in._t != ValType::TYPE::NONE) && (p.out._t != ValType::TYPE::NONE) && (p.val != -0.0f) ) {
 		// init Value
-		Value input((*in)._t, *val);
+		Value input(p.in._t, p.val);
 		// if types don't match, and neither types are TYPE::ALL, convert to target type
-		if ( (in->_t != ValType::TYPE::ALL && out->_t != ValType::TYPE::ALL) && (in->_t != out->_t) ) {
-			Value output = input.convert_to(out->_t);
+		if ( (p.in._t != ValType::TYPE::ALL && p.out._t != ValType::TYPE::ALL) && (p.in != p.out) ) {
+			Value output = input.convert_to(p.out);
 			if ( !cfg.bGet("DisableColors") ) {
 				std::cout << '\t'; input.cout(); std::cout << "\t=  "; output.cout(true); std::cout << std::endl;
 			}
 			else std::cout << '\t' << input.asString() << "\t=  " << output.asString(true) << std::endl;
 		}
 		// if types don't match, and only output type is TYPE::ALL, convert to all types
-		else if ( (in->_t != ValType::TYPE::ALL && out->_t == ValType::TYPE::ALL) && (in->_t != out->_t) ) {
+		else if ( (p.in._t != ValType::TYPE::ALL && p.out._t == ValType::TYPE::ALL) && (p.in != p.out) ) {
 			// when true, displays a blank space instead of the input type
 			bool display_short = false;
 
@@ -140,36 +140,12 @@ inline void convert(ValType* in, ValType* out, double* val, std::string& arg)
 				display_short = true;
 			}
 		}
-		// 
-		else sys::msg(sys::error, in->asString() + " to " + out->asString() + " isn't a valid conversion.");
+		// else show error message
+		else sys::msg(sys::error, p.in.asString() + " to " + p.out.asString() + " isn't a valid conversion.");
 	}
+	// clear params
+	p.clear();
 }
-
-// holds the needed arguments for one conversion
-struct Param {
-	// argument given as input, used if input type is not a primary type & requires conversion to primary in convert()
-	// ex: ( inches, cm, mm, um )
-	std::string inputArg;
-	// input types
-	ValType *in, *out;
-	// value
-	double val;
-
-	/** CONSTRUCTOR **
-	 */
-	Param() : in(nullptr), out(nullptr), val(-0.0f) {}
-
-	/**
-	 * clear()
-	 * Resets all member values.
-	 */
-	inline void clear()
-	{
-		in = nullptr;
-		out = nullptr;
-		val = -0.0f;
-	}
-};
 
 /**
  * interpret(int, char*[])
@@ -218,16 +194,14 @@ inline int interpret(std::vector<std::string> arg)
 				// if arg is entirely alphabetical characters
 				else if ( std::all_of((*it).begin(), (*it).end(), ::isalpha) ) {
 					// check if input type has not been set
-					if ( p.in == nullptr ) {
-						p.in = new ValType(Value::stot(*it));
-						p.inputArg = *it;
-					}
+					if ( p.in._t == ValType::TYPE::NONE )
+						p.in._t = Value::stot(*it);
 					else { // else set output type & begin conversion
-						p.out = new ValType(Value::stot(*it));
-						convert(p.in, p.out, &p.val, p.inputArg);
-						p.clear(); // reset arguments for next conversion
+						p.out._t = Value::stot(*it);
+						convert(p);
 					}
 				}
+				// check if arg is only digits
 				else {
 					// copy arg to temp string
 					std::string tmp = *it;

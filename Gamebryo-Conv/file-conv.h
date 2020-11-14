@@ -107,7 +107,7 @@ public:
 				if ( args.size() == 3 && std::all_of(args[0].begin(), args[0].end(), ::isalpha) && std::all_of(args[2].begin(), args[2].end(), ::isalpha) ) {
 					// convert parsed args to Values
 					Value in(args[0], args[1]);
-					Value out = in.convert_to(args[2]);
+					Value out = in.convert_to(Value::stot(args[2]));
 
 					// check if Values are valid
 					if ( in.valid() && out.valid() ) {
