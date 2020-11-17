@@ -61,7 +61,7 @@ IDI_ICON1               ICON                    "MAINICON.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,1,0,0
+ FILEVERSION 4,2,0,0
  PRODUCTVERSION 4,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -79,7 +79,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "radj307 (tjradj)"
             VALUE "FileDescription", "Convert Bethesda's ""Units"" to and from feet & meters."
-            VALUE "FileVersion", "4.1.0.0"
+            VALUE "FileVersion", "4.2.0.0"
             VALUE "InternalName", "Gamebryo.exe"
             VALUE "LegalCopyright", "Copyright (C) 2020"
             VALUE "OriginalFilename", "Gamebryo.exe"

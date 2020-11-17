@@ -5,6 +5,7 @@
  */
 #pragma once
 #include "file-conv.h"
+#include "opt.h"
 
 // holds the needed arguments for one conversion
 struct Param {
@@ -155,73 +156,62 @@ inline void convert(Param& p)
  * @param argv		- The argument array from main()
  * @returns int		- ( 0 = success ) ( 1 = failed because: invalid arguments, errors )
  */
-inline int interpret(std::vector<std::string> arg)
+inline int interpret(opt::list& args)
 {
 	// check if arg count is valid
-	if ( !arg.empty() ) {
+	if ( !args.empty() ) {
 		Param p; // hold conversion arguments so they can be properly reset 
 
-		// iterate arguments, skip argv[0]
-		for ( auto it = arg.begin(); it != arg.end(); it++ ) {
+		// COMMANDS
+		for ( auto it = args.com.begin(); it != args.com.end(); it++ ) {
 			// check if arg has at least 1 character
-			if ( (*it).size() > 0 ) {
-				// check if first char is a slash
-				if ( (*it).at(0) == '/' ) {
-					std::stringstream ss;
-					// remove the slash
-					ss << (*it).substr(1) << ',';
-					// parse command argument
-					for ( std::string parse; std::getline(ss, parse, ','); parse.clear() ) {
-						// ensure checking arg won't cause exception
-						if ( parse.size() > 2 ) {
-							if ( parse == "ini" )
-								cfg.write(/*File Header: */"Gamebryo Engine Unit Converter Settings\n; Changing the conversion factors is not recommended.");
-							else if ( parse.at(0) == 'f' && parse.at(1) == '=' ) {
-								File proc(parse.substr(2));
-								// check if file conversion succeeded
-								switch ( proc._success ) {
-								case true:
-									sys::msg(sys::log, "Successfully processed file: \"" + parse.substr(2) + "\"");
-									break;
-								default:
-									sys::msg(sys::error, "Failed to process file: \"" + parse.substr(2) + "\"");
-									break;
-								}
-							}
-						} // else continue
-					}
-				}
-				// if arg is entirely alphabetical characters
-				else if ( std::all_of((*it).begin(), (*it).end(), ::isalpha) ) {
-					// check if input type has not been set
-					if ( p.in._t == ValType::TYPE::NONE )
-						p.in._t = Value::stot(*it);
-					else { // else set output type & begin conversion
-						p.out._t = Value::stot(*it);
-						convert(p);
-					}
-				}
-				// check if arg is only digits
-				else {
-					// copy arg to temp string
-					std::string tmp = *it;
-					// remove all decimal points from temp string
-					tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
-
-					// check if temp string is entirely digits
-					if ( std::all_of(tmp.begin(), tmp.end(), ::isdigit) ) {
-						// set val to arg as type double
-						try { p.val = std::stod(*it); }
-						catch ( std::exception & exc ) { // catch stod exceptions
-							sys::msg(sys::error, "\"" + std::string(exc.what()) + "\" was thrown while interpreting the value!");
-						}
-					}
-
-					// else show invalid argument warning
-					else sys::msg(sys::warning, "Invalid argument: " + *it);
+			if ( (*it).checkName("ini") ) {
+				cfg.write("Gamebryo Engine Unit Converter INI");
+			}
+			else if ( (*it).checkName("file") ) {
+				File proc((*it)._opt);
+				// check if file conversion succeeded
+				switch ( proc._success ) {
+				case true:
+					sys::msg(sys::log, "Successfully processed file: \"" + (*it)._opt + "\"");
+					break;
+				default:
+					sys::msg(sys::error, "Failed to process file: \"" + (*it)._opt + "\"");
+					break;
 				}
 			}
-			else continue;
+		}
+
+		// PARAMS
+		for ( auto it = args.par.begin(); it != args.par.end(); it++ ) {
+			// if arg is entirely alphabetical characters
+			if ( std::all_of((*it)._name.begin(), (*it)._name.end(), ::isalpha) ) {
+				// check if input type has not been set
+				if ( p.in._t == ValType::TYPE::NONE )
+					p.in._t = Value::stot((*it)._name);
+				else { // else set output type & begin conversion
+					p.out._t = Value::stot((*it)._name);
+					convert(p);
+				}
+			}
+			// check if arg is only digits
+			else {
+				// copy arg to temp string
+				std::string tmp = (*it)._name;
+				// remove all decimal points from temp string
+				tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
+
+				// check if temp string is entirely digits
+				if ( std::all_of(tmp.begin(), tmp.end(), ::isdigit) ) {
+					// set val to arg as type double
+					try { p.val = std::stod((*it)._name); }
+					catch ( std::exception & exc ) { // catch stod exceptions
+						sys::msg(sys::error, "\"" + std::string(exc.what()) + "\" was thrown while interpreting the value!");
+					}
+				}
+				// else show invalid argument warning
+				else sys::msg(sys::warning, "Invalid parameter: " + (*it)._name);
+			}
 		}
 		return 0;
 	} // else return error

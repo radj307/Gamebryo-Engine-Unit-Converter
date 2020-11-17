@@ -123,6 +123,5 @@ public:
 			}
 			_success = file::write(_savename, toWrite);
 		}
-		else sys::msg(sys::error, "Couldn't open '" + _filename + "'");
 	}
 };
