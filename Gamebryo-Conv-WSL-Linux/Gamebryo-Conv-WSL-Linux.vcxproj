@@ -77,12 +77,12 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClInclude Include="file-conv.h" />
-    <ClInclude Include="interpret.hpp" />
-    <ClInclude Include="Value.h" />
+    <ClInclude Include="..\Gamebryo-Conv\file-conv.h" />
+    <ClInclude Include="..\Gamebryo-Conv\interpret.hpp" />
+    <ClInclude Include="..\Gamebryo-Conv\Value.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="..\Gamebryo-Conv\main.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

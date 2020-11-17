@@ -9,18 +9,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="file-conv.h">
+    <ClInclude Include="..\Gamebryo-Conv\file-conv.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="interpret.hpp">
+    <ClInclude Include="..\Gamebryo-Conv\interpret.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Value.h">
+    <ClInclude Include="..\Gamebryo-Conv\Value.h">
       <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="..\Gamebryo-Conv\main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
