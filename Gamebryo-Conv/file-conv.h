@@ -1,6 +1,7 @@
 #pragma once
-#include "file.h"
-#include "sys.h"
+#include <file.h>
+#include <sys.h>
+#include <sysapi.h>
 #include "Value.h"
 
 /**
@@ -18,9 +19,9 @@ protected: // accessible in children
 	 * @param filename	- The name/location/extension of target file
 	 * @returns bool success state
 	 */
-	inline bool getFrom(std::string filename)
+	bool getFrom(std::string filename)
 	{
-		_content = file::readToVector(filename);
+		_content = file::toVector(file::read(filename));
 		return valid();
 	}
 
@@ -31,7 +32,7 @@ protected: // accessible in children
 	 * @param filename	- The name/location/extension of target file
 	 * @returns bool success state
 	 */
-	inline bool saveTo(std::string filename)
+	bool saveTo(std::string filename)
 	{
 		if ( valid() )
 			return file::write(filename, _content);
@@ -46,7 +47,7 @@ public:	// accessible anywhere
 	 *
 	 * @returns bool success state
 	 */
-	inline bool valid()
+	bool valid()
 	{
 		if ( !_content.empty() )
 			return true;
@@ -64,7 +65,10 @@ public:
 	std::string _savename;
 	bool _success = false;
 
-	File(std::string file) : _filename(file), _savename(file::extendName(_filename, "-converted"))
+	File(std::string file) : _filename(file), _savename([](std::string str) -> std::string { 
+			auto pair{ file::filename_split(str) };
+			return pair.first + "-converted" + pair.second;
+		}(file))
 	{
 		// check if file was read to content successfully
 		if ( getFrom(_filename) ) {
@@ -72,14 +76,14 @@ public:
 			std::stringstream toWrite;
 
 			toWrite << std::fixed;
-			toWrite.precision(cfg.iGet("Precision"));
+			toWrite.precision(cfg->iGet("config", "precision"));
 
 			// iterate through content
-			for ( auto it = _content.begin(); it != _content.end(); it++ ) {
+			for ( auto it = _content.begin(); it != _content.end(); ++it ) {
 				// delete extra char from windows line endings if present
 				(*it).erase(std::remove((*it).begin(), (*it).end(), '\r'), (*it).end());
 				// replace all tabs with spaces
-				for ( auto it_ = it->begin(); it_ != it->end(); it_++ ) {
+				for ( auto it_ = it->begin(); it_ != it->end(); ++it_ ) {
 					switch ( *it_ ) {
 					case '\t':
 						*it_ = ' ';

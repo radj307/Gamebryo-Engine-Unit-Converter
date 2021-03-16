@@ -6,8 +6,11 @@
 #pragma once
 #include <sstream>
 #include <algorithm>
-#include "INI.h"
-#include "termcolor.hpp"
+#include <INI.hpp>
+#include <strmanip.hpp>
+#include <utility>
+#include <sysapi.h>
+#include <strconv.hpp>
 
 /**
  * struct ValType
@@ -18,13 +21,13 @@ struct ValType {
 	enum class TYPE {
 		NONE,			// none/error
 		ALL,			// all (output)
-		unit,			// units
-		imperial,		// feet
-		imperial_inch,	// inch
-		metric,			// meter
-		metric_cm,		// centimeters
-		metric_mm,		// millimeters
-		metric_um,		// micrometers
+		UNIT,			// units
+		IMPERIAL,		// feet
+		IMPERIAL_INCH,	// inch
+		METRIC,			// meter
+		METRIC_CM,		// centimeters
+		METRIC_MM,		// millimeters
+		METRIC_UM,		// micrometers
 	};
 
 	// This instance's type
@@ -32,78 +35,74 @@ struct ValType {
 
 	/**
 	 * symbol()
-	 * Returns this ValType as its official representative symbol.
-	 *
+	 * @brief Returns this ValType as its official representative symbol.
 	 * @returns const char*
 	 */
-	inline std::string symbol()
+	std::string symbol() const
 	{
 		switch ( _t ) {
-		case TYPE::unit:			return ("u");	// u
-		case TYPE::imperial:		return ("\'");	// '
-		case TYPE::imperial_inch:	return ("\"");	// "
-		case TYPE::metric:			return ("m");	// m
-		case TYPE::metric_cm:		return ("cm");	// cm
-		case TYPE::metric_mm:		return ("mm");	// mm
-		case TYPE::metric_um:		return ("um");	// um
+		case TYPE::UNIT:			return ("u");	// u
+		case TYPE::IMPERIAL:		return ("\'");	// '
+		case TYPE::IMPERIAL_INCH:	return ("\"");	// "
+		case TYPE::METRIC:			return ("m");	// m
+		case TYPE::METRIC_CM:		return ("cm");	// cm
+		case TYPE::METRIC_MM:		return ("mm");	// mm
+		case TYPE::METRIC_UM:		return ("um");	// um
 		default:					return ("");	// <blank>
 		}
 	}
-	/** STATIC **
+	/**
 	 * symbol()
-	 * Returns a ValType as its official representative symbol.
-	 *
+	 * @brief Returns a ValType as its official representative symbol.
 	 * @returns const char*
 	 */
-	static inline const char* symbol(TYPE t)
+	static const char* symbol(const TYPE t)
 	{
 		switch ( t ) {
-		case TYPE::unit:			return (const char*)("u");	// u
-		case TYPE::imperial:		return (const char*)("\'");	// '
-		case TYPE::imperial_inch:	return (const char*)("\"");	// "
-		case TYPE::metric:			return (const char*)("m");	// m
-		case TYPE::metric_cm:		return (const char*)("cm");	// cm
-		case TYPE::metric_mm:		return (const char*)("mm");	// mm
-		case TYPE::metric_um:		return (const char*)("um");	// um
-		default:					return (const char*)("");	// <blank>
+		case TYPE::UNIT:			return static_cast<const char*>("u");	// u
+		case TYPE::IMPERIAL:		return static_cast<const char*>("\'");	// '
+		case TYPE::IMPERIAL_INCH:	return static_cast<const char*>("\"");	// "
+		case TYPE::METRIC:			return static_cast<const char*>("m");	// m
+		case TYPE::METRIC_CM:		return static_cast<const char*>("cm");	// cm
+		case TYPE::METRIC_MM:		return static_cast<const char*>("mm");	// mm
+		case TYPE::METRIC_UM:		return static_cast<const char*>("um");	// um
+		default:					return static_cast<const char*>("");	// <blank>
 		}
 	}
 
 	/**
 	 * asString()
-	 * Returns this ValType as its full name, of type string
-	 * 
+	 * @brief Returns this ValType as its full name, of type string
 	 * @returns string
 	 */
-	inline std::string asString()
+	std::string asString() const
 	{
 		switch ( _t ) {
-		case TYPE::unit:			return ("(Gamebryo Units)");
-		case TYPE::imperial:		return ("(Feet)");
-		case TYPE::imperial_inch:	return ("(Inches)");
-		case TYPE::metric:			return ("(Meters)");
-		case TYPE::metric_cm:		return ("(Centimeters)");
-		case TYPE::metric_mm:		return ("(Millimeters)");
-		case TYPE::metric_um:		return ("(Micrometers)");
+		case TYPE::UNIT:			return ("(Gamebryo Units)");
+		case TYPE::IMPERIAL:		return ("(Feet)");
+		case TYPE::IMPERIAL_INCH:	return ("(Inches)");
+		case TYPE::METRIC:			return ("(Meters)");
+		case TYPE::METRIC_CM:		return ("(Centimeters)");
+		case TYPE::METRIC_MM:		return ("(Millimeters)");
+		case TYPE::METRIC_UM:		return ("(Micrometers)");
 		default:					return ("(Error-Type)");
 		}
 	}
-	/** STATIC **
+	/**
 	 * asString()
-	 * Returns a ValType as its full name, of type string
-	 *
+	 * @brief Returns a ValType as its full name, of type string
 	 * @returns string
 	 */
-	static inline std::string asString(TYPE t)
+	static std::string asString(const TYPE t)
 	{
 		switch ( t ) {
-		case TYPE::unit:			return ("(Gamebryo Units)");
-		case TYPE::imperial:		return ("(Feet)");
-		case TYPE::imperial_inch:	return ("(Inches)");
-		case TYPE::metric:			return ("(Meters)");
-		case TYPE::metric_cm:		return ("(Centimeters)");
-		case TYPE::metric_mm:		return ("(Millimeters)");
-		case TYPE::metric_um:		return ("(Micrometers)");
+		case TYPE::UNIT:			return ("(Gamebryo Units)");
+		case TYPE::IMPERIAL:		return ("(Feet)");
+		case TYPE::IMPERIAL_INCH:	return ("(Inches)");
+		case TYPE::METRIC:			return ("(Meters)");
+		case TYPE::METRIC_CM:		return ("(Centimeters)");
+		case TYPE::METRIC_MM:		return ("(Millimeters)");
+		case TYPE::METRIC_UM:		return ("(Micrometers)");
 		default:					return ("(Error-Type)");
 		}
 	}
@@ -112,21 +111,16 @@ struct ValType {
 	 * ValType(enum type)
 	 * Instantiate a new Value Type
 	 */
-	ValType(TYPE myType = TYPE::NONE) : _t(myType) {}
-	/** CONSTRUCTOR (MOVE) **
-	 * ValType(ValType&& other)
-	 * Move constructor
-	 */
-	ValType(ValType&& other) noexcept : _t(std::move(other._t)) {}
+	explicit ValType(const TYPE myType = TYPE::NONE) : _t(myType) {}
 
 	/**
 	 * operator==
-	 * Comparison operator.
-	 * 
+	 * @brief Comparison operator.
 	 * @param compare	- Another ValType to compare against
-	 * @returns bool	- ( true = types match ) ( false = types do not match )
+	 * @return true		- Types match.
+	 * @return false	- Types do not match.
 	 */
-	inline bool operator==(ValType& compare)
+	bool operator==(ValType& compare) const
 	{
 		if (compare._t == _t)
 			return true;
@@ -135,12 +129,12 @@ struct ValType {
 
 	/**
 	 * operator!=
-	 * Comparison operator.
-	 *
+	 * @brief Comparison operator.
 	 * @param compare	- Another ValType to compare against
-	 * @returns bool	- ( true = types do not match ) ( false = types match )
+	 * @return true		- Types do not match.
+	 * @return false	- Types match.
 	 */
-	inline bool operator!=(ValType& compare)
+	bool operator!=(ValType& compare) const
 	{
 		if (_t != compare._t)
 			return true;
@@ -149,28 +143,27 @@ struct ValType {
 };
 
 /**
- * class Value
- * Contains a floating-point number & its unit type, as well as the conversion logic.
+ * @class Value
+ * @brief Contains a floating-point number & its unit type, as well as the conversion logic.
  */
-class Value : public ValType {
+class Value final : public ValType {
 	/**
 	 * toMetric()
-	 * Returns member value converted to metric meters
-	 *
+	 * @brief Returns member value converted to metric meters.
 	 * @returns Value		- Returns *this if the requested type == this type
 	 */
 	template <class EnumType = TYPE>
-	inline Value toMetric(const EnumType metric_sub_type = TYPE::metric)
+	Value toMetric(const EnumType metric_sub_type = TYPE::METRIC)
 	{
-		int modifier = 1;
+		auto modifier{ 1 };
 		switch ( metric_sub_type ) {
-		case TYPE::metric_cm:
+		case TYPE::METRIC_CM:
 			modifier = 100;
 			break;
-		case TYPE::metric_mm:
+		case TYPE::METRIC_MM:
 			modifier = 1000;
 			break;
-		case TYPE::metric_um:
+		case TYPE::METRIC_UM:
 			modifier = 1000000;
 			break;
 		default:break;
@@ -178,18 +171,18 @@ class Value : public ValType {
 		// switch through input types:
 		switch ( _t )
 		{
-		case TYPE::unit: // units -> meters
-			return Value(metric_sub_type, (_v * cfg.fGet("Factor_UM")) * modifier);
-		case TYPE::imperial: // feet -> meters
-			return Value(metric_sub_type, (_v * cfg.fGet("Factor_MI")) * modifier);
-		case TYPE::imperial_inch: // inch -> feet -> meters
-			return Value(metric_sub_type, ((_v / 12) * cfg.fGet("Factor_MI")) * modifier);
-		case TYPE::metric_cm: // cm -> m
-			return Value(metric_sub_type, ((_v / 100) * cfg.fGet("Factor_MI")) * modifier);
-		case TYPE::metric_mm: // mm -> m
-			return Value(metric_sub_type, ((_v / 1000) * cfg.fGet("Factor_MI")) * modifier);
-		case TYPE::metric_um: // um -> m
-			return Value(metric_sub_type, ((_v / 1000000) * cfg.fGet("Factor_MI")) * modifier);
+		case TYPE::UNIT: // units -> meters
+			return Value(metric_sub_type, (_v * cfg->fGet("conversions", "metric_to_unit")) * modifier);
+		case TYPE::IMPERIAL: // feet -> meters
+			return Value(metric_sub_type, (_v * cfg->fGet("conversions", "imperial_to_metric")) * modifier);
+		case TYPE::IMPERIAL_INCH: // inch -> feet -> meters
+			return Value(metric_sub_type, ((_v / 12) * cfg->fGet("conversions", "imperial_to_metric")) * modifier);
+		case TYPE::METRIC_CM: // cm -> m
+			return Value(metric_sub_type, ((_v / 100) * cfg->fGet("conversions", "imperial_to_metric")) * modifier);
+		case TYPE::METRIC_MM: // mm -> m
+			return Value(metric_sub_type, ((_v / 1000) * cfg->fGet("conversions", "imperial_to_metric")) * modifier);
+		case TYPE::METRIC_UM: // um -> m
+			return Value(metric_sub_type, ((_v / 1000000) * cfg->fGet("conversions", "imperial_to_metric")) * modifier);
 		default:
 			return *this;
 		}
@@ -197,27 +190,26 @@ class Value : public ValType {
 
 	/**
 	 * toUnit()
-	 * Returns member value converted to Bethesda's Units
-	 *
+	 * @brief Returns member value converted to Bethesda's Units.
 	 * @returns Value		- Returns *this if the requested type == this type
 	 */
-	inline Value toUnit()
+	Value toUnit()
 	{
 		// switch through input types:
 		switch ( _t )
 		{
-		case TYPE::metric: // meters -> units
-			return Value(TYPE::unit, _v / cfg.fGet("Factor_UM"));
-		case TYPE::metric_cm: // cm -> m -> units
-			return Value(TYPE::unit, (_v / 100) / cfg.fGet("Factor_UM"));
-		case TYPE::metric_mm: // mm -> m -> units
-			return Value(TYPE::unit, (_v / 1000) / cfg.fGet("Factor_UM"));
-		case TYPE::metric_um: // um -> m -> units
-			return Value(TYPE::unit, (_v / 1000000) / cfg.fGet("Factor_UM"));
-		case TYPE::imperial: // feet -> units
-			return Value(TYPE::unit, _v / cfg.fGet("Factor_UI"));
-		case TYPE::imperial_inch: // inch -> feet -> units
-			return Value(TYPE::unit, ((_v / 12) / cfg.fGet("Factor_UI")));
+		case TYPE::METRIC: // meters -> units
+			return Value(TYPE::UNIT, _v / cfg->fGet("conversions", "metric_to_unit"));
+		case TYPE::METRIC_CM: // cm -> m -> units
+			return Value(TYPE::UNIT, (_v / 100) / cfg->fGet("conversions", "metric_to_unit"));
+		case TYPE::METRIC_MM: // mm -> m -> units
+			return Value(TYPE::UNIT, (_v / 1000) / cfg->fGet("conversions", "metric_to_unit"));
+		case TYPE::METRIC_UM: // um -> m -> units
+			return Value(TYPE::UNIT, (_v / 1000000) / cfg->fGet("conversions", "metric_to_unit"));
+		case TYPE::IMPERIAL: // feet -> units
+			return Value(TYPE::UNIT, _v / cfg->fGet("conversions", "imperial_to_unit"));
+		case TYPE::IMPERIAL_INCH: // inch -> feet -> units
+			return Value(TYPE::UNIT, ((_v / 12) / cfg->fGet("conversions", "imperial_to_unit")));
 		default:
 			return *this;
 		}
@@ -225,16 +217,15 @@ class Value : public ValType {
 
 	/**
 	 * toImperial()
-	 * Returns member value converted to imperial feet
-	 *
+	 * @brief Returns member value converted to imperial feet.
 	 * @returns Value		- Returns *this if the requested type == this type
 	 */
 	template <class EnumType = TYPE>
-	inline Value toImperial(const EnumType imperial_sub_type = TYPE::imperial)
+	Value toImperial(const EnumType imperial_sub_type = TYPE::IMPERIAL)
 	{
-		int modifier = 1;
+		auto modifier{ 1 };
 		switch ( imperial_sub_type ) {
-		case TYPE::imperial_inch:
+		case TYPE::IMPERIAL_INCH:
 			modifier = 12;
 			break;
 		default:break;
@@ -242,18 +233,18 @@ class Value : public ValType {
 		// switch through input types:
 		switch ( _t )
 		{
-		case TYPE::metric: // meters -> feet
-			return Value(imperial_sub_type, (_v / cfg.fGet("Factor_MI")) * modifier);
-		case TYPE::metric_cm: // cm -> m -> feet
-			return Value(imperial_sub_type, ((_v / 100) / cfg.fGet("Factor_MI")) * modifier);
-		case TYPE::metric_mm: // mm -> m -> feet
-			return Value(imperial_sub_type, ((_v / 1000) / cfg.fGet("Factor_MI")) * modifier);
-		case TYPE::metric_um: // um -> m -> feet
-			return Value(imperial_sub_type, ((_v / 1000000) / cfg.fGet("Factor_MI")) * modifier);
-		case TYPE::unit: // units -> feet
-			return Value(imperial_sub_type, (_v * cfg.fGet("Factor_UI")) * modifier);
-		case TYPE::imperial_inch: // inch -> feet
-			return Value(imperial_sub_type, ((_v / 12) * cfg.fGet("Factor_UI")) * modifier);
+		case TYPE::METRIC: // meters -> feet
+			return Value(imperial_sub_type, (_v / cfg->fGet("conversions", "imperial_to_metric")) * modifier);
+		case TYPE::METRIC_CM: // cm -> m -> feet
+			return Value(imperial_sub_type, ((_v / 100) / cfg->fGet("conversions", "imperial_to_metric")) * modifier);
+		case TYPE::METRIC_MM: // mm -> m -> feet
+			return Value(imperial_sub_type, ((_v / 1000) / cfg->fGet("conversions", "imperial_to_metric")) * modifier);
+		case TYPE::METRIC_UM: // um -> m -> feet
+			return Value(imperial_sub_type, ((_v / 1000000) / cfg->fGet("conversions", "imperial_to_metric")) * modifier);
+		case TYPE::UNIT: // units -> feet
+			return Value(imperial_sub_type, (_v * cfg->fGet("conversions", "imperial_to_unit")) * modifier);
+		case TYPE::IMPERIAL_INCH: // inch -> feet
+			return Value(imperial_sub_type, ((_v / 12) * cfg->fGet("conversions", "imperial_to_unit")) * modifier);
 		default:
 			return *this;
 		}
@@ -261,77 +252,58 @@ class Value : public ValType {
 
 public:
 
+	/**
+	 * Value(const TYPE, const double)
+	 * @brief Value constructor that takes a const double.
+	 * @param myType	- Unit type.
+	 * @param myValue	- Value in units of myType.
+	 */
+	Value(const TYPE myType, const double myValue) : ValType(myType), _v(myValue) {}
+	/**
+	 * Value(const TYPE, const string&)
+	 * @brief Value constructor that takes a const string&.
+	 * @param myType	- Unit type.
+	 * @param myValue	- Value in units of myType.
+	 */
+	Value(std::string myType, const std::string& myValue) : ValType(stot(std::move(myType))), _v(str::stod(myValue)) {}
+
+	Value(Value&&) = default;
+	Value(const Value&) = default;
+
 	/** STATIC **
 	 * stot(string)
-	 * (String TO Type) converts string to TYPE
-	 *
+	 * @brief (String TO Type) converts string to TYPE.
 	 * @returns TYPE
 	 */
-	static inline TYPE stot(std::string s)
+	static TYPE stot(std::string s)
 	{
 		// Convert input string to lowercase
-		for ( auto it = s.begin(); it != s.end(); it++ ) { *it = std::tolower(*it); }
+		str::tolower(s);
 
 		// GAMEBRYO UNIT
-		if ( s == "u" || s == "unit" || s == "units" || s == "beth" || s == "bethesda" || s == "gamebryo" || s == "game" )
-			return TYPE::unit;
+		if (s == "u" || s == "unit" || s == "units" || s == "beth" || s == "bethesda" || s == "gamebryo" || s == "game")
+			return TYPE::UNIT;
 
 		// METRIC
-		else if ( s == "m" || s == "meter" || s == "meters" || s == "metric" || s == "met" )
-			return TYPE::metric;
-		else if ( s == "cm" || s == "centimeter" || s == "centimeters" )
-			return TYPE::metric_cm;
-		else if ( s == "mm" || s == "millimeter" || s == "millimeters" )
-			return TYPE::metric_mm;
-		else if ( s == "um" || s == "micrometer" || s == "micrometers" )
-			return TYPE::metric_um;
+		if (s == "m" || s == "meter" || s == "meters" || s == "metric" || s == "met")
+			return TYPE::METRIC;
+		if (s == "cm" || s == "centimeter" || s == "centimeters")
+			return TYPE::METRIC_CM;
+		if (s == "mm" || s == "millimeter" || s == "millimeters")
+			return TYPE::METRIC_MM;
+		if (s == "um" || s == "micrometer" || s == "micrometers")
+			return TYPE::METRIC_UM;
 
 		// IMPERIAL
-		else if ( s == "f" || s == "ft" || s == "feet" || s == "foot" || s == "imperial" || s == "imp" )
-			return TYPE::imperial;
-		else if ( s == "i" || s == "in" || s == "inch" || s == "inches" )
-			return TYPE::imperial_inch;
+		if (s == "f" || s == "ft" || s == "feet" || s == "foot" || s == "imperial" || s == "imp")
+			return TYPE::IMPERIAL;
+		if (s == "i" || s == "in" || s == "inch" || s == "inches")
+			return TYPE::IMPERIAL_INCH;
 
 		// MISC
-		else if ( s == "a" || s == "all" ) return TYPE::ALL;
-		else							   return TYPE::NONE;
+		if (s == "a" || s == "all") return TYPE::ALL;
+		return TYPE::NONE;
 	}
-
-	/** STATIC **
-	 * stod(string)
-	 * (String TO Double) Same as std::stod() but returns a -0.0 if an exception is thrown
-	 *
-	 * @returns double
-	 */
-	static inline double stod(std::string s)
-	{
-		try { return std::stod(s); }
-		catch ( ... ) { return -0.0f; }
-	}
-
-	/** CONSTRUCTOR **
-	 * Value(TYPE, double)
-	 * 
-	 * @param myType	- Unit type
-	 * @param myValue	- Value in units of myType
-	 */
-	// NEW FROM TYPE
-	Value(ValType::TYPE myType, double myValue) : ValType(myType), _v(myValue) {}
-	// NEW FROM STRING
-	Value(std::string myType, std::string myValue) : ValType(stot(myType)), _v(Value::stod(myValue)) {}
-	// COPY FROM OTHER
-	Value(const Value& other) : ValType(other._t), _v(other._v) {}
-	// MOVE FROM OTHER
-	Value(Value&& other) noexcept : ValType(std::move(other)), _v(std::move(other._v)) { *this = std::move(other); }
-
-	inline Value& operator=(Value&& other) noexcept
-	{
-		_t = std::move(other._t);
-		_v = std::move(other._v);
-		delete[] &other;
-		return *this;
-	}
-
 
 	/**
 	 * invalid()
@@ -340,18 +312,17 @@ public:
 	 *
 	 * @returns Value
 	 */
-	inline Value invalid()
+	static Value invalid()
 	{
 		return Value(TYPE::NONE, -0.0f);
 	}
 
 	/**
 	 * valid()
-	 * Returns true when this Value is valid, false when invalid.
-	 *
+	 * @brief Returns true when this Value is valid, false when invalid.
 	 * @returns bool
 	 */
-	inline bool valid()
+	bool valid()
 	{
 		if ( *this == invalid() )
 			return false;
@@ -364,7 +335,7 @@ public:
 	 *
 	 * @returns bool
 	 */
-	inline bool operator==(Value compare)
+	bool operator==(const Value& compare) const
 	{
 		// compare the types & values of this, and compare
 		if ( _t == compare._t && _v == compare._v )
@@ -376,34 +347,35 @@ public:
 	 * convert_to(TYPE)
 	 * Returns a converted Value
 	 *
-	 * @param type		- The requested TYPE
+	 * @param otherType	- The requested TYPE
 	 * @returns Value	- Returns *this if param type == this type
 	 */
-	inline Value convert_to(TYPE otherType)
+	Value convert_to(const TYPE otherType)
 	{
 		// check if types don't match
 		if ( _t != otherType ) {
 			switch ( otherType ) {
-			case TYPE::unit: // return this in units
+			case TYPE::UNIT: // return this in units
 				return toUnit();
-			case TYPE::imperial: // return this in feet
+			case TYPE::IMPERIAL: // return this in feet
 				return toImperial();
-			case TYPE::imperial_inch: // return this in feet
-				return toImperial(TYPE::imperial_inch);
-			case TYPE::metric: // return this in meters
+			case TYPE::IMPERIAL_INCH: // return this in feet
+				return toImperial(TYPE::IMPERIAL_INCH);
+			case TYPE::METRIC: // return this in meters
 				return toMetric();
-			case TYPE::metric_cm: // return this in meters
-				return toMetric(TYPE::metric_cm);
-			case TYPE::metric_mm: // return this in meters
-				return toMetric(TYPE::metric_mm);
-			case TYPE::metric_um: // return this in meters
-				return toMetric(TYPE::metric_um);
+			case TYPE::METRIC_CM: // return this in meters
+				return toMetric(TYPE::METRIC_CM);
+			case TYPE::METRIC_MM: // return this in meters
+				return toMetric(TYPE::METRIC_MM);
+			case TYPE::METRIC_UM: // return this in meters
+				return toMetric(TYPE::METRIC_UM);
 			default:break;
 			}
 		} // else:
 		return *this;
 	}
-	inline Value convert_to(ValType& other)
+
+	Value convert_to(ValType& other)
 	{
 		return Value::convert_to(other._t);
 	}
@@ -415,18 +387,18 @@ public:
 	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
 	 * @returns string
 	 */
-	inline std::string asString(bool smallUnits = false)
+	std::string asString(const bool smallUnits = false)
 	{
 		// create stringstream to force standard notation
 		std::stringstream ss;
-		ss.precision(cfg.iGet("Precision"));
+		ss.precision(cfg->iGet("config", "precision"));
 		ss << std::fixed << _v << ' ' << symbol();
 
 		// check if smallUnits is enabled
 		if ( smallUnits ) {
 			// switch type
 			switch ( _t ) {
-			case TYPE::metric: // metric
+			case TYPE::METRIC: // metric
 				if ( _v < 1.0f ) {
 					_v *= 100; // convert meters to centimeters
 					ss << "\t ( " << _v << " cm )";
@@ -442,7 +414,7 @@ public:
 					}
 				}
 				break;
-			case TYPE::imperial: // imperial
+			case TYPE::IMPERIAL: // imperial
 				if ( _v < 1.0f ) {
 					_v *= 12; // convert feet to inches
 					ss << "\t ( " << _v << " \" )"; // output inches as well
@@ -456,27 +428,27 @@ public:
 
 	/**
 	 * cout(bool)
-	 * Directly outputs value as string to console with termcolor lib
+	 * Directly outputs value as string to console with Color lib
 	 *
 	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
 	 */
-	inline void cout(bool smallUnits = false)
+	void cout(bool smallUnits = false)
 	{
-		std::cout.precision(cfg.iGet("Precision"));
+		std::cout.precision(cfg->iGet("config", "precision"));
 		std::cout << std::fixed;
 	#ifndef WSL
-		std::cout << termcolor::green << _v << termcolor::reset << ' ' << symbol();
+		std::cout << Color::f_green << _v << Color::reset << ' ' << symbol();
 	#else
 		std::cout << _v << ' ' << symbol();
 	#endif
 		switch ( smallUnits ) {
 		case true:
 			switch ( _t ) {
-			case TYPE::metric: // metric
+			case TYPE::METRIC: // metric
 				if ( _v < 1.0f ) {
 					_v *= 100; // convert meters to centimeters
 				#ifndef WSL
-					std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " cm )";
+					std::cout << "  ( " << Color::f_green << _v << Color::reset << " cm )";
 				#else
 					std::cout << "  ( " << _v << " cm )";
 				#endif
@@ -484,7 +456,7 @@ public:
 					if ( _v < 1.0f ) {
 						_v *= 10; // convert centimeters to millimeters
 					#ifndef WSL
-						std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " mm )";
+						std::cout << "  ( " << Color::f_green << _v << Color::reset << " mm )";
 					#else
 						std::cout << "  ( " << _v << " mm )";
 					#endif
@@ -492,7 +464,7 @@ public:
 						if ( _v < 1.0f ) {
 							_v *= 1000; // convert millimeters to micrometers
 						#ifndef WSL
-							std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " um )";
+							std::cout << "  ( " << Color::f_green << _v << Color::reset << " um )";
 						#else
 							std::cout << "  ( " << _v << " um )";
 						#endif
@@ -500,10 +472,10 @@ public:
 					}
 				}
 				break;
-			case TYPE::imperial: // imperial
+			case TYPE::IMPERIAL: // imperial
 				if ( _v < 1.0f ) {
 					_v *= 12; // convert feet to inches
-					std::cout << "  ( " << termcolor::green << _v << termcolor::reset << " \" )"; // output inches as well
+					std::cout << "  ( " << Color::f_green << _v << Color::reset << " \" )"; // output inches as well
 				}
 				break;
 			default:break;
@@ -514,38 +486,38 @@ public:
 	}
 	/**
 	 * cout(bool)
-	 * Directly outputs value as string to console with termcolor lib
+	 * Directly outputs value as string to console with Color lib
 	 *
 	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
 	 */
-	inline void cout_all(bool smallUnits = false)
+	void cout_all(bool smallUnits = false)
 	{
-		std::cout.precision(cfg.iGet("Precision"));
+		std::cout.precision(cfg->iGet("config", "precision"));
 		std::cout << std::fixed;
-		std::cout << termcolor::yellow << _v << termcolor::reset << ' ' << symbol();
+		std::cout << Color::f_yellow << _v << Color::reset << ' ' << symbol();
 		switch ( smallUnits ) {
 		case true:
 			switch ( _t ) {
-			case TYPE::metric: // metric
+			case TYPE::METRIC: // metric
 				if ( _v < 1.0f ) {
 					_v *= 100; // convert meters to centimeters
-					std::cout << "  ( " << termcolor::yellow << _v << termcolor::reset << " cm )";
+					std::cout << "  ( " << Color::f_yellow << _v << Color::reset << " cm )";
 					// check if result val is still less than 1
 					if ( _v < 1.0f ) {
 						_v *= 10; // convert centimeters to millimeters
-						std::cout << "  ( " << termcolor::yellow << _v << termcolor::reset << " mm )";
+						std::cout << "  ( " << Color::f_yellow << _v << Color::reset << " mm )";
 						// check if result val is still less than 1
 						if ( _v < 1.0f ) {
 							_v *= 1000; // convert millimeters to micrometers
-							std::cout << "  ( " << termcolor::yellow << _v << termcolor::reset << " um )";
+							std::cout << "  ( " << Color::f_yellow << _v << Color::reset << " um )";
 						}
 					}
 				}
 				break;
-			case TYPE::imperial: // imperial
+			case TYPE::IMPERIAL: // imperial
 				if ( _v < 1.0f ) {
 					_v *= 12; // convert feet to inches
-					std::cout << "  ( " << termcolor::yellow << _v << termcolor::reset << " \" )"; // output inches as well
+					std::cout << "  ( " << Color::f_yellow << _v << Color::reset << " \" )"; // output inches as well
 				}
 				break;
 			default:break;
