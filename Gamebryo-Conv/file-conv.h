@@ -55,7 +55,7 @@ public:	// accessible anywhere
 	}
 };
 
-/** 
+/**
  * class File : public Content
  * Processes a file, then saves the contents.
  */
@@ -65,7 +65,7 @@ public:
 	std::string _savename;
 	bool _success = false;
 
-	File(std::string file) : _filename(file), _savename([](std::string str) -> std::string { 
+	File(std::string file) : _filename(file), _savename([](std::string str) -> std::string {
 			auto pair{ file::filename_split(str) };
 			return pair.first + "-converted" + pair.second;
 		}(file))

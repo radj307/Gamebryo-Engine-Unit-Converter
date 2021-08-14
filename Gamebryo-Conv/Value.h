@@ -38,7 +38,7 @@ struct ValType {
 	 * @brief Returns this ValType as its official representative symbol.
 	 * @returns const char*
 	 */
-	std::string symbol() const
+	[[nodiscard]] std::string symbol() const
 	{
 		switch ( _t ) {
 		case TYPE::UNIT:			return ("u");	// u
@@ -59,15 +59,18 @@ struct ValType {
 	static const char* symbol(const TYPE t)
 	{
 		switch ( t ) {
-		case TYPE::UNIT:			return static_cast<const char*>("u");	// u
-		case TYPE::IMPERIAL:		return static_cast<const char*>("\'");	// '
-		case TYPE::IMPERIAL_INCH:	return static_cast<const char*>("\"");	// "
-		case TYPE::METRIC:			return static_cast<const char*>("m");	// m
-		case TYPE::METRIC_CM:		return static_cast<const char*>("cm");	// cm
-		case TYPE::METRIC_MM:		return static_cast<const char*>("mm");	// mm
-		case TYPE::METRIC_UM:		return static_cast<const char*>("um");	// um
-		default:					return static_cast<const char*>("");	// <blank>
+		case TYPE::UNIT:			return "u";                    // u
+		case TYPE::IMPERIAL:		return "\'";                   // '
+		case TYPE::IMPERIAL_INCH:	return "\"";                   // "
+		case TYPE::METRIC:			return "m";                    // m
+		case TYPE::METRIC_CM:		return "cm";                   // cm
+		case TYPE::METRIC_MM:		return "mm";                   // mm
+		case TYPE::METRIC_UM:		return "um";                   // um
+		case TYPE::NONE: break;
+		case TYPE::ALL: break;
+		default:					return ""; // <blank>
 		}
+		return nullptr;
 	}
 
 	/**
@@ -75,7 +78,7 @@ struct ValType {
 	 * @brief Returns this ValType as its full name, of type string
 	 * @returns string
 	 */
-	std::string asString() const
+	[[nodiscard]] std::string asString() const
 	{
 		switch ( _t ) {
 		case TYPE::UNIT:			return ("(Gamebryo Units)");
@@ -85,9 +88,13 @@ struct ValType {
 		case TYPE::METRIC_CM:		return ("(Centimeters)");
 		case TYPE::METRIC_MM:		return ("(Millimeters)");
 		case TYPE::METRIC_UM:		return ("(Micrometers)");
+		case TYPE::NONE: break;
+		case TYPE::ALL: break;
 		default:					return ("(Error-Type)");
 		}
+		return {};
 	}
+
 	/**
 	 * asString()
 	 * @brief Returns a ValType as its full name, of type string
@@ -103,8 +110,11 @@ struct ValType {
 		case TYPE::METRIC_CM:		return ("(Centimeters)");
 		case TYPE::METRIC_MM:		return ("(Millimeters)");
 		case TYPE::METRIC_UM:		return ("(Micrometers)");
+		case TYPE::NONE: break;
+		case TYPE::ALL: break;
 		default:					return ("(Error-Type)");
 		}
+		return {};
 	}
 
 	/** CONSTRUCTOR (DEFAULT) **
@@ -153,7 +163,7 @@ class Value final : public ValType {
 	 * @returns Value		- Returns *this if the requested type == this type
 	 */
 	template <class EnumType = TYPE>
-	Value toMetric(const EnumType metric_sub_type = TYPE::METRIC)
+	Value toMetric(const EnumType metric_sub_type = TYPE::METRIC) const
 	{
 		auto modifier{ 1 };
 		switch ( metric_sub_type ) {
@@ -193,7 +203,7 @@ class Value final : public ValType {
 	 * @brief Returns member value converted to Bethesda's Units.
 	 * @returns Value		- Returns *this if the requested type == this type
 	 */
-	Value toUnit()
+	Value toUnit() const
 	{
 		// switch through input types:
 		switch ( _t )
@@ -221,7 +231,7 @@ class Value final : public ValType {
 	 * @returns Value		- Returns *this if the requested type == this type
 	 */
 	template <class EnumType = TYPE>
-	Value toImperial(const EnumType imperial_sub_type = TYPE::IMPERIAL)
+	Value toImperial(const EnumType imperial_sub_type = TYPE::IMPERIAL) const
 	{
 		auto modifier{ 1 };
 		switch ( imperial_sub_type ) {
@@ -245,12 +255,50 @@ class Value final : public ValType {
 			return Value(imperial_sub_type, (_v * cfg->fGet("conversions", "imperial_to_unit")) * modifier);
 		case TYPE::IMPERIAL_INCH: // inch -> feet
 			return Value(imperial_sub_type, ((_v / 12) * cfg->fGet("conversions", "imperial_to_unit")) * modifier);
+		case TYPE::NONE: break;
+		case TYPE::ALL: break;
+		case TYPE::IMPERIAL: break;
 		default:
 			return *this;
 		}
+		return {};
 	}
 
 public:
+	/** STATIC **
+	 * stot(string)
+	 * @brief (String TO Type) converts string to TYPE.
+	 * @returns TYPE
+	 */
+	static TYPE stot(std::string s)
+	{
+		// Convert input string to lowercase
+		s = str::tolower(s);
+
+		// GAMEBRYO UNIT
+		if ( s == "u" || s == "unit" || s == "units" || s == "beth" || s == "bethesda" || s == "gamebryo" || s == "game" )
+			return TYPE::UNIT;
+
+		// METRIC
+		if ( s == "m" || s == "meter" || s == "meters" || s == "metric" || s == "met" )
+			return TYPE::METRIC;
+		if ( s == "cm" || s == "centimeter" || s == "centimeters" )
+			return TYPE::METRIC_CM;
+		if ( s == "mm" || s == "millimeter" || s == "millimeters" )
+			return TYPE::METRIC_MM;
+		if ( s == "um" || s == "micrometer" || s == "micrometers" )
+			return TYPE::METRIC_UM;
+
+		// IMPERIAL
+		if ( s == "f" || s == "ft" || s == "feet" || s == "foot" || s == "imperial" || s == "imp" )
+			return TYPE::IMPERIAL;
+		if ( s == "i" || s == "in" || s == "inch" || s == "inches" )
+			return TYPE::IMPERIAL_INCH;
+
+		// MISC
+		if ( s == "a" || s == "all" ) return TYPE::ALL;
+		return TYPE::NONE;
+	}
 
 	/**
 	 * Value(const TYPE, const double)
@@ -269,41 +317,8 @@ public:
 
 	Value(Value&&) = default;
 	Value(const Value&) = default;
+	Value() : ValType(TYPE::NONE), _v{ 0.0 } {}
 
-	/** STATIC **
-	 * stot(string)
-	 * @brief (String TO Type) converts string to TYPE.
-	 * @returns TYPE
-	 */
-	static TYPE stot(std::string s)
-	{
-		// Convert input string to lowercase
-		str::tolower(s);
-
-		// GAMEBRYO UNIT
-		if (s == "u" || s == "unit" || s == "units" || s == "beth" || s == "bethesda" || s == "gamebryo" || s == "game")
-			return TYPE::UNIT;
-
-		// METRIC
-		if (s == "m" || s == "meter" || s == "meters" || s == "metric" || s == "met")
-			return TYPE::METRIC;
-		if (s == "cm" || s == "centimeter" || s == "centimeters")
-			return TYPE::METRIC_CM;
-		if (s == "mm" || s == "millimeter" || s == "millimeters")
-			return TYPE::METRIC_MM;
-		if (s == "um" || s == "micrometer" || s == "micrometers")
-			return TYPE::METRIC_UM;
-
-		// IMPERIAL
-		if (s == "f" || s == "ft" || s == "feet" || s == "foot" || s == "imperial" || s == "imp")
-			return TYPE::IMPERIAL;
-		if (s == "i" || s == "in" || s == "inch" || s == "inches")
-			return TYPE::IMPERIAL_INCH;
-
-		// MISC
-		if (s == "a" || s == "all") return TYPE::ALL;
-		return TYPE::NONE;
-	}
 
 	/**
 	 * invalid()
@@ -383,7 +398,7 @@ public:
 	/**
 	 * asString()
 	 * Returns a string with value (forced standard notation) & type in the format: ("<value> <type>")
-	 * 
+	 *
 	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
 	 * @returns string
 	 */

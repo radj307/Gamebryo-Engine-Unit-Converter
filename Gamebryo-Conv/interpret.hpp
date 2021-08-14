@@ -36,7 +36,7 @@ struct Param {
 /**
  * convert(Param&)
  * Performs a single conversion
- * 
+ *
  * @param p	- Parameter struct containing all conversion arguments.
  */
 inline void convert(Param& p)
@@ -153,20 +153,20 @@ inline void convert(Param& p)
 /**
  * interpret(int, char*[])
  * Used to convert commandline arguments into usable commands.
- * 
+ *
  * @param argc		- The argument count from main()
  * @param argv		- The argument array from main()
  * @returns int		- ( 0 = success ) ( 1 = failed because: invalid arguments, errors )
  */
-inline int interpret(opt::list& args)
+inline int interpret(opt::Param& args)
 {
 	// check if arg count is valid
 	if ( !args.empty() ) {
-		Param p; // hold conversion arguments so they can be properly reset 
+		Param p; // hold conversion arguments so they can be properly reset
 
 		// COMMANDS
-		if (args.exists("file", "f")) {
-			File proc(args.getParam("file"));
+		if (args.exists_any("file", "f")) {
+			File proc(args.getv("file"));
 		}
 
 		/*for ( auto it = args.com.begin(); it != args.com.end(); it++ ) {
@@ -189,11 +189,10 @@ inline int interpret(opt::list& args)
 		}*/
 
 		// PARAMS
-		for (auto& it : args.getKeywords()) {
+		for (auto& it : args._param) {
 			if (std::all_of(it.begin(), it.end(), isalpha)) {
-				if (p.in._t == ValType::TYPE::NONE) {
+				if (p.in._t == ValType::TYPE::NONE)
 					p.in._t = Value::stot(it);
-				}
 				else {
 					p.out._t = Value::stot(it);
 					convert(p);

@@ -61,3 +61,29 @@ Debug/Docs/termcolorlib-LICENSE
 *.iobj
 .vs/Gamebryo Converter/v16/.suo
 Gamebryo Converter/Gamebryo Converter.vcxproj.user
+
+#Ignore thumbnails created by Windows
+Thumbs.db
+#Ignore files built by Visual Studio
+*.user
+*.aps
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+[Bb]in
+[Dd]ebug*/
+*.sbr
+obj/
+[Rr]elease*/
+_ReSharper*/
+[Tt]est[Rr]esult*
+.vs/
+#Nuget packages folder
+packages/
+*.vshistory/
