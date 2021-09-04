@@ -9,7 +9,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NewRelease|Win32'">
-    <LocalDebuggerCommandArguments>u 1024 a</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--ini-reset</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerMergeEnvironment>false</LocalDebuggerMergeEnvironment>
   </PropertyGroup>
