@@ -4,15 +4,7 @@
 #include <INI_Defaults.hpp>
 #include <strconv.hpp>
 
-/**
- * write_default_ini(const string&)
- * @brief Write the default INI config values to disk.
- * @param filename	- (Default: "def.ini")
- * @return true		- Successfully wrote default INI values to disk.
- * @return false	- Failed to write default INI values to disk.
- */
-inline bool write_default_ini(const std::string& filename = "def.ini", bool overwrite = true)
-{
+struct {
 	const section_map
 		// Default Setting Values
 		defMap{
@@ -30,7 +22,7 @@ inline bool write_default_ini(const std::string& filename = "def.ini", bool over
 					{ "always-show-input", "false" },
 				}
 			},
-		},
+	},
 		// Default Setting Comments
 		defCommentMap{
 			{
@@ -46,10 +38,19 @@ inline bool write_default_ini(const std::string& filename = "def.ini", bool over
 					{ "always-show-input", "false" },
 				}
 			},
-		};
-	// forward the return value from the INI_Defaults::write() function.
-	return INI_Defaults{ defMap, defCommentMap }.write(filename, !overwrite);
-}
+	};
+
+	bool write(const std::string& filename, bool append = false)
+	{
+		return INI_Defaults{ defMap, defCommentMap }.write(filename, append);
+	}
+
+	INI buildINI()
+	{
+		return INI( std::forward<decltype(defMap)>(defMap) );
+	}
+
+} DEFAULT_INI;
 
 /**
  * @class Config
@@ -81,7 +82,7 @@ public:
 	 */
 	INI::key_list* get(std::string&& header)
 	{
-		if (_config != nullptr) return _config->getSecPtr(std::forward<std::string>(header));
+		if ( _config != nullptr ) return _config->getSecPtr(std::forward<std::string>(header));
 		throw std::exception("CONFIG_INI_NULLPTR");
 	}
 
@@ -95,7 +96,7 @@ public:
 	 */
 	std::string get(std::string&& header, std::string&& key)
 	{
-		if (_config != nullptr) return _config->get(std::forward<std::string>(header), std::forward<std::string>(key)).value_or("");
+		if ( _config != nullptr ) return _config->get(std::forward<std::string>(header), std::forward<std::string>(key)).value_or("");
 		throw std::exception("CONFIG_INI_NULLPTR");
 	}
 
@@ -148,3 +149,4 @@ public:
 		return os;
 	}
 };
+Config* cfg{ nullptr }; ///< @brief This is required until I go through the whole program and change the use of global vars.

@@ -4,7 +4,7 @@
  * by radj307
  */
 #pragma once
-#include <sysapi.h>
+#include <TermAPI.hpp>
 #include <opt.hpp>
 
 #include "file-conv.h"
@@ -49,9 +49,14 @@ inline void convert(Param& p)
 		if ((p.in._t != ValType::TYPE::ALL && p.out._t != ValType::TYPE::ALL) && (p.in != p.out)) {
 			Value output = input.convert_to(p.out);
 			if (!cfg->bGet("config", "disable-colors")) {
-				std::cout << '\t'; input.cout(); std::cout << "\t=  "; output.cout(true); std::cout << std::endl;
+				std::cout << '\t'; 
+				input.cout(); 
+				std::cout << "\t=  "; 
+				output.cout(true); 
+				std::cout << '\n';
 			}
-			else std::cout << '\t' << input.asString() << "\t=  " << output.asString(true) << std::endl;
+			else
+				std::cout << '\t' << input.asString() << "\t=  " << output.asString(true) << std::endl;
 		}
 		// if types don't match, and only output type is TYPE::ALL, convert to all types
 		else if ((p.in._t != ValType::TYPE::ALL && p.out._t == ValType::TYPE::ALL) && (p.in != p.out)) {
@@ -148,6 +153,7 @@ inline void convert(Param& p)
 	}
 	// clear params
 	p.clear();
+	std::cout.flush();
 }
 
 /**
@@ -158,35 +164,11 @@ inline void convert(Param& p)
  * @param argv		- The argument array from main()
  * @returns int		- ( 0 = success ) ( 1 = failed because: invalid arguments, errors )
  */
-inline int interpret(opt::Param& args)
+inline int interpret(const opt::Param& args)
 {
 	// check if arg count is valid
 	if ( !args.empty() ) {
 		Param p; // hold conversion arguments so they can be properly reset
-
-		// COMMANDS
-		if (args.exists_any("file", "f")) {
-			File proc(args.getv("file"));
-		}
-
-		/*for ( auto it = args.com.begin(); it != args.com.end(); it++ ) {
-			// check if arg has at least 1 character
-			if ( (*it).checkName("ini") ) {
-				cfg.write("Gamebryo Engine Unit Converter INI");
-			}
-			else if ( (*it).checkName("file") ) {
-				File proc((*it)._opt);
-				// check if file conversion succeeded
-				switch ( proc._success ) {
-				case true:
-					sys::msg(sys::log, "Successfully processed file: \"" + (*it)._opt + "\"");
-					break;
-				default:
-					sys::msg(sys::error, "Failed to process file: \"" + (*it)._opt + "\"");
-					break;
-				}
-			}
-		}*/
 
 		// PARAMS
 		for (auto& it : args._param) {
@@ -206,36 +188,6 @@ inline int interpret(opt::Param& args)
 				else std::cout << sys::warn << "Invalid Parameter: \"" << it << '\"' << std::endl;
 			}
 		}
-		/*for ( auto it = args.par.begin(); it != args.par.end(); it++ ) {
-			// if arg is entirely alphabetical characters
-			if ( std::all_of((*it)._name.begin(), (*it)._name.end(), ::isalpha) ) {
-				// check if input type has not been set
-				if ( p.in._t == ValType::TYPE::NONE )
-					p.in._t = Value::stot((*it)._name);
-				else { // else set output type & begin conversion
-					p.out._t = Value::stot((*it)._name);
-					convert(p);
-				}
-			}
-			// check if arg is only digits
-			else {
-				// copy arg to temp string
-				std::string tmp = (*it)._name;
-				// remove all decimal points from temp string
-				tmp.erase(std::remove(tmp.begin(), tmp.end(), '.'), tmp.end());
-
-				// check if temp string is entirely digits
-				if ( std::all_of(tmp.begin(), tmp.end(), ::isdigit) ) {
-					// set val to arg as type double
-					try { p.val = std::stod((*it)._name); }
-					catch ( std::exception & exc ) { // catch stod exceptions
-						sys::msg(sys::error, "\"" + std::string(exc.what()) + "\" was thrown while interpreting the value!");
-					}
-				}
-				// else show invalid argument warning
-				else sys::msg(sys::warning, "Invalid parameter: " + (*it)._name);
-			}
-		}*/
 		return 0;
 	} // else return error
 	return 1;

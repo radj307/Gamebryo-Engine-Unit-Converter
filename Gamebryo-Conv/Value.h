@@ -9,9 +9,9 @@
 #include <INI.hpp>
 #include <strmanip.hpp>
 #include <utility>
-#include <sysapi.h>
 #include <strconv.hpp>
 
+#include <TermAPI.hpp>
 /**
  * struct ValType
  * Wrapper for Value Unit Types, used by the Value class below.
@@ -399,7 +399,7 @@ public:
 	 * asString()
 	 * Returns a string with value (forced standard notation) & type in the format: ("<value> <type>")
 	 *
-	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
+	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until ( result < 1.0 )
 	 * @returns string
 	 */
 	std::string asString(const bool smallUnits = false)
@@ -445,7 +445,7 @@ public:
 	 * cout(bool)
 	 * Directly outputs value as string to console with Color lib
 	 *
-	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until result is >1.0
+	 * @param smallUnits	- (Default: false) Set to true to keep converting to smaller units until ( result < 1.0 )
 	 */
 	void cout(bool smallUnits = false)
 	{
@@ -488,7 +488,7 @@ public:
 				}
 				break;
 			case TYPE::IMPERIAL: // imperial
-				if ( _v < 1.0f ) {
+				if ( _v < 1.0 ) {
 					_v *= 12; // convert feet to inches
 					std::cout << "  ( " << Color::f_green << _v << Color::reset << " \" )"; // output inches as well
 				}
@@ -543,5 +543,5 @@ public:
 	}
 
 protected:
-	double _v;	// value as a double float
+	double _v;	// value as a double
 };
