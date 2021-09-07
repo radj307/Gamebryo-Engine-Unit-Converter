@@ -10,7 +10,8 @@
 #include <strmanip.hpp>
 #include <utility>
 #include <strconv.hpp>
-#include <TermAPI.hpp>
+
+#include "ColorAPISelector.hpp"
 
 namespace ck_unit_conv {
 	/**
@@ -450,7 +451,7 @@ namespace ck_unit_conv {
 			std::cout.precision(cfg->iGet("config", "precision"));
 			std::cout << std::fixed;
 		#ifndef WSL
-			std::cout << Color::f_green << _v << Color::reset << ' ' << symbol();
+			std::cout << Colorize(Color::_f_green) << _v << Color::reset << ' ' << symbol();
 		#else
 			std::cout << _v << ' ' << symbol();
 		#endif
@@ -461,7 +462,7 @@ namespace ck_unit_conv {
 					if ( _v < 1.0f ) {
 						_v *= 100; // convert meters to centimeters
 					#ifndef WSL
-						std::cout << "  ( " << Color::f_green << _v << Color::reset << " cm )";
+						std::cout << "  ( " << Colorize(Color::_f_green) << _v << Color::reset << " cm )";
 					#else
 						std::cout << "  ( " << _v << " cm )";
 					#endif
@@ -469,7 +470,7 @@ namespace ck_unit_conv {
 						if ( _v < 1.0f ) {
 							_v *= 10; // convert centimeters to millimeters
 						#ifndef WSL
-							std::cout << "  ( " << Color::f_green << _v << Color::reset << " mm )";
+							std::cout << "  ( " << Colorize(Color::_f_green) << _v << Color::reset << " mm )";
 						#else
 							std::cout << "  ( " << _v << " mm )";
 						#endif
@@ -477,7 +478,7 @@ namespace ck_unit_conv {
 							if ( _v < 1.0f ) {
 								_v *= 1000; // convert millimeters to micrometers
 							#ifndef WSL
-								std::cout << "  ( " << Color::f_green << _v << Color::reset << " um )";
+								std::cout << "  ( " << Colorize(Color::_f_green) << _v << Color::reset << " um )";
 							#else
 								std::cout << "  ( " << _v << " um )";
 							#endif
@@ -488,7 +489,7 @@ namespace ck_unit_conv {
 				case TYPE::IMPERIAL: // imperial
 					if ( _v < 1.0 ) {
 						_v *= 12; // convert feet to inches
-						std::cout << "  ( " << Color::f_green << _v << Color::reset << " \" )"; // output inches as well
+						std::cout << "  ( " << Colorize(Color::_f_green) << _v << Color::reset << " \" )"; // output inches as well
 					}
 					break;
 				default:break;
@@ -507,22 +508,22 @@ namespace ck_unit_conv {
 		{
 			std::cout.precision(cfg->iGet("config", "precision"));
 			std::cout << std::fixed;
-			std::cout << Color::f_yellow << _v << Color::reset << ' ' << symbol();
+			std::cout << Colorize(Color::_f_yellow) << _v << Color::reset << ' ' << symbol();
 			switch ( smallUnits ) {
 			case true:
 				switch ( _t ) {
 				case TYPE::METRIC: // metric
 					if ( _v < 1.0f ) {
 						_v *= 100; // convert meters to centimeters
-						std::cout << "  ( " << Color::f_yellow << _v << Color::reset << " cm )";
+						std::cout << "  ( " << Colorize(Color::_f_yellow) << _v << Color::reset << " cm )";
 						// check if result val is still less than 1
 						if ( _v < 1.0f ) {
 							_v *= 10; // convert centimeters to millimeters
-							std::cout << "  ( " << Color::f_yellow << _v << Color::reset << " mm )";
+							std::cout << "  ( " << Colorize(Color::_f_yellow) << _v << Color::reset << " mm )";
 							// check if result val is still less than 1
 							if ( _v < 1.0f ) {
 								_v *= 1000; // convert millimeters to micrometers
-								std::cout << "  ( " << Color::f_yellow << _v << Color::reset << " um )";
+								std::cout << "  ( " << Colorize(Color::_f_yellow) << _v << Color::reset << " um )";
 							}
 						}
 					}
@@ -530,7 +531,7 @@ namespace ck_unit_conv {
 				case TYPE::IMPERIAL: // imperial
 					if ( _v < 1.0f ) {
 						_v *= 12; // convert feet to inches
-						std::cout << "  ( " << Color::f_yellow << _v << Color::reset << " \" )"; // output inches as well
+						std::cout << "  ( " << Colorize(Color::_f_yellow) << _v << Color::reset << " \" )"; // output inches as well
 					}
 					break;
 				default:break;

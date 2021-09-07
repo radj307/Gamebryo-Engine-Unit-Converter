@@ -4,10 +4,10 @@
  * by radj307
  */
 #pragma once
-#include <TermAPI.hpp>
 #include <opt.hpp>
 
 #include "file-conv.h"
+#include <TermAPI.hpp>
 
 namespace ck_unit_conv {
 	// holds the needed arguments for one conversion
@@ -82,7 +82,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << Color::f_cyan << "\t=  " << Color::reset;
+						std::cout << Colorize(Color::_f_cyan) << "\t=  " << Color::reset;
 						input.convert_to(ValType::TYPE::UNIT).cout(true);
 						std::cout << std::endl;
 					}
@@ -111,7 +111,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << Color::f_cyan << "\t=  " << Color::reset;
+						std::cout << Colorize(Color::_f_cyan) << "\t=  " << Color::reset;
 						input.convert_to(ValType::TYPE::METRIC).cout(true);
 						std::cout << std::endl;
 					}
@@ -138,7 +138,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << Color::f_cyan << "\t=  " << Color::reset;
+						std::cout << Colorize(Color::_f_cyan) << "\t=  " << Color::reset;
 						input.convert_to(ValType::TYPE::IMPERIAL).cout(true);
 						std::cout << std::endl;
 					}
