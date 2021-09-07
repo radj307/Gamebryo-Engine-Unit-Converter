@@ -1,5 +1,4 @@
 #include <INI.hpp>
-#include <optlib.hpp>
 #include <resolve-path.hpp>
 
 #include "build-cfg.hpp"
@@ -36,8 +35,10 @@ int main(const int argc, char** argv, char** envp)
 		else // use default ini if none found.
 			ini = std::move(DEFAULT_INI.buildINI());
 
-		if (ini.get("config", "use-ansi-colors") || args.check_opt("ANSI"))
+		if (ini.get("config", "use-ansi-colors") || args.check_opt("ANSI")) {
+			setANSISupport(true);
 			useANSI = true;
+		}
 
 		Config conf(ini);
 		cfg = &conf;
@@ -48,7 +49,12 @@ int main(const int argc, char** argv, char** envp)
 		}
 
 		// interpret args & return result code
+		#ifdef _DEBUG
+		int retval{ interpret(args) };
+		return retval;
+		#else
 		return interpret(args);
+		#endif
 	} catch (std::exception& ex) {
 		std::cout << sys::error << ex.what() << std::endl;
 		return -1;

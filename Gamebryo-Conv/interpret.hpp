@@ -4,7 +4,7 @@
  * by radj307
  */
 #pragma once
-#include <opt.hpp>
+#include <optlib.hpp>
 
 #include "file-conv.h"
 #include <TermAPI.hpp>
