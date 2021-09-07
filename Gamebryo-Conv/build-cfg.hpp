@@ -21,6 +21,7 @@ namespace ck_unit_conv {
 						{ "precision", "6" },
 						{ "disable-colors", "false" },
 						{ "always-show-input", "false" },
+						{ "use-ansi-colors", "false" }
 					}
 				},
 		},
