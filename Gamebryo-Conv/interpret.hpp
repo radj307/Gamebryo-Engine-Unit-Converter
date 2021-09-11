@@ -84,7 +84,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << color::setcolor(color::cyan) << "\t=  " << Color::reset;
+						std::cout << color::setcolor(color::cyan) << "\t=  " << color::reset;
 						input.convert_to(ValType::TYPE::UNIT).cout(true);
 						std::cout << std::endl;
 					}
@@ -113,7 +113,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << color::setcolor(color::cyan) << "\t=  " << Color::reset;
+						std::cout << color::setcolor(color::cyan) << "\t=  " << color::reset;
 						input.convert_to(ValType::TYPE::METRIC).cout(true);
 						std::cout << std::endl;
 					}
@@ -140,7 +140,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << color::setcolor(color::cyan) << "\t=  " << Color::reset;
+						std::cout << color::setcolor(color::cyan) << "\t=  " << color::reset;
 						input.convert_to(ValType::TYPE::IMPERIAL).cout(true);
 						std::cout << std::endl;
 					}
@@ -152,7 +152,7 @@ namespace ck_unit_conv {
 				}
 			}
 			// else show error message
-			else std::cout << sys::error << p.in.asString() << " to " << p.out.asString() << " isn't a valid conversion." << std::endl;
+			else std::cout << sys::term::error << p.in.asString() << " to " << p.out.asString() << " isn't a valid conversion." << std::endl;
 		}
 		// clear params
 		p.clear();
@@ -188,7 +188,7 @@ namespace ck_unit_conv {
 					tmp.erase(std::remove_if(tmp.begin(), tmp.end(), ispunct), tmp.end());
 					if ( std::all_of(tmp.begin(), tmp.end(), isdigit) )
 						p.val = str::stod(it);
-					else std::cout << sys::warn << "Invalid Parameter: \"" << it << '\"' << std::endl;
+					else std::cout << sys::term::warn << "Invalid Parameter: \"" << it << '\"' << std::endl;
 				}
 			}
 			return 0;
