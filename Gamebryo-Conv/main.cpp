@@ -40,8 +40,8 @@ int main(const int argc, char** argv, char** envp)
 		Config conf(ini);
 		cfg = &conf;
 
-		// COMMANDS
-		if (args.contains("file", "f"))
+		// FILE COMMANDS
+		if (args.contains("file"))
 			File proc(args.getv("file").value_or(""));
 
 		// interpret args & return result code

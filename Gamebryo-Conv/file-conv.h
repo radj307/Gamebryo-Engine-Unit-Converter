@@ -23,7 +23,8 @@ namespace ck_unit_conv {
 			auto tmp{ file::read(filename) };
 			if (tmp.fail())
 				throw std::exception(std::string("Failed to find file: \"" + filename + "\"").c_str());
-			_content = file::toVector(std::move(tmp));
+			else
+				_content = file::toVector(std::move(tmp));
 			return valid();
 		}
 
@@ -69,7 +70,7 @@ namespace ck_unit_conv {
 
 		File(std::string file) : _filename(file), _savename([](std::string str) -> std::string {
 			auto pair{ file::filename_split(str) };
-			return pair.first + "-converted" + pair.second;
+			return pair.first + "-converted." + pair.second;
 			}( file ))
 		{
 			// check if file was read to content successfully
