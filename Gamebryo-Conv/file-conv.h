@@ -1,7 +1,5 @@
 #pragma once
 #include <file.h>
-#include <sys.h>
-#include <sysapi.h>
 #include "Value.h"
 
 namespace ck_unit_conv {
@@ -22,7 +20,10 @@ namespace ck_unit_conv {
 		 */
 		bool getFrom(std::string filename)
 		{
-			_content = file::toVector(file::read(filename));
+			auto tmp{ file::read(filename) };
+			if (tmp.fail())
+				throw std::exception(std::string("Failed to find file: \"" + filename + "\"").c_str());
+			_content = file::toVector(std::move(tmp));
 			return valid();
 		}
 
