@@ -218,7 +218,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ColorAPISelector.hpp" />
     <ClInclude Include="file-conv.h" />
     <ClInclude Include="Help.hpp" />
     <ClInclude Include="interpret.hpp" />

@@ -10,23 +10,24 @@ int main(const int argc, char** argv, char** envp)
 	try {
 		using namespace ck_unit_conv;
 
+		std::cout << sys::term::EnableANSI;
+
 		const std::string DEFAULT_INI_NAME{ "Gamebryo-Converter.ini" };
 		const opt::Params args(argc, argv, { "file" });
-		// { { 'h' }, { { "help", false }, {"file", true}, {"reset-ini", false}, {"ini-reset", false}, {"ANSI", false} }});
 
 		const auto [location, name] { opt::resolve_split_path(envp, argv[0]) };
 
-		if (args.empty() || args.check_flag('h') || args.check_opt("help"))
+		if (args.empty() || args.check('h', "help"))
 			std::cout << Help(name, 32) << '\n';
 
 		INI ini;
-		const auto resetINI{ args.check_opt("reset-ini") || args.check_opt("ini-reset") };
+		const auto resetINI{ args.check_opt("reset-ini", "ini-reset") };
 
 		if (resetINI) { // reset INI
 			if (DEFAULT_INI.write(DEFAULT_INI_NAME))
-				std::cout << sys::log << "Reset \"" << DEFAULT_INI_NAME << '\"' << std::endl;
+				std::cout << sys::term::log << "Reset \"" << DEFAULT_INI_NAME << '\"' << std::endl;
 			else
-				std::cout << sys::error << "Failed to reset \"" << DEFAULT_INI_NAME << '\"' << std::endl;
+				std::cout << sys::term::error << "Failed to reset \"" << DEFAULT_INI_NAME << '\"' << std::endl;
 		}
 
 		if (file::exists(DEFAULT_INI_NAME))
@@ -35,11 +36,6 @@ int main(const int argc, char** argv, char** envp)
 			ini.read(location + DEFAULT_INI_NAME); // read ini on PATH if it exists
 		else // use default ini if none found.
 			ini = std::move(DEFAULT_INI.buildINI());
-
-		if (ini.get("config", "use-ansi-colors") || args.check_opt("ANSI")) {
-			setANSISupport(true);
-			useANSI = true;
-		}
 
 		Config conf(ini);
 		cfg = &conf;
@@ -56,10 +52,10 @@ int main(const int argc, char** argv, char** envp)
 		return interpret(args);
 		#endif
 	} catch (std::exception& ex) {
-		std::cout << sys::error << ex.what() << std::endl;
+		std::cout << sys::term::error << ex.what() << std::endl;
 		return -1;
 	} catch (...) {
-		std::cout << sys::error << "An unknown exception occurred!" << std::endl;
+		std::cout << sys::term::error << "An unknown exception occurred!" << std::endl;
 		return -2;
 	}
 }

@@ -84,7 +84,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << Colorize(Color::_f_cyan) << "\t=  " << Color::reset;
+						std::cout << color::setcolor(color::cyan) << "\t=  " << Color::reset;
 						input.convert_to(ValType::TYPE::UNIT).cout(true);
 						std::cout << std::endl;
 					}
@@ -113,7 +113,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << Colorize(Color::_f_cyan) << "\t=  " << Color::reset;
+						std::cout << color::setcolor(color::cyan) << "\t=  " << Color::reset;
 						input.convert_to(ValType::TYPE::METRIC).cout(true);
 						std::cout << std::endl;
 					}
@@ -140,7 +140,7 @@ namespace ck_unit_conv {
 
 					// show output
 					if ( !cfg->bGet("config", "disable-colors") ) { // check if INI disable color is on
-						std::cout << Colorize(Color::_f_cyan) << "\t=  " << Color::reset;
+						std::cout << color::setcolor(color::cyan) << "\t=  " << Color::reset;
 						input.convert_to(ValType::TYPE::IMPERIAL).cout(true);
 						std::cout << std::endl;
 					}

@@ -20,8 +20,7 @@ namespace ck_unit_conv {
 					"config", {
 						{ "precision", "6" },
 						{ "disable-colors", "false" },
-						{ "always-show-input", "false" },
-						{ "use-ansi-colors", "true" }
+						{ "always-show-input", "false" }
 					}
 				},
 		},
@@ -38,7 +37,6 @@ namespace ck_unit_conv {
 					"config", {
 						{ "disable-colors", "When true, disables the usage of colors throughout the program." },
 						{ "always-show-input", "When true, always shows the input value." },
-						{ "use-ansi-colors", "When true, uses ANSI escape sequences to colorize output rather than the Win32 API." }
 					}
 				},
 		};
