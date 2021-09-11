@@ -4,7 +4,9 @@
  * by radj307
  */
 #pragma once
-#include <optlib.hpp>
+//#include <optlib.hpp>
+#include <iostream>
+#include <Params.hpp>
 
 #include "file-conv.h"
 #include <TermAPI.hpp>
@@ -165,14 +167,14 @@ namespace ck_unit_conv {
 	 * @param argv		- The argument array from main()
 	 * @returns int		- ( 0 = success ) ( 1 = failed because: invalid arguments, errors )
 	 */
-	inline int interpret(const opt::Param& args)
+	inline int interpret(const opt::Params& args)
 	{
 		// check if arg count is valid
 		if ( !args.empty() ) {
 			Param p; // hold conversion arguments so they can be properly reset
 
 			// PARAMS
-			for ( auto& it : args._param ) {
+			for ( auto& it : args.getAllParameters() ) {
 				if ( std::all_of(it.begin(), it.end(), isalpha) ) {
 					if ( p.in._t == ValType::TYPE::NONE )
 						p.in._t = Value::stot(it);

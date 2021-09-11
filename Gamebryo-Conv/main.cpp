@@ -11,11 +11,12 @@ int main(const int argc, char** argv, char** envp)
 		using namespace ck_unit_conv;
 
 		const std::string DEFAULT_INI_NAME{ "Gamebryo-Converter.ini" };
-		const opt::Param args(argc, argv, { { 'h' }, { { "help", false }, {"file", true}, {"reset-ini", false}, {"ini-reset", false}, {"ANSI", false}}});
+		const opt::Params args(argc, argv, { "file" });
+		// { { 'h' }, { { "help", false }, {"file", true}, {"reset-ini", false}, {"ini-reset", false}, {"ANSI", false} }});
 
 		const auto [location, name] { opt::resolve_split_path(envp, argv[0]) };
 
-		if (args.empty() || args.flag('h') || args.check_opt("help"))
+		if (args.empty() || args.check_flag('h') || args.check_opt("help"))
 			std::cout << Help(name, 32) << '\n';
 
 		INI ini;
@@ -44,9 +45,8 @@ int main(const int argc, char** argv, char** envp)
 		cfg = &conf;
 
 		// COMMANDS
-		if (args.exists_any("file", "f")) {
-			File proc(args.getv("file"));
-		}
+		if (args.contains("file", "f"))
+			File proc(args.getv("file").value_or(""));
 
 		// interpret args & return result code
 		#ifdef _DEBUG
