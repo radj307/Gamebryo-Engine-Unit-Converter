@@ -1,72 +1,13 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Folders
-.git\
-.vs\
-Debug\
-x64\
-*.db
-*.db-shm
-*.db-wal
-*.opendb
-.vs/suck/v16/.suo
-*.ipch
-*.tlog
-*.recipe
-*.ilk
-*.pdb
-*.res
-*.log
-*.txt
-*.idb
-*.sln
-Debug/RCa03668
-Debug/RCa11164
-Debug/Docs/README.md
-Debug/Docs/termcolorlib-LICENSE
-*.ini
-*.zip
-*.iobj
-*.iobj
-.vs/Gamebryo Converter/v16/.suo
-Gamebryo Converter/Gamebryo Converter.vcxproj.user
 
 #Ignore thumbnails created by Windows
 Thumbs.db
 #Ignore files built by Visual Studio
+*.obj
+*.exe
+*.pdb
 *.user
 *.aps
+*.pch
 *.vspscc
 *_i.c
 *_p.c
@@ -76,8 +17,11 @@ Thumbs.db
 *.tlh
 *.bak
 *.cache
+*.ilk
+*.log
 [Bb]in
 [Dd]ebug*/
+*.lib
 *.sbr
 obj/
 [Rr]elease*/
@@ -86,4 +30,4 @@ _ReSharper*/
 .vs/
 #Nuget packages folder
 packages/
-*.vshistory/
+out/

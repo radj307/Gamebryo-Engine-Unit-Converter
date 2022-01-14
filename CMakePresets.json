@@ -1,0 +1,106 @@
+﻿{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+      }
+
+    },
+    {
+      "name": "linux-default",
+      "hidden": true,
+      "inherits": "default",
+      "displayName": "Linux",
+      "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
+      "generator": "Ninja",
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "Linux" ] },
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" }
+      }
+    },
+    {
+      "name": "linux-debug",
+      "hidden": false,
+      "inherits": "linux-default",
+      "displayName": "Linux Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-release",
+      "hidden": false,
+      "inherits": "linux-default",
+      "displayName": "Linux Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "macos-default",
+      "hidden": true,
+      "inherits": "default",
+      "displayName": "macOS",
+      "description": "Target a remote macOS system with Ninja",
+      "generator": "Ninja",
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "macOS" ] },
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" }
+      }
+    },
+    {
+      "name": "macos-debug",
+      "hidden": false,
+      "inherits": "macos-default",
+      "displayName": "macOS Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "macos-release",
+      "hidden": false,
+      "inherits": "macos-default",
+      "displayName": "macOS Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "windows-default",
+      "hidden": true,
+      "inherits": "default",
+      "displayName": "Windows x64",
+      "description": "Target Windows with the Visual Studio development environment.",
+      "generator": "Ninja",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "vendor": { "microsoft.com/VisualStudioSettings/CMake/1.0": { "hostOS": [ "Windows" ] } }
+    },
+    {
+      "name": "windows-debug",
+      "hidden": false,
+      "inherits": "windows-default",
+      "displayName": "Windows x64 Debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "windows-release",
+      "hidden": false,
+      "inherits": "windows-default",
+      "displayName": "Windows x64 Release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ]
+}
