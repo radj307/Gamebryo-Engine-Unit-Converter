@@ -5,8 +5,8 @@
 #include <TermAPI.hpp>
 #include <palette.hpp>
 #include <ParamsAPI2.hpp>
-#include <xlog.hpp>
 #include <INI.hpp>
+#include <fileutil.hpp>
 
 #include <variant>
 #include <filesystem>
@@ -20,13 +20,15 @@ using FmtFlag = std::_Iosb<int>::_Fmtflags;
 using FmtFlag = std::ios_base::fmtflags;
 #endif
 
+INLINE CONSTEXPR const FmtFlag* const FIXED{ &std::ios_base::fixed }, * SCIENTIFIC{ &std::ios_base::scientific };
+
 namespace ckconv {
 
 	/// @brief	Default executable name.
 	INLINE CONSTEXPR const auto DEFAULT_NAME{ "ckconv.exe" };
 
 	/// @brief	INI Header that contains output-related settings.
-	INLINE CONSTEXPR const auto HEADER_OUTPUT{ "output" };
+	INLINE CONSTEXPR const auto HEADER_OUTPUT{ "output" }, HEADER_GLOBAL{ "" };
 
 	/**
 	 * @enum	OUT
@@ -49,10 +51,7 @@ namespace ckconv {
 			std::make_pair(OUT::OUTPUT_VALUE,	term::setcolor(color::green)),
 			std::make_pair(OUT::EQUALS,			term::setcolor(color::white)),
 		};
-		/// @brief	Log instance.
-		xlog::xLogs<std::ostream> log;
 
-		inline static constexpr const FmtFlag* const FIXED{ &std::ios_base::fixed }, * SCIENTIFIC{ &std::ios_base::scientific };
 
 		std::filesystem::path ini_path;
 
@@ -69,7 +68,7 @@ namespace ckconv {
 	 * @param os			Output stream ref to write to.
 	 * @param program_name	The current name of the executable.
 	 */
-	inline void write_help(std::ostream& os, const std::string_view& program_name)
+	inline void write_help(std::ostream& os, const std::string_view& program_name) noexcept
 	{
 		os << program_name << ' '; // print current program name
 		if (program_name != DEFAULT_NAME) // print original program name if modified
@@ -96,7 +95,7 @@ namespace ckconv {
 	 * @brief		Handle all arguments except for help/version.
 	 * @param args	The argument container instance.
 	 */
-	inline void handle_args(const opt::ParamsAPI2& args)
+	inline void handle_args(const opt::ParamsAPI2& args) noexcept(false)
 	{
 		// precision
 		if (const auto precision{ args.typegetv_any<opt::Flag, opt::Option>('p', "precision") }; precision.has_value())
@@ -104,9 +103,9 @@ namespace ckconv {
 
 		// notation
 		if (args.check<opt::Option>("standard"))
-			Global.notation = Global.FIXED;
+			Global.notation = FIXED;
 		else if (args.check<opt::Option>("scientific"))
-			Global.notation = Global.SCIENTIFIC;
+			Global.notation = SCIENTIFIC;
 
 		// quiet
 		Global.quiet = args.check_any<opt::Flag, opt::Option>('q', "quiet");
@@ -115,40 +114,65 @@ namespace ckconv {
 		if (args.check_any<opt::Flag, opt::Option>('n', "no-color")) {
 			Global.no_color = true;
 			Global.palette.setActive(false);
-			Global.log.setColorEnabled(false);
 		}
 
-		// reset-ini
-		if (args.check<opt::Option>("reset-ini")) {
-			if (file::INI(file::ini::INIContainer::Map{
-				{
-					std::string{HEADER_OUTPUT}, file::ini::INI::SectionContent{
-						{ "precision", file::ini::VariableT{ static_cast<file::ini::Integer>(Global.precision) }},
-						{ "notation", file::ini::VariableT{ []() -> std::string {
-								if (Global.notation != nullptr) {
-									if (Global.notation == Global.FIXED)
-										return "fixed";
-									else if (Global.notation == Global.SCIENTIFIC)
-										return "scientific";
-								}
-								return{};
-
-							}() }},
-						{ "quiet", file::ini::VariableT{ Global.quiet } },
-						{ "no-color", file::ini::VariableT{ Global.no_color } },
-					}
+		// reset-ini | ini-reset
+		if (args.check_any<opt::Option>("reset-ini", "ini-reset")) {
+			const bool is_new{ !file::exists(Global.ini_path) };
+			using section = file::ini::INIContainer::SectionContent;
+			using var = file::ini::VariableT;
+			if (file::INI(std::move(file::ini::INIContainer::Map{ {
+					{
+						std::string{HEADER_GLOBAL}, section {
+							{ "version", file::ini::VariableT{ static_cast<file::ini::String>(ckconv_VERSION) } },
+						}
+					},
+					{
+						std::string{HEADER_OUTPUT}, section {
+							{ "precision", var{ static_cast<file::ini::Integer>(Global.precision) } },
+							{ "notation", var{ []() -> std::string {
+									if (Global.notation != nullptr) {
+										if (Global.notation == FIXED)
+											return "fixed";
+										else if (Global.notation == SCIENTIFIC)
+											return "scientific";
+									}
+									return{};
+								}()
+							} },
+							{ "quiet", var{ Global.quiet } },
+							{ "no-color", var{ Global.no_color } },
+						}
+					},
 				},
-				}).write(Global.ini_path)) {
-				std::cout << "";
+				})).write(Global.ini_path)) {
+				std::cout << (Global.no_color ? "" : term::msg) << "Successfully " << (is_new ? "created" : "reset") << " config: " << Global.ini_path << std::endl;
 			}
+			else throw make_exception("Failed to ", (is_new ? "create" : "reset"), " config: ", Global.ini_path);
 		}
 	}
+
+	/**
+	 * @brief 
+	 * @param strver 
+	 */
+	inline void handle_config_version(const std::string& strver) noexcept(false)
+	{
+		if (!strver.empty())
+			if (const auto pos{ strver.find('.') }; pos < strver.size() && strver.substr(0ull, pos) == STRINGIZE(ckconv_VERSION_MAJOR))
+				return;
+		throw make_exception("Configuration file created with an incompatible build of ckconv:  ", Global.ini_path, "!  (Current version: ", ckconv_VERSION, ')');
+	}
+
 	/**
 	 * @brief		Handle setting values from the configuration file.
 	 * @param ini	The INI config instance.
 	 */
-	inline void handle_config(const file::INI& ini)
+	inline void handle_config(const file::INI& ini) noexcept(false)
 	{
+		// version
+		handle_config_version(ini.getvs(HEADER_GLOBAL, "version").value_or(ckconv_VERSION));
+
 		// precision
 		if (const auto precision{ ini.getv(HEADER_OUTPUT, "precision") }; precision.has_value())
 			Global.precision = std::visit([](auto&& val) -> std::streamsize {
@@ -161,16 +185,15 @@ namespace ckconv {
 				return str::stoll(val);
 			else if constexpr (std::same_as<T, file::ini::Boolean> || std::same_as<T, std::monostate>)
 				return Global.precision;
-			else static_assert(var::false_v, "Visitor cannot handle all potential type cases!");
+			else static_assert(var::false_v<T>, "Visitor cannot handle all potential type cases!");
 				}, precision.value());
 
 		// notation
 		if (const auto notation{ ini.getvs(HEADER_OUTPUT, "notation") }; notation.has_value()) {
-			const auto lc{ str::tolower(notation.value()) };
-			if (lc == "fixed")
-				Global.notation = Global.FIXED;
+			if (const auto lc{ str::tolower(notation.value()) }; lc == "fixed")
+				Global.notation = FIXED;
 			else if (lc == "scientific")
-				Global.notation = Global.SCIENTIFIC;
+				Global.notation = SCIENTIFIC;
 		}
 
 		// quiet
@@ -180,11 +203,10 @@ namespace ckconv {
 		if (ini.checkv(HEADER_OUTPUT, "no-color", true)) {
 			Global.no_color = true;
 			Global.palette.setActive(false);
-			Global.log.setColorEnabled(false);
 		}
 	}
 
-	inline std::ostream& configure_ostream(std::ostream & os)
+	inline std::ostream& configure_ostream(std::ostream& os)
 	{
 		// override floatfield notation
 		if (Global.notation != nullptr)

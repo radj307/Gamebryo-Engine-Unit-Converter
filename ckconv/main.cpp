@@ -92,8 +92,7 @@ public:
 
 int main(const int argc, char** argv)
 {
-	const auto clog_rdbuf{ std::clog.rdbuf(Global.log.rdbuf()) };
-	int rc{ 0 };
+	int rc{ -1 };
 	try {
 		// parse arguments
 		opt::ParamsAPI2 args{ argc, argv, 'p', "precision" };
@@ -101,7 +100,7 @@ int main(const int argc, char** argv)
 		const auto [program_path, program_name] { env::PATH().resolve_split(argv[0]) };
 
 		// handle help argument
-		if (args.check_any<opt::Flag, opt::Option>('h', "help")) {
+		if (args.empty() || args.check_any<opt::Flag, opt::Option>('h', "help")) {
 			write_help(std::cout, program_name.generic_string());
 			return 0;
 		}
@@ -111,15 +110,11 @@ int main(const int argc, char** argv)
 			return 0;
 		}
 
-		// handle other arguments
-		handle_args(args);
-
 		// Set the ini path
-		Global.ini_path = [&program_path, &program_name]() {
-			std::filesystem::path tmp{ program_name };
-			tmp.replace_extension("ini");
-			return program_path / tmp;
-		}();
+		Global.ini_path = program_path / std::filesystem::path{ program_name }.replace_extension("ini");
+
+		// handle other arguments (this must be called before reading the INI so --reset-ini works properly)
+		handle_args(args);
 
 		// read the ini if it exists
 		if (file::exists(Global.ini_path))
@@ -141,15 +136,11 @@ int main(const int argc, char** argv)
 			if (std::distance(it, params.end()) > 2ull) // if there are at least 2 more arguments after this one
 				std::cout << "  " << Convert(getArgTuple(it), minIndent) << '\n';
 
-		// reset clog read buffer
-		std::clog.rdbuf(clog_rdbuf);
+		rc = 0;
 	} catch (const std::exception& ex) {
 		std::cerr << term::error << ex.what() << std::endl;
-		rc = -1;
 	} catch (...) {
 		std::cerr << term::crit << "An undefined exception occurred!" << std::endl;
-		rc = -1;
 	}
-	std::clog.rdbuf(clog_rdbuf);
 	return rc;
 }
