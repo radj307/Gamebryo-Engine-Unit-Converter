@@ -88,7 +88,7 @@ namespace ckconv {
 	/// @brief	Inter-System (Metric:Imperial) Conversion Factor
 	const constexpr auto ONE_FOOT_IN_METERS{ 0.3048 };
 	/// @brief	Inter-System (CKUnit:Metric) Conversion Factor
-	const constexpr auto ONE_UNIT_IN_METERS{ 0.01428 }, ONE_UNIT_IN_FEET{ 0.046875 };
+	const constexpr auto ONE_UNIT_IN_METERS{ 0.0142875313 }, ONE_UNIT_IN_FEET{ 0.046875 };
 
 	/**
 	 * @struct	Unit
@@ -96,8 +96,9 @@ namespace ckconv {
 	 */
 	struct Unit {
 		System system;
-		long double unitcf;
-		//	Unit(System sys, long double dbl) : system{ sys }, unitcf{ dbl } {}
+		long double unitcf; // unit conversion factor
+
+		/// @brief	Retrieve the given value in it's base form.
 		long double base(const long double& val) const
 		{
 			return val * unitcf;
@@ -119,6 +120,8 @@ namespace ckconv {
 	 */
 	inline constexpr long double convert_unit(const long double& in_unit, const long double& v, const long double& out_unit)
 	{
+		if (math::equal(out_unit, 0.0l))
+			throw make_exception("convert_unit() failed:  Cannot divide by zero!");
 		return ((v * in_unit) / out_unit);
 	}
 	/**
