@@ -8,9 +8,43 @@
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+      },
+      "warnings": {
+        "deprecated": true,
+        "unusedCli": true,
+        "uninitialized": true
       }
-
     },
+
+    {
+      "name": "Debug",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "RelWithDebInfo",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "Release",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "MinSizeRel",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "MinSizeRel"
+      }
+    },
+
     {
       "name": "linux-default",
       "hidden": true,
@@ -26,21 +60,16 @@
     {
       "name": "linux-debug",
       "hidden": false,
-      "inherits": "linux-default",
-      "displayName": "Linux Debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "inherits": [ "linux-default", "Debug" ],
+      "displayName": "Linux Debug"
     },
     {
       "name": "linux-release",
       "hidden": false,
-      "inherits": "linux-default",
-      "displayName": "Linux Release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "inherits": [ "linux-default", "Release" ],
+      "displayName": "Linux Release"
     },
+
     {
       "name": "macos-default",
       "hidden": true,
@@ -56,21 +85,16 @@
     {
       "name": "macos-debug",
       "hidden": false,
-      "inherits": "macos-default",
-      "displayName": "macOS Debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "inherits": [ "macos-default", "Debug" ],
+      "displayName": "macOS Debug"
     },
     {
       "name": "macos-release",
       "hidden": false,
-      "inherits": "macos-default",
-      "displayName": "macOS Release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "inherits": [ "macos-default", "Release" ],
+      "displayName": "macOS Release"
     },
+
     {
       "name": "windows-default",
       "hidden": true,
@@ -87,20 +111,34 @@
     {
       "name": "windows-debug",
       "hidden": false,
-      "inherits": "windows-default",
-      "displayName": "Windows x64 Debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
+      "inherits": [ "windows-default", "Debug" ],
+      "displayName": "Windows x64 Debug"
     },
     {
       "name": "windows-release",
       "hidden": false,
-      "inherits": "windows-default",
-      "displayName": "Windows x64 Release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+      "inherits": [ "windows-default", "Release" ],
+      "displayName": "Windows x64 Release"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "release-clean",
+      "hidden": true,
+      "cleanFirst": true,
+      "verbose": false,
+      "jobs": 4
+    },
+    {
+      "name": "linux-release",
+      "inherits": "release-clean",
+      "configurePreset": "linux-release",
+      "displayName": "Clean Release"
+    },
+    {
+      "name": "windows-x64-release",
+      "inherits": "release-clean",
+      "configurePreset": "windows-release"
     }
   ]
 }
