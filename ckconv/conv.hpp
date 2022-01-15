@@ -276,6 +276,32 @@ namespace ckconv {
 			return Unit{ SystemID::METRIC, Metric.METER };
 
 		// CREATIONKIT
+		// negative
+		if (str == "pu" || s.find("picounit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.PICOUNIT };
+		if (str == "nu" || s.find("nanounit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.NANOUNIT };
+		if (str == "uu" || s.find("microunit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.MICROUNIT };
+		if (str == "mu" || s.find("milliunit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.MILLIUNIT };
+		if (str == "cu" || s.find("centiunit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.CENTIUNIT };
+		if (str == "du" || s.find("deciunit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.DECIUNIT };
+		// positive
+		if (str == "dau" || s.find("decaunit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.DECAUNIT };
+		if (str == "hu" || s.find("hectounit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.HECTOUNIT };
+		if (str == "ku" || s.find("kilounit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.KILOUNIT };
+		if (str == "Mu" || s.find("megaunit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.MEGAUNIT };
+		if (str == "Gu" || s.find("gigaunit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.GIGAUNIT };
+		if (str == "Tu" || s.find("teraunit") < s.size())
+			return Unit{ SystemID::CREATIONKIT, CreationKit.TERAUNIT };
 		// base
 		if (str == "u" || s.find("unit") < s.size())
 			return Unit{ SystemID::CREATIONKIT, CreationKit.UNIT };
