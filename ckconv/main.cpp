@@ -1,6 +1,8 @@
 #include "conv.hpp"
 #include "Global.h"
+using namespace ckconv;
 
+#include <math.hpp>
 #include <envpath.hpp>
 
 /**
@@ -10,8 +12,10 @@
 struct Convert {
 	/// @brief	String Tuple
 	using Tuple = std::tuple<std::string, std::string, std::string>;
+	using NumberT = long double;
 private:
 	Tuple _vars;
+	std::streamsize _min_indent{ 0ull };
 
 	///	@brief	Sorts the first & second arguments so that they are in the correct order when passed to the converter. Also removes any commas.
 	static inline Tuple&& sort_args(Tuple&& tpl)
@@ -29,21 +33,27 @@ private:
 		return std::move(tpl);
 	}
 
-	///	@brief	Returns the result of the conversion
-	long double getResult() const noexcept(false) { return ckconv::convert(ckconv::getUnit(std::get<0>(_vars)), str::stold(std::get<1>(_vars)), ckconv::getUnit(std::get<2>(_vars))); }
+	///	@brief	Returns the result of the conversion.
+	NumberT getResult() const noexcept(false) 
+	{ 
+		const NumberT input{ str::stold(std::get<1>(_vars)) };
+		if (math::equal(input, 0.0l)) // if input is 0, short-circuit and return 0
+			return 0.0l;
+		return ckconv::convert(ckconv::getUnit(std::get<0>(_vars)), input, ckconv::getUnit(std::get<2>(_vars)));
+	}
 
 public:
 	/// @brief	Default constructor
-	Convert(std::tuple<std::string, std::string, std::string>&& vars) : _vars{ sort_args(std::move(vars)) } {}
+	Convert(std::tuple<std::string, std::string, std::string>&& vars, const std::streamsize& min_indent = 0ull) : _vars{ sort_args(std::move(vars)) }, _min_indent{ min_indent } {}
 	/**
 	 * @brief			Constructor
 	 * @param unit_in	Input Unit (OR Input Value, if val_in is the input unit)
 	 * @param val_in	Input Value (OR Input Unit, if unit_in is the input value)
 	 * @param unit_out	Output Unit
-	*/
-	Convert(const std::string& unit_in, const std::string& val_in, const std::string& unit_out) : _vars{ sort_args(std::make_tuple(unit_in, val_in, unit_out)) } {}
+	 */
+	Convert(const std::string& unit_in, const std::string& val_in, const std::string& unit_out, const std::streamsize& min_indent = 0ull) : Convert(std::move(std::make_tuple(unit_in, val_in, unit_out)), min_indent) {}
 
-	long double operator()() const { return getResult(); }
+	NumberT operator()() const { return getResult(); }
 
 	/**
 	 * @brief	Format and print the result of the conversion to the given ostream instance.
@@ -52,40 +62,39 @@ public:
 	 */
 	friend std::ostream& operator<<(std::ostream& os, const Convert& conv)
 	{
+		// get inputs
 		const auto& [unit_in, input, unit_out] {conv._vars};
-		const auto output{ conv.getResult() };
+		
+		// temporary buffer to prevent modifying STDOUT stream state
+		std::stringstream ss;
+		ss << configure_ostream;
 
-		// override floatfield notation
-		if (Global.notation != nullptr)
-			os.setf(*Global.notation);
-
-		// modify precision
-		if (Global.precision != 6ll)
-			os.precision(Global.precision);
-
-		// quiet
 		if (!Global.quiet) {
-			os  // show input value & unit
+			ss // insert input
 				<< Global.palette.set(OUT::INPUT_VALUE) << input << Global.palette.reset()
 				<< ' '
 				<< Global.palette.set(OUT::INPUT_UNIT) << unit_in << Global.palette.reset()
-				<< Global.palette.set(OUT::EQUALS) << " = " << Global.palette.reset();
+				<< str::VIndent(conv._min_indent, (input.size() + unit_in.size() + 1ull))
+				<< Global.palette.set(OUT::EQUALS) << '=' << Global.palette.reset() << ' ';
 		}
 
+		const NumberT output{ conv.getResult() };
 
-		return os // output:
+		ss // insert output
 			<< Global.palette.set(OUT::OUTPUT_VALUE) << output << Global.palette.reset()
 			<< ' '
 			<< Global.palette.set(OUT::OUTPUT_UNIT) << unit_out << Global.palette.reset()
 			;
+
+		return os << ss.rdbuf();
 	}
 };
 
 int main(const int argc, char** argv)
 {
+	const auto clog_rdbuf{ std::clog.rdbuf(Global.log.rdbuf()) };
+	int rc{ 0 };
 	try {
-		const auto clog_rdbuf{ std::clog.rdbuf(Global.log.rdbuf()) };
-
 		// parse arguments
 		opt::ParamsAPI2 args{ argc, argv, 'p', "precision" };
 		// find the program's location
@@ -116,37 +125,31 @@ int main(const int argc, char** argv)
 		if (file::exists(Global.ini_path))
 			handle_config(file::INI(Global.ini_path));
 
+		// get all parameters
 		const auto params{ args.typegetv_all<opt::Parameter>() };
 
+		// lambda to retrieve the current argument & the next 2 arguments as a string tuple. Does NOT check for out-of-range iterators!
 		const auto& getArgTuple{ [&params](decltype(params)::const_iterator& it) -> Convert::Tuple {
-			const auto first{ *it };
+			const auto first{ *it }; // these have to be defined in long form or operator++ causes them to be in the wrong order.
 			const auto second{ *++it };
 			const auto third{ *++it };
 			return{ first, second, third };
 		} };
 
-		for (auto it{ params.begin() }; it < params.end(); ++it) {
-			if (std::distance(it, params.end()) > 2ull) {
-				std::cout << "  " << Convert(getArgTuple(it)) << '\n';
-			}
-		}
+		std::streamsize minIndent{ 8ll };
+		for (auto it{ params.begin() }; it < params.end(); ++it)
+			if (std::distance(it, params.end()) > 2ull) // if there are at least 2 more arguments after this one
+				std::cout << "  " << Convert(getArgTuple(it), minIndent) << '\n';
 
-		return 0;
+		// reset clog read buffer
+		std::clog.rdbuf(clog_rdbuf);
 	} catch (const std::exception& ex) {
 		std::cerr << term::error << ex.what() << std::endl;
-		return -1;
+		rc = -1;
 	} catch (...) {
 		std::cerr << term::crit << "An undefined exception occurred!" << std::endl;
-		return -1;
+		rc = -1;
 	}
-
-
-	std::cout << Convert("u", "1", "m") << '\n';
-	std::cout << Convert("u", "99", "m") << '\n';
-	std::cout << Convert("m", "1", "u") << '\n';
-	std::cout << Convert("m", "1", "ft") << '\n';
-	std::cout << Convert("mm", "500", "u") << '\n';
-	std::cout << Convert("mm", "500", "in") << '\n';
-
-	return 0;
+	std::clog.rdbuf(clog_rdbuf);
+	return rc;
 }
