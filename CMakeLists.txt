@@ -1,6 +1,8 @@
 ﻿# GamebryoUnitConv
 cmake_minimum_required (VERSION 3.15)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/307lib/307modules")
 
 if (DEFINED $ENV{GamebryoUnitConv_VERSION})
