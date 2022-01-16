@@ -250,7 +250,7 @@ namespace ckconv {
 		}
 		const auto s{ str::tolower(str) };
 
-		#define DISABLE_NUTJOB_UNITS
+		//#define DISABLE_NUTJOB_UNITS
 
 		// BEGIN IMPERIAL //
 		#ifdef DISABLE_NUTJOB_UNITS
