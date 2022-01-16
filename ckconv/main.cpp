@@ -5,13 +5,6 @@ using namespace ckconv;
 #include <math.hpp>
 #include <envpath.hpp>
 
-#include <getch.hpp>
-
-#ifdef OS_WIN // thanks M$
-#undef IN
-#undef OUT
-#endif
-
 /**
  * @struct	Convert
  * @brief	Performs a single conversion operation, and exposes std::ostream operator<<() to format and insert it into an output stream.
@@ -99,7 +92,35 @@ public:
 	}
 };
 
-inline std::vector<std::string> read_all_stdin()
+#ifndef OS_WIN
+/**
+ * @brief		Check if the given read file descriptor has pending data.
+ * @param fd	The target file descriptor. (STDIN = 0)
+ * @param s		Timeout in seconds.
+ * @param us	Additional timeout in nanoseconds.
+ * @returns		bool
+ *\n			true	There is pending input.
+ *\n			false	There is no pending input.
+ */
+INLINE bool hasPending(const int& fd)
+{
+	struct timespec timeout { 0L, 0L };
+	fd_set fds; // create a file descriptor set
+	FD_ZERO(&fds);
+	FD_SET(fd, &fds); // stdin file descriptor is 0
+	fflush(NULL); // flush input buffer
+	return pselect(fd + 1, &fds, nullptr, nullptr, &timeout, nullptr) == 1;
+}
+#else
+// Dummy function for windows that always returns false
+INLINE CONSTEXPR bool hasPending(const int& fd) { return false; }
+#endif
+
+/**
+ * @brief	Read all available input from STDIN.
+ * @returns	std::vector<std::string>
+ */
+INLINE std::vector<std::string> read_all_stdin()
 {
 	// lambda that gets the next word from STDIN
 	const auto& getNextWord{ [&]() -> std::string {
@@ -110,16 +131,23 @@ inline std::vector<std::string> read_all_stdin()
 	} };
 	std::vector<std::string> vec;
 	vec.reserve(24);
-	while (std::cin.good() && nstd::kbhit())
+	while (std::cin.good() && hasPending(0))
 		if (auto word{ getNextWord() }; !word.empty())
 			vec.emplace_back(std::move(word));
 	vec.shrink_to_fit();
 	return vec;
 }
 
-inline std::vector<std::string> merge_vectors(const std::vector<std::string>& fst, const std::vector<std::string>& snd)
+/**
+ * @brief		Concatenate 2 string vectors.
+ * @param fst	First Vector
+ * @param snd	Second Vector
+ * @returns		std::vector<std::string>
+ */
+template<typename T> [[nodiscard]] 
+INLINE std::vector<T> catvec(const std::vector<T>& fst, const std::vector<T>& snd)
 {
-	std::vector<std::string> vec;
+	std::vector<T> vec;
 	vec.reserve(fst.size() + snd.size());
 	for (auto& it : fst)
 		vec.emplace_back(it);
@@ -127,6 +155,23 @@ inline std::vector<std::string> merge_vectors(const std::vector<std::string>& fs
 		vec.emplace_back(it);
 	vec.shrink_to_fit();
 	return vec;
+}
+
+/**
+ * @brief		This function only exists because windows doesn't allow checking if STDIN has pending data.
+ * @param args	Arguments
+ * @returns		std::vector<std::string>
+ */
+[[nodiscard]] INLINE std::vector<std::string> get_conversion_parameters(const opt::ParamsAPI2& args)
+{
+	#ifndef OS_WIN // if not using windows, read from stdin
+	return catvec(read_all_stdin(), args.typegetv_all<opt::Parameter>());
+	#else // Windows:
+	const auto params{ args.typegetv_all<opt::Parameter>() };
+	if (args.check<opt::Flag>('p'))
+		return catvec(read_all_stdin(), params);
+	else return params;
+	#endif
 }
 
 int main(const int argc, char** argv)
@@ -138,8 +183,11 @@ int main(const int argc, char** argv)
 		// find the program's location
 		const auto [program_path, program_name] { env::PATH().resolve_split(argv[0]) };
 
+		// Set the ini path
+		Global.ini_path = program_path / std::filesystem::path{ program_name }.replace_extension("ini");
+
 		// handle help argument
-		if ((args.empty() && !nstd::kbhit()) || args.check_any<opt::Flag, opt::Option>('h', "help")) {
+		if ((args.empty() && !hasPending(0)) || args.check_any<opt::Flag, opt::Option>('h', "help")) {
 			write_help(std::cout, program_name.generic_string());
 			return 0;
 		}
@@ -154,16 +202,13 @@ int main(const int argc, char** argv)
 			return 0;
 		}
 
-		// Set the ini path
-		Global.ini_path = program_path / std::filesystem::path{ program_name }.replace_extension("ini");
-
 		// read the ini if it exists
 		if (file::exists(Global.ini_path))
 			handle_config(file::INI(Global.ini_path));
 
 		handle_args(args);
 
-		const auto params{ merge_vectors(read_all_stdin(), args.typegetv_all<opt::Parameter>()) };
+		const auto params{ get_conversion_parameters(args) };
 
 		// Hidden debug option to dump all parameters to STDOUT
 		if (args.check<opt::Option>("debug-dump-all")) {

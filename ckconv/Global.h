@@ -69,7 +69,7 @@ namespace ckconv {
 	 * @param os			Output stream ref to write to.
 	 * @param program_name	The current name of the executable.
 	 */
-	inline void write_help(std::ostream& os, const std::string_view& program_name) noexcept
+	inline void write_help(std::ostream& os, const std::string& program_name) noexcept
 	{
 		os << program_name << ' '; // print current program name
 		if (program_name != DEFAULT_NAME) // print original program name if modified
@@ -93,6 +93,9 @@ namespace ckconv {
 			<< "  " << "-n  --no-color                 Don't use color escape sequences." << '\n'
 			<< "  " << "--reset-ini                    Create or overwrite the config with the current configuration, including options." << '\n'
 			<< "  " << "                               This is sensitive to other options like precision & no-color." << '\n'
+			#ifdef OS_WIN
+			<< "  " << "-p                             Receive piped input from STDIN." << '\n'
+			#endif
 			;
 	}
 	/**
