@@ -4,7 +4,13 @@ using namespace ckconv;
 
 #include <math.hpp>
 #include <envpath.hpp>
-#include <process.hpp>
+
+#include <getch.hpp>
+
+#ifdef OS_WIN // thanks M$
+#undef IN
+#undef OUT
+#endif
 
 /**
  * @struct	Convert
@@ -104,7 +110,7 @@ inline std::vector<std::string> read_all_stdin()
 	} };
 	std::vector<std::string> vec;
 	vec.reserve(24);
-	while (std::cin.good() && process::hasPendingInput(0))
+	while (std::cin.good() && nstd::kbhit())
 		if (auto word{ getNextWord() }; !word.empty())
 			vec.emplace_back(std::move(word));
 	vec.shrink_to_fit();
@@ -133,7 +139,7 @@ int main(const int argc, char** argv)
 		const auto [program_path, program_name] { env::PATH().resolve_split(argv[0]) };
 
 		// handle help argument
-		if ((args.empty() && !process::hasPendingInput(0)) || args.check_any<opt::Flag, opt::Option>('h', "help")) {
+		if ((args.empty() && !nstd::kbhit()) || args.check_any<opt::Flag, opt::Option>('h', "help")) {
 			write_help(std::cout, program_name.generic_string());
 			return 0;
 		}
