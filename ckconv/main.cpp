@@ -4,6 +4,7 @@ using namespace ckconv;
 
 #include <math.hpp>
 #include <envpath.hpp>
+#include <process.hpp>
 
 /**
  * @struct	Convert
@@ -34,12 +35,13 @@ private:
 	}
 
 	///	@brief	Returns the result of the conversion.
-	NumberT getResult() const noexcept(false) 
-	{ 
-		const NumberT input{ str::stold(std::get<1>(_vars)) };
+	static inline NumberT getResult(const ckconv::Unit& input_unit, const NumberT& input, const ckconv::Unit& output_unit) noexcept(false)
+	{
 		if (math::equal(input, 0.0l)) // if input is 0, short-circuit and return 0
 			return 0.0l;
-		return ckconv::convert(ckconv::getUnit(std::get<0>(_vars)), input, ckconv::getUnit(std::get<2>(_vars)));
+		if (input_unit == output_unit)
+			return input;
+		return ckconv::convert(input_unit, input, output_unit);
 	}
 
 public:
@@ -53,7 +55,7 @@ public:
 	 */
 	Convert(const std::string& unit_in, const std::string& val_in, const std::string& unit_out, const std::streamsize& min_indent = 0ull) : Convert(std::move(std::make_tuple(unit_in, val_in, unit_out)), min_indent) {}
 
-	NumberT operator()() const { return getResult(); }
+	NumberT operator()() const { return getResult(ckconv::getUnit(std::get<0>(_vars)), str::stold(std::get<1>(_vars)), ckconv::getUnit(std::get<2>(_vars))); }
 
 	/**
 	 * @brief	Format and print the result of the conversion to the given ostream instance.
@@ -64,7 +66,9 @@ public:
 	{
 		// get inputs
 		const auto& [unit_in, input, unit_out] {conv._vars};
-		
+
+		const auto input_unit{ ckconv::getUnit(unit_in) }, output_unit{ ckconv::getUnit(unit_out) };
+
 		// temporary buffer to prevent modifying STDOUT stream state
 		std::stringstream ss;
 		ss << configure_ostream;
@@ -73,34 +77,63 @@ public:
 			ss // insert input
 				<< Global.palette.set(OUT::INPUT_VALUE) << input << Global.palette.reset()
 				<< ' '
-				<< Global.palette.set(OUT::INPUT_UNIT) << unit_in << Global.palette.reset()
-				<< str::VIndent(conv._min_indent, (input.size() + unit_in.size() + 1ull))
+				<< Global.palette.set(OUT::INPUT_UNIT) << input_unit << Global.palette.reset()
+				<< str::VIndent(conv._min_indent, (input.size() + input_unit.sym.size() + 1ull))
 				<< Global.palette.set(OUT::EQUALS) << '=' << Global.palette.reset() << ' ';
 		}
 
-		const NumberT output{ conv.getResult() };
+		const NumberT output{ conv.getResult(input_unit, str::stold(input), output_unit) };
 
-		ss // insert output
-			<< Global.palette.set(OUT::OUTPUT_VALUE) << output << Global.palette.reset()
-			<< ' '
-			<< Global.palette.set(OUT::OUTPUT_UNIT) << unit_out << Global.palette.reset()
-			;
+		ss << Global.palette.set(OUT::OUTPUT_VALUE) << output << Global.palette.reset();
+
+		if (!Global.quiet)
+			ss << ' ' << Global.palette.set(OUT::OUTPUT_UNIT) << output_unit << Global.palette.reset();
 
 		return os << ss.rdbuf();
 	}
 };
+
+inline std::vector<std::string> read_all_stdin()
+{
+	// lambda that gets the next word from STDIN
+	const auto& getNextWord{ [&]() -> std::string {
+		std::string s;
+		if (std::cin.good())
+			str::getline(std::cin, s, ' ', '\n', '\t');
+		return s;
+	} };
+	std::vector<std::string> vec;
+	vec.reserve(24);
+	while (std::cin.good() && process::hasPendingInput(0))
+		if (auto word{ getNextWord() }; !word.empty())
+			vec.emplace_back(std::move(word));
+	vec.shrink_to_fit();
+	return vec;
+}
+
+inline std::vector<std::string> merge_vectors(const std::vector<std::string>& fst, const std::vector<std::string>& snd)
+{
+	std::vector<std::string> vec;
+	vec.reserve(fst.size() + snd.size());
+	for (auto& it : fst)
+		vec.emplace_back(it);
+	for (auto& it : snd)
+		vec.emplace_back(it);
+	vec.shrink_to_fit();
+	return vec;
+}
 
 int main(const int argc, char** argv)
 {
 	int rc{ -1 };
 	try {
 		// parse arguments
-		opt::ParamsAPI2 args{ argc, argv, 'p', "precision" };
+		opt::ParamsAPI2 args{ argc, argv, 'p', "precision", 'a', "align-to" };
 		// find the program's location
 		const auto [program_path, program_name] { env::PATH().resolve_split(argv[0]) };
 
 		// handle help argument
-		if (args.empty() || args.check_any<opt::Flag, opt::Option>('h', "help")) {
+		if ((args.empty() && !process::hasPendingInput(0)) || args.check_any<opt::Flag, opt::Option>('h', "help")) {
 			write_help(std::cout, program_name.generic_string());
 			return 0;
 		}
@@ -109,32 +142,44 @@ int main(const int argc, char** argv)
 			std::cout << program_name.generic_string() << " v" << ckconv_VERSION << std::endl;
 			return 0;
 		}
+		else if (args.check_any<opt::Option>("reset-ini", "ini-reset")) {
+			handle_args(args);
+			write_settings_to_config();
+			return 0;
+		}
 
 		// Set the ini path
 		Global.ini_path = program_path / std::filesystem::path{ program_name }.replace_extension("ini");
-
-		// handle other arguments (this must be called before reading the INI so --reset-ini works properly)
-		handle_args(args);
 
 		// read the ini if it exists
 		if (file::exists(Global.ini_path))
 			handle_config(file::INI(Global.ini_path));
 
+		handle_args(args);
+
+		const auto params{ merge_vectors(read_all_stdin(), args.typegetv_all<opt::Parameter>()) };
+
+		// Hidden debug option to dump all parameters to STDOUT
+		if (args.check<opt::Option>("debug-dump-all")) {
+			for (auto& it : params)
+				std::cout << term::debug << '\"' << it << "\"\n";
+			return 0;
+		}
+
 		// get all parameters
-		const auto params{ args.typegetv_all<opt::Parameter>() };
+		if (!params.empty()) {
+			// lambda to retrieve the current argument & the next 2 arguments as a string tuple. Does NOT check for out-of-range iterators!
+			const auto& getArgTuple{ [&params](decltype(params)::const_iterator& it) -> Convert::Tuple {
+				const auto first{ *it }; // these have to be defined in long form or operator++ causes them to be in the wrong order.
+				const auto second{ *++it };
+				const auto third{ *++it };
+				return{ first, second, third };
+			} };
 
-		// lambda to retrieve the current argument & the next 2 arguments as a string tuple. Does NOT check for out-of-range iterators!
-		const auto& getArgTuple{ [&params](decltype(params)::const_iterator& it) -> Convert::Tuple {
-			const auto first{ *it }; // these have to be defined in long form or operator++ causes them to be in the wrong order.
-			const auto second{ *++it };
-			const auto third{ *++it };
-			return{ first, second, third };
-		} };
-
-		std::streamsize minIndent{ 8ll };
-		for (auto it{ params.begin() }; it < params.end(); ++it)
-			if (std::distance(it, params.end()) > 2ull) // if there are at least 2 more arguments after this one
-				std::cout << "  " << Convert(getArgTuple(it), minIndent) << '\n';
+			for (auto it{ params.begin() }; it < params.end(); ++it)
+				if (std::distance(it, params.end()) > 2ull) // if there are at least 2 more arguments after this one
+					std::cout << Convert(getArgTuple(it), Global.align_to_column) << '\n';
+		}
 
 		rc = 0;
 	} catch (const std::exception& ex) {

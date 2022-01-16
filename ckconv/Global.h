@@ -57,10 +57,11 @@ namespace ckconv {
 
 		// CONFIG VALUES:
 
-		std::streamsize precision{ 6ull };
+		std::streamsize precision{ 6LL };
+		std::streamsize align_to_column{ 8LL };
 		const FmtFlag* notation{ nullptr };
 		bool quiet{ false };
-		bool no_color{ false };
+		bool no_color{ false }; // this only exists to allow the --no-color option to influence --reset-ini
 	} Global;
 
 	/**
@@ -86,9 +87,12 @@ namespace ckconv {
 			<< "  " << "--standard  --fixed            Force standard notation." << '\n'
 			<< "  " << "--scientific  --sci            Force scientific notation." << '\n'
 			<< "  " << "-p <INT>  --precision <INT>    Force show at least <INT> number of digits after the decimal point." << '\n'
-			<< "  " << "-q  --quiet                    Don't print input values/units." << '\n'
+			<< "  " << "-a <INT>  --align-to <INT>     Set the minimum indentation after the equals sign before printing output." << '\n'
+			<< "  " << "                               Does nothing if the quiet option is specified." << '\n'
+			<< "  " << "-q  --quiet                    Print only output values." << '\n'
 			<< "  " << "-n  --no-color                 Don't use color escape sequences." << '\n'
-			<< "  " << "--reset-ini                    Create or overwrite the config with the current configuration. (Sensitive to other arguments)" << '\n'
+			<< "  " << "--reset-ini                    Create or overwrite the config with the current configuration, including options." << '\n'
+			<< "  " << "                               This is sensitive to other options like precision & no-color." << '\n'
 			;
 	}
 	/**
@@ -97,15 +101,19 @@ namespace ckconv {
 	 */
 	inline void handle_args(const opt::ParamsAPI2& args) noexcept(false)
 	{
-		// precision
-		if (const auto precision{ args.typegetv_any<opt::Flag, opt::Option>('p', "precision") }; precision.has_value())
-			Global.precision = str::stoll(precision.value());
-
 		// notation
 		if (args.check_any<opt::Option>("fixed", "standard"))
 			Global.notation = FIXED;
 		else if (args.check_any<opt::Option>("sci", "scientific"))
 			Global.notation = SCIENTIFIC;
+
+		// precision
+		if (const auto precision{ args.typegetv_any<opt::Flag, opt::Option>('p', "precision") }; precision.has_value())
+			Global.precision = str::stoll(precision.value());
+
+		// align-to
+		if (const auto alignment{ args.typegetv_any<opt::Flag, opt::Option>('a', "align-to") }; alignment.has_value())
+			Global.align_to_column = str::stoll(alignment.value());
 
 		// quiet
 		Global.quiet = args.check_any<opt::Flag, opt::Option>('q', "quiet");
@@ -115,41 +123,44 @@ namespace ckconv {
 			Global.no_color = true;
 			Global.palette.setActive(false);
 		}
+	}
 
-		// reset-ini | ini-reset
-		if (args.check_any<opt::Option>("reset-ini", "ini-reset")) {
-			const bool is_new{ !file::exists(Global.ini_path) };
-			using section = file::ini::INIContainer::SectionContent;
-			using var = file::ini::VariableT;
-			if (file::INI(std::move(file::ini::INIContainer::Map{ {
-					{
-						std::string{HEADER_GLOBAL}, section {
-							{ "version", file::ini::VariableT{ static_cast<file::ini::String>(ckconv_VERSION) } },
-						}
-					},
-					{
-						std::string{HEADER_OUTPUT}, section {
-							{ "precision", var{ static_cast<file::ini::Integer>(Global.precision) } },
-							{ "notation", var{ []() -> std::string {
-									if (Global.notation != nullptr) {
-										if (Global.notation == FIXED)
-											return "fixed";
-										else if (Global.notation == SCIENTIFIC)
-											return "scientific";
-									}
-									return{};
-								}()
-							} },
-							{ "quiet", var{ Global.quiet } },
-							{ "no-color", var{ Global.no_color } },
-						}
-					},
+	/**
+	 * @brief	Write the current configuration to the file specified by (Global.ini_path).
+	 */
+	inline void write_settings_to_config()
+	{
+		const bool is_new{ !file::exists(Global.ini_path) };
+		using section = file::ini::INIContainer::SectionContent;
+		using var = file::ini::VariableT;
+		if (file::INI(std::move(file::ini::INIContainer::Map{ {
+				{
+					std::string{HEADER_GLOBAL}, section {
+						{ "version", file::ini::VariableT{ static_cast<file::ini::String>(ckconv_VERSION) } },
+					}
 				},
-				})).write(Global.ini_path)) {
-				std::cout << (Global.no_color ? "" : term::msg) << "Successfully " << (is_new ? "created" : "reset") << " config: " << Global.ini_path << std::endl;
-			}
-			else throw make_exception("Failed to ", (is_new ? "create" : "reset"), " config: ", Global.ini_path);
+				{
+					std::string{HEADER_OUTPUT}, section {
+						{ "precision", var{ static_cast<file::ini::Integer>(Global.precision) } },
+						{ "notation", var{ []() -> std::string {
+								if (Global.notation != nullptr) {
+									if (Global.notation == FIXED)
+										return "fixed";
+									else if (Global.notation == SCIENTIFIC)
+										return "scientific";
+								}
+								return{};
+							}()
+						} },
+						{ "quiet", var{ Global.quiet } },
+						{ "no-color", var{ Global.no_color } },
+					}
+				},
+			},
+			})).write(Global.ini_path)) {
+			std::cout << (Global.no_color ? "" : term::msg) << "Successfully " << (is_new ? "created" : "reset") << " config: " << Global.ini_path << std::endl;
 		}
+		else throw make_exception("Failed to ", (is_new ? "create" : "reset"), " config: ", Global.ini_path);
 	}
 
 	/**
@@ -174,19 +185,20 @@ namespace ckconv {
 		handle_config_version(ini.getvs(HEADER_GLOBAL, "version").value_or(ckconv_VERSION));
 
 		// precision
-		if (const auto precision{ ini.getv(HEADER_OUTPUT, "precision") }; precision.has_value())
+		if (const auto precision{ ini.getv(HEADER_OUTPUT, "precision") }; precision.has_value()) {
 			Global.precision = std::visit([](auto&& val) -> std::streamsize {
-			using T = std::decay_t<decltype(val)>;
-			if constexpr (std::same_as<T, file::ini::Integer>)
-				return val;
-			else if constexpr (std::same_as<T, file::ini::Float>)
-				return static_cast<std::streamsize>(val);
-			else if constexpr (std::same_as<T, file::ini::String>)
-				return str::stoll(val);
-			else if constexpr (std::same_as<T, file::ini::Boolean> || std::same_as<T, std::monostate>)
-				return Global.precision;
-			else static_assert(var::false_v<T>, "Visitor cannot handle all potential type cases!");
-				}, precision.value());
+				using T = std::decay_t<decltype(val)>;
+				if constexpr (std::same_as<T, file::ini::Integer>)
+					return val;
+				else if constexpr (std::same_as<T, file::ini::Float>)
+					return static_cast<std::streamsize>(val);
+				else if constexpr (std::same_as<T, file::ini::String>)
+					return str::stoll(val);
+				else if constexpr (std::same_as<T, file::ini::Boolean> || std::same_as<T, std::monostate>)
+					return Global.precision;
+				else static_assert(var::false_v<T>, "Visitor cannot handle all potential type cases!");
+			}, precision.value());
+		}
 
 		// notation
 		if (const auto notation{ ini.getvs(HEADER_OUTPUT, "notation") }; notation.has_value()) {
