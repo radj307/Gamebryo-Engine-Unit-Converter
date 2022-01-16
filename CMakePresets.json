@@ -138,7 +138,8 @@
     {
       "name": "windows-x64-release",
       "inherits": "release-clean",
-      "configurePreset": "windows-release"
+      "configurePreset": "windows-release",
+      "displayName": "Clean Release"
     }
   ]
 }
