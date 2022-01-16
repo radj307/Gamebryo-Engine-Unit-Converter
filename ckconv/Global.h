@@ -153,8 +153,8 @@ namespace ckconv {
 	}
 
 	/**
-	 * @brief 
-	 * @param strver 
+	 * @brief			Handle the config file's version number, and print a warning.
+	 * @param strver	
 	 */
 	inline void handle_config_version(const std::string& strver) noexcept(false)
 	{
