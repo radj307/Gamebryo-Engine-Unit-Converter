@@ -43,9 +43,8 @@
   ![](https://i.imgur.com/djxJO0t.png)
   ![](https://i.imgur.com/AH01PU6.png)
   ![](https://i.imgur.com/djxJO0t.png)
-  ![](https://i.imgur.com/02IlBID.png)
-  
-  
+  ![](https://i.imgur.com/02IlBID.png)  
+  _Note: Only the Linux version allows piped input, as Windows refuses to process STDIN using `select()`. Blame Microsoft._
   
   Multiple conversions at once:  
   ![](https://i.imgur.com/TPmpR1W.png)
