@@ -145,6 +145,7 @@ namespace ckconv {
 	struct Unit {
 		SystemID system;
 		long double unitcf; // unit conversion factor
+		std::string sym;
 
 		/// @brief	Retrieve the given value in it's base form.
 		long double base(const long double& val) const
@@ -157,6 +158,11 @@ namespace ckconv {
 		}
 		CONSTEXPR operator SystemID() const { return system; }
 		CONSTEXPR operator long double() const { return unitcf; }
+
+		friend std::ostream& operator<<(std::ostream& os, const Unit& unit)
+		{
+			return os << unit.sym;
+		}
 	};
 
 	/**
@@ -253,101 +259,101 @@ namespace ckconv {
 		//#define DISABLE_NUTJOB_UNITS
 
 		// BEGIN IMPERIAL //
-		#ifdef DISABLE_NUTJOB_UNITS
+		#ifndef DISABLE_NUTJOB_UNITS
 		if (s.find("twip") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.TWIP };
-		if (str == "th" || s.find("thou") < s.size() || s.find("mil") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.THOU };
+			return Unit{ SystemID::IMPERIAL, Imperial.TWIP, "twip(s)" };
+		if (str == "th" || s.find("thou") < s.size())
+			return Unit{ SystemID::IMPERIAL, Imperial.THOU, "th"};
 		if (str == "Bc" || s.find("barleycorn") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.BARLEYCORN };
+			return Unit{ SystemID::IMPERIAL, Imperial.BARLEYCORN, "Bc" };
 		if (str == "h" || s.find("hand") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.HAND };
+			return Unit{ SystemID::IMPERIAL, Imperial.HAND, "h" };
 		if (str == "ch" || s.find("chain") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.CHAIN };
+			return Unit{ SystemID::IMPERIAL, Imperial.CHAIN, "ch" };
 		if (str == "fur" || s.find("furlong") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.FURLONG };
+			return Unit{ SystemID::IMPERIAL, Imperial.FURLONG, "fur" };
 		if (str == "lea" || s.find("league") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.LEAGUE };
+			return Unit{ SystemID::IMPERIAL, Imperial.LEAGUE, "lea"};
 		if (str == "ftm" || s.find("fathom") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.FATHOM };
+			return Unit{ SystemID::IMPERIAL, Imperial.FATHOM, "ftm"};
 		if (s.find("cable") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.CABLE };
-		if (str == "nmi" || s.find("nauticalmile") < s.size() || s.find("nmile") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.CABLE };
+			return Unit{ SystemID::IMPERIAL, Imperial.CABLE, "cable(s)"};
 		if (s.find("link") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.LINK };
-		if (s.find("rod") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.ROD };
+			return Unit{ SystemID::IMPERIAL, Imperial.LINK, "link(s)"};
+		if (str == "rd" || s.find("rod") < s.size())
+			return Unit{ SystemID::IMPERIAL, Imperial.ROD, "rd" };
 		#endif // DISABLE_NUTJOB_UNITS
 		if (str == "in" || s == "i" || s.find("inch") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.INCH };
+			return Unit{ SystemID::IMPERIAL, Imperial.INCH, "\""};
 		if (str == "ft" || s == "f" || s.find("foot") < s.size() || s.find("feet") < s.size())
-			return Unit{ SystemID::IMPERIAL, *Imperial.base };
+			return Unit{ SystemID::IMPERIAL, *Imperial.base, "\'"};
 		if (str == "yd" || s.find("yard") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.YARD };
+			return Unit{ SystemID::IMPERIAL, Imperial.YARD, "yd"};
+		if (str == "nmi" || s.find("nauticalmile") < s.size() || s.find("nmile") < s.size())
+			return Unit{ SystemID::IMPERIAL, Imperial.CABLE, "nmi" };
 		if (str == "mi" || s.find("mile") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.MILE };
+			return Unit{ SystemID::IMPERIAL, Imperial.MILE, "mi"};
 		// END IMPERIAL //
 		
 		// BEGIN METRIC //
 		// comparisons omit -er|-re to allow both the American and British spelling of "meter|metre".
 		if (str == "pm" || s.find("picomet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.PICOMETER };
+			return Unit{ SystemID::METRIC, Metric.PICOMETER, "pm"};
 		if (str == "nm" || s.find("nanomet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.NANOMETER };
+			return Unit{ SystemID::METRIC, Metric.NANOMETER, "nm"};
 		if (str == "um" || s.find("micromet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.MICROMETER };
+			return Unit{ SystemID::METRIC, Metric.MICROMETER, "µm"};
 		if (str == "mm" || s.find("millimet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.MILLIMETER };
+			return Unit{ SystemID::METRIC, Metric.MILLIMETER, "mm"};
 		if (str == "cm" || s.find("centimet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.CENTIMETER };
+			return Unit{ SystemID::METRIC, Metric.CENTIMETER, "cm"};
 		if (str == "dm" || s.find("decimet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.DECIMETER };
+			return Unit{ SystemID::METRIC, Metric.DECIMETER, "dm"};
 		if (str == "dam" || s.find("decamet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.DECAMETER };
+			return Unit{ SystemID::METRIC, Metric.DECAMETER, "dam"};
 		if (str == "hm" || s.find("hectomet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.HECTOMETER };
+			return Unit{ SystemID::METRIC, Metric.HECTOMETER, "hm"};
 		if (str == "km" || s.find("kilomet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.KILOMETER };
+			return Unit{ SystemID::METRIC, Metric.KILOMETER, "km"};
 		if (str == "Mm" || s.find("megamet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.MEGAMETER };
+			return Unit{ SystemID::METRIC, Metric.MEGAMETER, "Mm"};
 		if (str == "Gm" || s.find("gigamet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.GIGAMETER };
+			return Unit{ SystemID::METRIC, Metric.GIGAMETER, "Gm"};
 		if (str == "Tm" || s.find("teramet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.TERAMETER };
+			return Unit{ SystemID::METRIC, Metric.TERAMETER, "Tm"};
 		// this has to be checked after all prefix types
 		if (str == "m" || s.find("met") < s.size())
-			return Unit{ SystemID::METRIC, *Metric.base };
+			return Unit{ SystemID::METRIC, *Metric.base, "m"};
 		// END METRIC //
 
 		// BEGIN CREATIONKIT //
 		if (str == "pu" || s.find("picounit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.PICOUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.PICOUNIT, "pu"};
 		if (str == "nu" || s.find("nanounit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.NANOUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.NANOUNIT, "nu"};
 		if (str == "uu" || s.find("microunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.MICROUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.MICROUNIT, "µu"};
 		if (str == "mu" || s.find("milliunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.MILLIUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.MILLIUNIT, "mu"};
 		if (str == "cu" || s.find("centiunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.CENTIUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.CENTIUNIT, "cu"};
 		if (str == "du" || s.find("deciunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.DECIUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.DECIUNIT, "du"};
 		if (str == "dau" || s.find("decaunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.DECAUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.DECAUNIT, "dau"};
 		if (str == "hu" || s.find("hectounit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.HECTOUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.HECTOUNIT, "hu"};
 		if (str == "ku" || s.find("kilounit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.KILOUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.KILOUNIT, "ku"};
 		if (str == "Mu" || s.find("megaunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.MEGAUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.MEGAUNIT, "Mu"};
 		if (str == "Gu" || s.find("gigaunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.GIGAUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.GIGAUNIT, "Gu"};
 		if (str == "Tu" || s.find("teraunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.TERAUNIT };
+			return Unit{ SystemID::CREATIONKIT, CreationKit.TERAUNIT, "Tu"};
 		// this has to be checked after all prefix types
 		if (str == "u" || s.find("unit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, *CreationKit.base };
+			return Unit{ SystemID::CREATIONKIT, *CreationKit.base, "u"};
 		// END CREATIONKIT //
 
 		if (def.has_value())
