@@ -83,8 +83,8 @@ namespace ckconv {
 			<< "OPTIONS:\n"
 			<< "  " << "-h  --help                     Show the help display and exit." << '\n'
 			<< "  " << "-v  --version                  Show the current version number and exit." << '\n'
-			<< "  " << "--standard                     Force standard notation." << '\n'
-			<< "  " << "--scientific                   Force scientific notation." << '\n'
+			<< "  " << "--standard  --fixed            Force standard notation." << '\n'
+			<< "  " << "--scientific  --sci            Force scientific notation." << '\n'
 			<< "  " << "-p <INT>  --precision <INT>    Force show at least <INT> number of digits after the decimal point." << '\n'
 			<< "  " << "-q  --quiet                    Don't print input values/units." << '\n'
 			<< "  " << "-n  --no-color                 Don't use color escape sequences." << '\n'
@@ -102,9 +102,9 @@ namespace ckconv {
 			Global.precision = str::stoll(precision.value());
 
 		// notation
-		if (args.check<opt::Option>("standard"))
+		if (args.check_any<opt::Option>("fixed", "standard"))
 			Global.notation = FIXED;
-		else if (args.check<opt::Option>("scientific"))
+		else if (args.check_any<opt::Option>("sci", "scientific"))
 			Global.notation = SCIENTIFIC;
 
 		// quiet
