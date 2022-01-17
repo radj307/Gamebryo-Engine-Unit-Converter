@@ -5,7 +5,7 @@
 #pragma once
 #define ckconv_VERSION_MAJOR	5
 #define ckconv_VERSION_MINOR	0
-#define ckconv_VERSION_PATCH	0
+#define ckconv_VERSION_PATCH	1
 
 // Stringize function
 #define VERSION_H_STRINGIZEX(x)  #x

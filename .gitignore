@@ -31,4 +31,4 @@ _ReSharper*/
 #Nuget packages folder
 packages/
 out/
-/ckconv/version.h
+*version.h
