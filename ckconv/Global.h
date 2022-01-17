@@ -98,9 +98,6 @@ namespace ckconv {
 			<< "  " << "-n  --no-color                 Don't use color escape sequences." << '\n'
 			<< "  " << "--set-ini                      Create or overwrite the config with the current configuration, including options." << '\n'
 			<< "  " << "                               This is affected by other options like precision & no-color." << '\n'
-			#ifdef OS_WIN
-			<< "  " << "-P                             Receive piped input from STDIN." << '\n'
-			#endif
 			;
 	}
 	/**

@@ -240,19 +240,20 @@ int main(const int argc, char** argv)
 		}
 
 		// get all parameters
-		if (!params.empty()) {
-			// lambda to retrieve the current argument & the next 2 arguments as a string tuple. Does NOT check for out-of-range iterators!
-			const auto& getArgTuple{ [&params](decltype(params)::const_iterator& it) -> Convert::StrTuple {
-				const auto first{ *it }; // these have to be defined in long form or operator++ causes them to be in the wrong order.
-				const auto second{ *++it };
-				const auto third{ *++it };
-				return{ first, second, third };
-			} };
+		if (params.empty())
+			throw make_exception("Nothing to do.");
 
-			for (auto it{ params.begin() }; it < params.end(); ++it)
-				if (std::distance(it, params.end()) > 2ull) // if there are at least 2 more arguments after this one
-					std::cout << Convert(getArgTuple(it), Global.align_to_column) << '\n';
-		}
+		// lambda to retrieve the current argument & the next 2 arguments as a string tuple. Does NOT check for out-of-range iterators!
+		const auto& getArgTuple{ [&params](decltype(params)::const_iterator& it) -> Convert::StrTuple {
+			const auto first{ *it }; // these have to be defined in long form or operator++ causes them to be in the wrong order.
+			const auto second{ *++it };
+			const auto third{ *++it };
+			return{ first, second, third };
+		} };
+
+		for (auto it{ params.begin() }; it < params.end(); ++it)
+			if (std::distance(it, params.end()) > 2ull) // if there are at least 2 more arguments after this one
+				std::cout << Convert(getArgTuple(it), Global.align_to_column) << '\n';
 
 		rc = 0;
 	} catch (const std::exception& ex) {
