@@ -11,6 +11,7 @@
 #include <TermAPI.hpp>
 
 #include <optional>
+#include <iterator>
 #include <algorithm>
 
 namespace ckconv {
@@ -22,148 +23,178 @@ namespace ckconv {
 		METRIC,
 		IMPERIAL,
 		CREATIONKIT,
+		ALL,
+	};
+
+	class Unit {
+		SystemID _system;
+		std::string _sym, _name;
+
+	public:
+		long double unitcf; // unit conversion factor
+
+		WINCONSTEXPR Unit(SystemID const& system, long double const& unit_conversion_factor, std::string_view const& symbol, std::string_view const& full_name = {}) : _system{ system }, unitcf{ unit_conversion_factor }, _sym{ symbol }, _name{ full_name } {}
+
+		/// @brief	Retrieve the given value in it's base form.
+		CONSTEXPR long double to_base(const long double& val) const { return val * unitcf; }
+		CONSTEXPR SystemID getSystem() const noexcept { return _system; }
+		WINCONSTEXPR std::string getName() const noexcept { return (_name.empty() ? _sym : _name); }
+		WINCONSTEXPR std::string getSymbol() const noexcept { return _sym; }
+
+		WINCONSTEXPR bool hasName() const noexcept { return !_name.empty(); }
+
+		CONSTEXPR bool operator==(const Unit& o) const { return _system == o._system && unitcf == o.unitcf; }
+	};
+
+	enum class Powers : char {
+		PICO = -12,
+		NANO = -9,
+		MICRO = -6,
+		MILLI = -3,
+		CENTI = -2,
+		DECI = -1,
+		BASE = 0,
+		DECA = 1,
+		HECTO = 2,
+		KILO = 3,
+		MEGA = 6,
+		GIGA = 9,
+		TERA = 12,
+	};
+
+	struct System {
+		using T = long double;
+		using U = Unit;
 	};
 
 	/**
 	 * @struct	Metric
-	 * @brief	Intra-Metric-System Conversion Factors
+	 * @brief	Intra-Metric-System Conversion Factors. (Relative to Meters)
 	 */
-	static struct { // SystemID::METRIC
-		enum class Powers : char {
-			PICOMETER = -12,
-			NANOMETER = -9,
-			MICROMETER = -6,
-			MILLIMETER = -3,
-			CENTIMETER = -2,
-			DECIMETER = -1,
-			METER = 0,
-			DECAMETER = 1,
-			HECTOMETER = 2,
-			KILOMETER = 3,
-			MEGAMETER = 6,
-			GIGAMETER = 9,
-			TERAMETER = 12,
+	static struct : public System { // SystemID::METRIC
+		const std::vector<U> units{
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::PICO)), "pm", "Picometer" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::NANO)), "nm", "Nanometer" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::MICRO)), "um", "Micrometer" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::MILLI)), "mm", "Millimeter" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::CENTI)), "cm", "Centimeter" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::DECI)), "dm", "Decimeter" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::BASE)), "m", "Meter" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::DECA)), "dam", "Decameter" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::HECTO)), "hm", "Hectometer" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::KILO)), "km", "Kilometer" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::MEGA)), "Mm", "Megameter" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::GIGA)), "Gm", "Gigameter" },
+			{ SystemID::METRIC, std::pow(10.0L, static_cast<T>(Powers::TERA)), "Tm", "Terameter" }
 		};
 
-		using T = long double;
-		static inline constexpr T FP(const Powers& p) { return static_cast<T>(p); }
-
-		const T PICOMETER{ std::pow(10.0L, FP(Powers::PICOMETER)) };
-		const T NANOMETER{ std::pow(10.0L, FP(Powers::NANOMETER)) };
-		const T MICROMETER{ std::pow(10.0L, FP(Powers::MICROMETER)) };
-		const T MILLIMETER{ std::pow(10.0L, FP(Powers::MILLIMETER)) };
-		const T CENTIMETER{ std::pow(10.0L, FP(Powers::CENTIMETER)) };
-		const T DECIMETER{ std::pow(10.0L, FP(Powers::DECIMETER)) };
-		const T METER{ std::pow(10.0L, FP(Powers::METER)) };
-		const T DECAMETER{ std::pow(10.0L, FP(Powers::DECAMETER)) };
-		const T HECTOMETER{ std::pow(10.0L, FP(Powers::HECTOMETER)) };
-		const T KILOMETER{ std::pow(10.0L, FP(Powers::KILOMETER)) };
-		const T MEGAMETER{ std::pow(10.0L, FP(Powers::MEGAMETER)) };
-		const T GIGAMETER{ std::pow(10.0L, FP(Powers::GIGAMETER)) };
-		const T TERAMETER{ std::pow(10.0L, FP(Powers::TERAMETER)) };
+		const U* PICOMETER{ &units[0] };
+		const U* NANOMETER{ &units[1] };
+		const U* MICROMETER{ &units[2] };
+		const U* MILLIMETER{ &units[3] };
+		const U* CENTIMETER{ &units[4] };
+		const U* DECIMETER{ &units[5] };
+		const U* METER{ &units[6] };
+		const U* DECAMETER{ &units[7] };
+		const U* HECTOMETER{ &units[8] };
+		const U* KILOMETER{ &units[9] };
+		const U* MEGAMETER{ &units[10] };
+		const U* GIGAMETER{ &units[11] };
+		const U* TERAMETER{ &units[12] };
 
 		// the base unit of the Metric system (meters)
-		const T* const base{ &METER };
+		const U* const base{ METER };
 	} Metric;
 
-	static struct { // SystemID::CREATIONKIT
-		enum class Powers : char {
-			PICOUNIT = -12,
-			NANOUNIT = -9,
-			MICROUNIT = -6,
-			MILLIUNIT = -3,
-			CENTIUNIT = -2,
-			DECIUNIT = -1,
-			UNIT = 0,
-			DECAUNIT = 1,
-			HECTOUNIT = 2,
-			KILOUNIT = 3,
-			MEGAUNIT = 6,
-			GIGAUNIT = 9,
-			TERAUNIT = 12,
+	/**
+	 * @struct	CreationKit
+	 * @brief	Intra-CreationKit-System Conversion Factors. (Relative to Units)
+	 */
+	static struct : public System { // SystemID::CREATIONKIT
+		const std::vector<U> units{
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::PICO)), "pu", "Picounit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::NANO)), "nu", "Nanounit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::MICRO)), "uu", "Microunit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::MILLI)), "mu", "Milliunit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::CENTI)), "cu", "Centiunit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::DECI)), "du", "Deciunit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::BASE)), "u", "Unit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::DECA)), "dau", "Decaunit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::HECTO)), "hu", "Hectounit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::KILO)), "ku", "Kilometer" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::MEGA)), "Mu", "Megaunit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::GIGA)), "Gu", "Gigaunit" },
+			{ SystemID::CREATIONKIT, std::pow(10.0L, static_cast<T>(Powers::TERA)), "Tu", "Teraunit" }
 		};
 
-		using T = long double;
-		static inline constexpr T FP(const Powers& p) { return static_cast<T>(p); }
-
-		const T PICOUNIT{ std::pow(10.0L, FP(Powers::PICOUNIT)) };
-		const T NANOUNIT{ std::pow(10.0L, FP(Powers::NANOUNIT)) };
-		const T MICROUNIT{ std::pow(10.0L, FP(Powers::MICROUNIT)) };
-		const T MILLIUNIT{ std::pow(10.0L, FP(Powers::MILLIUNIT)) };
-		const T CENTIUNIT{ std::pow(10.0L, FP(Powers::CENTIUNIT)) };
-		const T DECIUNIT{ std::pow(10.0L, FP(Powers::DECIUNIT)) };
-		const T UNIT{ std::pow(10.0L, FP(Powers::UNIT)) };
-		const T DECAUNIT{ std::pow(10.0L, FP(Powers::DECAUNIT)) };
-		const T HECTOUNIT{ std::pow(10.0L, FP(Powers::HECTOUNIT)) };
-		const T KILOUNIT{ std::pow(10.0L, FP(Powers::KILOUNIT)) };
-		const T MEGAUNIT{ std::pow(10.0L, FP(Powers::MEGAUNIT)) };
-		const T GIGAUNIT{ std::pow(10.0L, FP(Powers::GIGAUNIT)) };
-		const T TERAUNIT{ std::pow(10.0L, FP(Powers::TERAUNIT)) };
+		const U* PICOUNIT{ &units[0] };
+		const U* NANOUNIT{ &units[1] };
+		const U* MICROUNIT{ &units[2] };
+		const U* MILLIUNIT{ &units[3] };
+		const U* CENTIUNIT{ &units[4] };
+		const U* DECIUNIT{ &units[5] };
+		const U* UNIT{ &units[6] };
+		const U* DECAUNIT{ &units[7] };
+		const U* HECTOUNIT{ &units[8] };
+		const U* KILOUNIT{ &units[9] };
+		const U* MEGAUNIT{ &units[10] };
+		const U* GIGAUNIT{ &units[11] };
+		const U* TERAUNIT{ &units[12] };
 
 		// the base unit of this system
-		const T* const base{ &UNIT };
+		const U* const base{ UNIT };
 	} CreationKit;
 
 	/**
 	 * @struct	Imperial
-	 * @brief	Intra-Imperial-System Conversion Factors
+	 * @brief	Intra-Imperial-System Conversion Factors. (Relative to Feet)
 	 */
-	static struct { // SystemID::IMPERIAL
-		using T = long double;
-		// regular length units
-		const T TWIP{ 1.0L / 17280.0L };
-		const T THOU{ 1.0L / 12000.0L };
-		const T BARLEYCORN{ 1.0L / 36.0L };
-		const T INCH{ 1.0L / 12.0L };
-		const T HAND{ 1.0L / 3.0L };
-		const T FOOT{ 1.0L };
-		const T YARD{ 3.0L };
-		const T CHAIN{ 66.0L };
-		const T FURLONG{ 660.0L };
-		const T MILE{ 5280.0L };
-		const T LEAGUE{ 15840.0L };
+	static struct : public System { // SystemID::IMPERIAL
+		const std::vector<U> units{
+			{ SystemID::IMPERIAL, (1.0L / 17280.0L), "Twip" },
+			{ SystemID::IMPERIAL, (1.0L / 12000.0L), "th", "Thou" },
+			{ SystemID::IMPERIAL, (1.0L / 36.0L), "Bc", "Barleycorn" },
+			{ SystemID::IMPERIAL, (1.0L / 12.0L), "\"", "Inch" },
+			{ SystemID::IMPERIAL, (1.0L / 3.0L), "h", "Hand" },
+			{ SystemID::IMPERIAL, (1.0L), "\'", "Feet" },
+			{ SystemID::IMPERIAL, (3.0L), "yd", "Yard" },
+			{ SystemID::IMPERIAL, (66.0L), "ch", "Chain" },
+			{ SystemID::IMPERIAL, (660.0L), "fur", "Furlong" },
+			{ SystemID::IMPERIAL, (5280.0L), "mi", "Mile" },
+			{ SystemID::IMPERIAL, (15840.0L), "lea", "League" },
+			{ SystemID::IMPERIAL, (6.0761L), "ftm", "Fathom" },
+			{ SystemID::IMPERIAL, (607.61L), "Cable" },
+			{ SystemID::IMPERIAL, (6076.1L), "nmi", "Nautical Mile" },
+			{ SystemID::IMPERIAL, (66.0L / 100.0L), "Link" },
+			{ SystemID::IMPERIAL, (66.0L / 4.0L), "rd", "Rod" }
+		};
+
+		const U* TWIP{ &units[0] };
+		const U* THOU{ &units[1] };
+		const U* BARLEYCORN{ &units[2] };
+		const U* INCH{ &units[3] };
+		const U* HAND{ &units[4] };
+		const U* FOOT{ &units[5] };
+		const U* YARD{ &units[6] };
+		const U* CHAIN{ &units[7] };
+		const U* FURLONG{ &units[8] };
+		const U* MILE{ &units[9] };
+		const U* LEAGUE{ &units[10] };
 		// maritime units
-		const T FATHOM{ 6.0761L };
-		const T CABLE{ 607.61L };
-		const T NAUTICAL_MILE{ 6076.1L };
+		const U* FATHOM{ &units[11] };
+		const U* CABLE{ &units[12] };
+		const U* NAUTICAL_MILE{ &units[13] };
 		// 17th century onwards
-		const T LINK{ 66.0L / 100.0L };
-		const T ROD{ 66.0L / 4.0L };
+		const U* LINK{ &units[14] };
+		const U* ROD{ &units[15] };
 		// the base unit of this system
-		const T* const base{ &FOOT };
+		const U* const base{ FOOT };
 	} Imperial;
 
 	/// @brief	Inter-System (Metric:Imperial) Conversion Factor
-	const constexpr auto ONE_FOOT_IN_METERS{ 0.3048 };
+	const constexpr auto ONE_FOOT_IN_METERS{ 0.3048L };
 	/// @brief	Inter-System (CKUnit:Metric) Conversion Factor
-	const constexpr auto ONE_UNIT_IN_METERS{ 0.0142875313 }, ONE_UNIT_IN_FEET{ 0.046875 };
-
-	/**
-	 * @struct	Unit
-	 * @brief	POD Structure with System & conversion factor members used to represent a measurement unit.
-	 */
-	struct Unit {
-		SystemID system;
-		long double unitcf; // unit conversion factor
-		std::string sym;
-
-		/// @brief	Retrieve the given value in it's base form.
-		long double base(const long double& val) const
-		{
-			return val * unitcf;
-		}
-		CONSTEXPR bool operator==(const Unit& o) const
-		{
-			return system == o.system && unitcf == o.unitcf;
-		}
-		CONSTEXPR operator SystemID() const { return system; }
-		CONSTEXPR operator long double() const { return unitcf; }
-
-		friend std::ostream& operator<<(std::ostream& os, const Unit& unit)
-		{
-			return os << unit.sym;
-		}
-	};
+	const constexpr auto ONE_UNIT_IN_METERS{ 0.0142875313L }, ONE_UNIT_IN_FEET{ 0.046875L };
 
 	/**
 	 * @brief			Converts between units in one measurement system.
@@ -172,11 +203,11 @@ namespace ckconv {
 	 * @param out_unit	Output Conversion Factor
 	 * @returns			long double
 	 */
-	inline constexpr long double convert_unit(const long double& in_unit, const long double& v, const long double& out_unit)
+	inline constexpr long double convert_unit(const long double& in_unitcf, const long double& v, const long double& out_unitcf)
 	{
-		if (math::equal(out_unit, 0.0L))
+		if (math::equal(out_unitcf, 0.0L))
 			throw make_exception("convert_unit() failed:  Cannot divide by zero!");
-		return ((v * in_unit) / out_unit);
+		return ((v * in_unitcf) / out_unitcf);
 	}
 	/**
 	 * @brief				Convert between measurement systems.
@@ -227,18 +258,17 @@ namespace ckconv {
 	 * @param out	Output Unit.
 	 * @returns		long double
 	 */
-	template<var::arithmetic T>
-	inline static constexpr long double convert(const Unit& in, const T& val, const Unit& out)
+	inline static constexpr long double convert(const Unit& in, const long double& val, const Unit& out)
 	{
 		if (in.unitcf == 0.0L)
 			throw make_exception("Illegal input conversion factor");
 		if (out.unitcf == 0.0L)
 			throw make_exception("Illegal output conversion factor");
 
-		if (in.system == out.system) // convert between units only
+		if (in.getSystem() == out.getSystem()) // convert between units only
 			return convert_unit(in.unitcf, val, out.unitcf);
 		// Convert between systems & units
-		return convert_system(in.system, in.base(static_cast<long double>(val)), out.system) / out.unitcf;
+		return convert_system(in.getSystem(), in.to_base(static_cast<long double>(val)), out.getSystem()) / out.unitcf;
 	}
 
 	/**
@@ -261,99 +291,99 @@ namespace ckconv {
 		// BEGIN IMPERIAL //
 		#ifndef DISABLE_NUTJOB_UNITS
 		if (s.find("twip") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.TWIP, "twip(s)" };
+			return *Imperial.TWIP;
 		if (str == "th" || s.find("thou") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.THOU, "th"};
+			return *Imperial.THOU;
 		if (str == "Bc" || s.find("barleycorn") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.BARLEYCORN, "Bc" };
+			return *Imperial.BARLEYCORN;
 		if (str == "h" || s.find("hand") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.HAND, "h" };
+			return *Imperial.HAND;
 		if (str == "ch" || s.find("chain") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.CHAIN, "ch" };
+			return *Imperial.CHAIN;
 		if (str == "fur" || s.find("furlong") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.FURLONG, "fur" };
+			return *Imperial.FURLONG;
 		if (str == "lea" || s.find("league") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.LEAGUE, "lea"};
+			return *Imperial.LEAGUE;
 		if (str == "ftm" || s.find("fathom") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.FATHOM, "ftm"};
+			return *Imperial.FATHOM;
 		if (s.find("cable") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.CABLE, "cable(s)"};
+			return *Imperial.CABLE;
 		if (s.find("link") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.LINK, "link(s)"};
+			return *Imperial.LINK;
 		if (str == "rd" || s.find("rod") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.ROD, "rd" };
+			return *Imperial.ROD;
 		#endif // DISABLE_NUTJOB_UNITS
 		if (str == "in" || s == "i" || s.find("inch") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.INCH, "\""};
+			return *Imperial.INCH;
 		if (str == "ft" || s == "f" || s.find("foot") < s.size() || s.find("feet") < s.size())
-			return Unit{ SystemID::IMPERIAL, *Imperial.base, "\'"};
+			return *Imperial.FOOT;
 		if (str == "yd" || s.find("yard") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.YARD, "yd"};
+			return *Imperial.YARD;
 		if (str == "nmi" || s.find("nauticalmile") < s.size() || s.find("nmile") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.CABLE, "nmi" };
+			return *Imperial.CABLE;
 		if (str == "mi" || s.find("mile") < s.size())
-			return Unit{ SystemID::IMPERIAL, Imperial.MILE, "mi"};
+			return *Imperial.MILE;
 		// END IMPERIAL //
-		
+
 		// BEGIN METRIC //
 		// comparisons omit -er|-re to allow both the American and British spelling of "meter|metre".
 		if (str == "pm" || s.find("picomet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.PICOMETER, "pm"};
+			return *Metric.PICOMETER;
 		if (str == "nm" || s.find("nanomet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.NANOMETER, "nm"};
+			return *Metric.NANOMETER;
 		if (str == "um" || s.find("micromet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.MICROMETER, "µm"};
+			return *Metric.MICROMETER;
 		if (str == "mm" || s.find("millimet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.MILLIMETER, "mm"};
+			return *Metric.MILLIMETER;
 		if (str == "cm" || s.find("centimet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.CENTIMETER, "cm"};
+			return *Metric.CENTIMETER;
 		if (str == "dm" || s.find("decimet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.DECIMETER, "dm"};
+			return *Metric.DECIMETER;
 		if (str == "dam" || s.find("decamet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.DECAMETER, "dam"};
+			return *Metric.DECAMETER;
 		if (str == "hm" || s.find("hectomet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.HECTOMETER, "hm"};
+			return *Metric.HECTOMETER;
 		if (str == "km" || s.find("kilomet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.KILOMETER, "km"};
+			return *Metric.KILOMETER;
 		if (str == "Mm" || s.find("megamet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.MEGAMETER, "Mm"};
+			return *Metric.MEGAMETER;
 		if (str == "Gm" || s.find("gigamet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.GIGAMETER, "Gm"};
+			return *Metric.GIGAMETER;
 		if (str == "Tm" || s.find("teramet") < s.size())
-			return Unit{ SystemID::METRIC, Metric.TERAMETER, "Tm"};
+			return *Metric.TERAMETER;
 		// this has to be checked after all prefix types
 		if (str == "m" || s.find("met") < s.size())
-			return Unit{ SystemID::METRIC, *Metric.base, "m"};
+			return *Metric.METER;
 		// END METRIC //
 
 		// BEGIN CREATIONKIT //
 		if (str == "pu" || s.find("picounit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.PICOUNIT, "pu"};
+			return *CreationKit.PICOUNIT;
 		if (str == "nu" || s.find("nanounit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.NANOUNIT, "nu"};
+			return *CreationKit.NANOUNIT;
 		if (str == "uu" || s.find("microunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.MICROUNIT, "µu"};
+			return *CreationKit.MICROUNIT;
 		if (str == "mu" || s.find("milliunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.MILLIUNIT, "mu"};
+			return *CreationKit.MILLIUNIT;
 		if (str == "cu" || s.find("centiunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.CENTIUNIT, "cu"};
+			return *CreationKit.CENTIUNIT;
 		if (str == "du" || s.find("deciunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.DECIUNIT, "du"};
+			return *CreationKit.DECIUNIT;
 		if (str == "dau" || s.find("decaunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.DECAUNIT, "dau"};
+			return *CreationKit.DECAUNIT;
 		if (str == "hu" || s.find("hectounit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.HECTOUNIT, "hu"};
+			return *CreationKit.HECTOUNIT;
 		if (str == "ku" || s.find("kilounit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.KILOUNIT, "ku"};
+			return *CreationKit.KILOUNIT;
 		if (str == "Mu" || s.find("megaunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.MEGAUNIT, "Mu"};
+			return *CreationKit.MEGAUNIT;
 		if (str == "Gu" || s.find("gigaunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.GIGAUNIT, "Gu"};
+			return *CreationKit.GIGAUNIT;
 		if (str == "Tu" || s.find("teraunit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, CreationKit.TERAUNIT, "Tu"};
+			return *CreationKit.TERAUNIT;
 		// this has to be checked after all prefix types
 		if (str == "u" || s.find("unit") < s.size())
-			return Unit{ SystemID::CREATIONKIT, *CreationKit.base, "u"};
+			return *CreationKit.UNIT;
 		// END CREATIONKIT //
 
 		if (def.has_value())

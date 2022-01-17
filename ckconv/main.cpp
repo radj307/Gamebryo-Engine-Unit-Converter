@@ -11,14 +11,15 @@ using namespace ckconv;
  */
 struct Convert {
 	/// @brief	String Tuple
-	using Tuple = std::tuple<std::string, std::string, std::string>;
+	using Tuple = std::tuple<ckconv::Unit, long double, ckconv::Unit>;
+	using StrTuple = std::tuple<std::string, std::string, std::string>;
 	using NumberT = long double;
 private:
 	Tuple _vars;
 	std::streamsize _min_indent{ 0ull };
 
 	///	@brief	Sorts the first & second arguments so that they are in the correct order when passed to the converter. Also removes any commas.
-	static inline Tuple&& sort_args(Tuple&& tpl)
+	static inline Tuple convert_tuple(std::tuple<std::string, std::string, std::string>&& tpl)
 	{
 		auto& [first, second, third] { tpl };
 
@@ -30,7 +31,7 @@ private:
 		}
 		else second = str::strip(second, ',');
 
-		return std::move(tpl);
+		return{ ckconv::getUnit(first), str::stold(second), ckconv::getUnit(third) };
 	}
 
 	///	@brief	Returns the result of the conversion.
@@ -45,7 +46,7 @@ private:
 
 public:
 	/// @brief	Default constructor
-	Convert(std::tuple<std::string, std::string, std::string>&& vars, const std::streamsize& min_indent = 0ull) : _vars{ sort_args(std::move(vars)) }, _min_indent{ min_indent } {}
+	Convert(std::tuple<std::string, std::string, std::string>&& vars, const std::streamsize& min_indent = 0ull) : _vars{ std::move(convert_tuple(std::move(vars))) }, _min_indent{ min_indent } {}
 	/**
 	 * @brief			Constructor
 	 * @param unit_in	Input Unit (OR Input Value, if val_in is the input unit)
@@ -54,7 +55,7 @@ public:
 	 */
 	Convert(const std::string& unit_in, const std::string& val_in, const std::string& unit_out, const std::streamsize& min_indent = 0ull) : Convert(std::move(std::make_tuple(unit_in, val_in, unit_out)), min_indent) {}
 
-	NumberT operator()() const { return getResult(ckconv::getUnit(std::get<0>(_vars)), str::stold(std::get<1>(_vars)), ckconv::getUnit(std::get<2>(_vars))); }
+	NumberT operator()() const { return getResult(std::get<0>(_vars), std::get<1>(_vars), std::get<2>(_vars)); }
 
 	/**
 	 * @brief	Format and print the result of the conversion to the given ostream instance.
@@ -63,32 +64,32 @@ public:
 	 */
 	friend std::ostream& operator<<(std::ostream& os, const Convert& conv)
 	{
+		using ckconv::operator<<;
 		// get inputs
-		const auto& [unit_in, input, unit_out] {conv._vars};
-
-		const auto input_unit{ ckconv::getUnit(unit_in) }, output_unit{ ckconv::getUnit(unit_out) };
-
-		// temporary buffer to prevent modifying STDOUT stream state
-		std::stringstream ss;
-		ss << configure_ostream;
+		const auto& [input_unit, input, output_unit] {conv._vars};
 
 		if (!Global.quiet) {
-			ss // insert input
-				<< Global.palette.set(OUT::INPUT_VALUE) << input << Global.palette.reset()
+			const auto
+				input_unit_str{ str::stringify(configure_ostream, input_unit) },
+				input_str{ str::stringify(configure_ostream, input) };
+
+			os // insert input
+				<< Global.palette.set(OUT::INPUT_VALUE) << input_str << Global.palette.reset()
 				<< ' '
-				<< Global.palette.set(OUT::INPUT_UNIT) << input_unit << Global.palette.reset()
-				<< str::VIndent(conv._min_indent, (input.size() + input_unit.sym.size() + 1ull))
+				<< Global.palette.set(OUT::INPUT_UNIT) << input_unit_str << Global.palette.reset()
+				<< str::VIndent(conv._min_indent, (input_str.size() + input_unit_str.size() + 1ull))
 				<< Global.palette.set(OUT::EQUALS) << '=' << Global.palette.reset() << ' ';
 		}
 
-		const NumberT output{ conv.getResult(input_unit, str::stold(input), output_unit) };
+		const NumberT output{ conv.getResult(input_unit, input, output_unit) };
+		const auto output_str{ str::stringify(configure_ostream, output) };
 
-		ss << Global.palette.set(OUT::OUTPUT_VALUE) << output << Global.palette.reset();
+		os << Global.palette.set(OUT::OUTPUT_VALUE) << output_str << Global.palette.reset();
 
 		if (!Global.quiet)
-			ss << ' ' << Global.palette.set(OUT::OUTPUT_UNIT) << output_unit << Global.palette.reset();
+			os << ' ' << Global.palette.set(OUT::OUTPUT_UNIT) << output_unit << Global.palette.reset();
 
-		return os << ss.rdbuf();
+		return os;
 	}
 };
 
@@ -144,7 +145,7 @@ INLINE std::vector<std::string> read_all_stdin()
  * @param snd	Second Vector
  * @returns		std::vector<std::string>
  */
-template<typename T> [[nodiscard]] 
+template<typename T> [[nodiscard]]
 INLINE std::vector<T> catvec(const std::vector<T>& fst, const std::vector<T>& snd)
 {
 	std::vector<T> vec;
@@ -168,7 +169,7 @@ INLINE std::vector<T> catvec(const std::vector<T>& fst, const std::vector<T>& sn
 	return catvec(read_all_stdin(), args.typegetv_all<opt::Parameter>());
 	#else // Windows:
 	const auto params{ args.typegetv_all<opt::Parameter>() };
-	if (args.check<opt::Flag>('p'))
+	if (args.check<opt::Flag>('P'))
 		return catvec(read_all_stdin(), params);
 	else return params;
 	#endif
@@ -196,9 +197,30 @@ int main(const int argc, char** argv)
 			std::cout << program_name.generic_string() << " v" << ckconv_VERSION << std::endl;
 			return 0;
 		}
-		else if (args.check_any<opt::Option>("reset-ini", "ini-reset")) {
+		// set ini
+		else if (args.check_any<opt::Option>("set-ini", "ini-set")) {
 			handle_args(args);
 			write_settings_to_config();
+			return 0;
+		}
+		// units
+		else if (args.check_any<opt::Flag, opt::Option>('u', "units")) {
+			if (const auto& units{ args.typegetv_any<opt::Flag, opt::Option>('u', "units") }; units.has_value()) {
+				const auto s{ str::tolower(units.value()) };
+				if (s == "m" || s == "metric") {
+					std::cout << ckconv::PrintableMeasurementUnits<SystemID::METRIC>() << std::endl;
+					return 0;
+				}
+				else if (s == "i" || s == "imperial") {
+					std::cout << ckconv::PrintableMeasurementUnits<SystemID::IMPERIAL>() << std::endl;
+					return 0;
+				}
+				else if (s == "creationkit" || s == "creation kit" || s == "ck" || s == "gamebryo" || s == "engine" || s == "unit" || s == "units" || s == "un" || s == "u") {
+					std::cout << ckconv::PrintableMeasurementUnits<SystemID::CREATIONKIT>() << std::endl;
+					return 0;
+				}
+			}
+			std::cout << ckconv::PrintableMeasurementUnits<SystemID::ALL>() << std::endl;
 			return 0;
 		}
 
@@ -220,7 +242,7 @@ int main(const int argc, char** argv)
 		// get all parameters
 		if (!params.empty()) {
 			// lambda to retrieve the current argument & the next 2 arguments as a string tuple. Does NOT check for out-of-range iterators!
-			const auto& getArgTuple{ [&params](decltype(params)::const_iterator& it) -> Convert::Tuple {
+			const auto& getArgTuple{ [&params](decltype(params)::const_iterator& it) -> Convert::StrTuple {
 				const auto first{ *it }; // these have to be defined in long form or operator++ causes them to be in the wrong order.
 				const auto second{ *++it };
 				const auto third{ *++it };

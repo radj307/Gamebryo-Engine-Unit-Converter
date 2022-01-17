@@ -40,16 +40,18 @@ namespace ckconv {
 		OUTPUT_UNIT,
 		OUTPUT_VALUE,
 		EQUALS,
+		UNITS_SECTION_TEXT,
 	};
 
 	static struct {
 		///	@brief	Palette instance containing each of the keys from OUT. This is used to allow disabling color sequences program-wide.
 		term::palette<OUT> palette{
-			std::make_pair(OUT::INPUT_UNIT,		term::setcolor(color::white, color::format::BOLD)),
-			std::make_pair(OUT::INPUT_VALUE,	term::setcolor(color::green)),
-			std::make_pair(OUT::OUTPUT_UNIT,	term::setcolor(color::white, color::format::BOLD)),
-			std::make_pair(OUT::OUTPUT_VALUE,	term::setcolor(color::green)),
-			std::make_pair(OUT::EQUALS,			term::setcolor(color::white)),
+			std::make_pair(OUT::INPUT_UNIT,			term::setcolor(color::white, color::format::BOLD)),
+			std::make_pair(OUT::INPUT_VALUE,		term::setcolor(color::green)),
+			std::make_pair(OUT::OUTPUT_UNIT,		term::setcolor(color::white, color::format::BOLD)),
+			std::make_pair(OUT::OUTPUT_VALUE,		term::setcolor(color::green)),
+			std::make_pair(OUT::EQUALS,				term::setcolor(color::white)),
+			std::make_pair(OUT::UNITS_SECTION_TEXT,	term::setcolor(color::intense_white)),
 		};
 
 
@@ -62,6 +64,7 @@ namespace ckconv {
 		const FmtFlag* notation{ nullptr };
 		bool quiet{ false };
 		bool no_color{ false }; // this only exists to allow the --no-color option to influence --reset-ini
+		bool use_full_unit_names{ false };
 	} Global;
 
 	/**
@@ -84,17 +87,19 @@ namespace ckconv {
 			<< "OPTIONS:\n"
 			<< "  " << "-h  --help                     Show the help display and exit." << '\n'
 			<< "  " << "-v  --version                  Show the current version number and exit." << '\n'
+			<< "  " << "-u [system]  --units [system]  Displays a list of all of the recognized units, optionally from a single" << '\n'
+			<< "  " << "                               measurement system, then exit. By default, all systems are shown." << '\n'
 			<< "  " << "--standard  --fixed            Force standard notation." << '\n'
 			<< "  " << "--scientific  --sci            Force scientific notation." << '\n'
-			<< "  " << "-p <INT>  --precision <INT>    Force show at least <INT> number of digits after the decimal point." << '\n'
-			<< "  " << "-a <INT>  --align-to <INT>     Set the minimum indentation after the equals sign before printing output." << '\n'
+			<< "  " << "-p <#>  --precision <#>        Force show at least <INT> number of digits after the decimal point." << '\n'
+			<< "  " << "-a <#>  --align-to <#>         Set the minimum number of characters before the equals sign, if quiet is not specified." << '\n'
 			<< "  " << "                               Does nothing if the quiet option is specified." << '\n'
 			<< "  " << "-q  --quiet                    Print only output values." << '\n'
 			<< "  " << "-n  --no-color                 Don't use color escape sequences." << '\n'
-			<< "  " << "--reset-ini                    Create or overwrite the config with the current configuration, including options." << '\n'
-			<< "  " << "                               This is sensitive to other options like precision & no-color." << '\n'
+			<< "  " << "--set-ini                      Create or overwrite the config with the current configuration, including options." << '\n'
+			<< "  " << "                               This is affected by other options like precision & no-color." << '\n'
 			#ifdef OS_WIN
-			<< "  " << "-p                             Receive piped input from STDIN." << '\n'
+			<< "  " << "-P                             Receive piped input from STDIN." << '\n'
 			#endif
 			;
 	}
@@ -168,7 +173,7 @@ namespace ckconv {
 
 	/**
 	 * @brief			Handle the config file's version number, and print a warning.
-	 * @param strver	
+	 * @param strver
 	 */
 	inline void handle_config_version(const std::string& strver) noexcept(false)
 	{
@@ -233,4 +238,94 @@ namespace ckconv {
 
 		return os;
 	}
+
+	/**
+	 * @brief		Stream insertion operator for the Unit struct that uses full names or symbols depending on Global.use_full_unit_names.
+	 *\n			This is implicitly called whenever inserting a Unit into an output stream.
+	 * @param os	Output Stream
+	 * @param u		Length Unit Instance
+	 * @returns		std::ostream&
+	 */
+	inline std::ostream& operator<<(std::ostream& os, const Unit& u)
+	{
+		if (Global.use_full_unit_names)
+			return os << u.getName();
+		return os << u.getSymbol();
+	}
+
+	template<SystemID System>
+	struct PrintableMeasurementUnits {
+		friend std::ostream& operator<<(std::ostream& os, const PrintableMeasurementUnits<System>& u)
+		{
+			bool fallthrough{ System == SystemID::ALL }; // fallthrough all cases and print everything
+			constexpr const std::streamsize symbol_indent_postfix{ 8ll }, name_indent_postfix{ 16ll };
+			std::stringstream ss;
+			switch (System) {
+			case SystemID::ALL:
+				if (!fallthrough) break;
+				[[fallthrough]];
+			case SystemID::CREATIONKIT:
+			{
+				ss
+					<< Global.palette.set(OUT::UNITS_SECTION_TEXT) << "Creation Kit Units:" << Global.palette.reset() << "\n"
+					<< "  Symbol  Name            1 in Base Unit\n"
+					<< "  --------------------------------------\n"
+					;
+				int power{ -12 };
+				for (const auto& unit : CreationKit.units) {
+					const auto& symbol{ (unit.hasName() ? unit.getSymbol() : ""s) }, name{ unit.getName() };
+					ss
+						<< "  " << symbol << str::VIndent(symbol_indent_postfix, symbol.size())
+						<< name << str::VIndent(name_indent_postfix, name.size())
+						<< unit.unitcf << ' ' << *CreationKit.base
+						<< '\n';
+				}
+				if (!fallthrough) break;
+				ss << '\n';
+				[[fallthrough]];
+			}
+			case SystemID::METRIC:
+			{
+				ss
+					<< Global.palette.set(OUT::UNITS_SECTION_TEXT) << "Metric Units:" << Global.palette.reset() << "\n"
+					<< "  Symbol  Name            1 in Base Unit\n"
+					<< "  --------------------------------------\n"
+					;
+				int power{ -12 };
+				for (const auto& unit : Metric.units) {
+					const auto& symbol{ (unit.hasName() ? unit.getSymbol() : ""s) }, name{ unit.getName() };
+					ss
+						<< "  " << symbol << str::VIndent(symbol_indent_postfix, symbol.size())
+						<< name << str::VIndent(name_indent_postfix, name.size())
+						<< unit.unitcf << ' ' << *Metric.base
+						<< '\n';
+					power += (power < 3 || power > 3 ? 3 : 1);
+				}
+				if (!fallthrough) break;
+				ss << '\n';
+				[[fallthrough]];
+			}
+			case SystemID::IMPERIAL:
+			{
+				ss
+					<< Global.palette.set(OUT::UNITS_SECTION_TEXT) << "Imperial Units:" << Global.palette.reset() << "\n"
+					<< "  Symbol  Name            1 in Base Unit\n"
+					<< "  --------------------------------------\n"
+					;
+				for (const auto& unit : Imperial.units) {
+					const auto& symbol{ (unit.hasName() ? unit.getSymbol() : ""s) }, name{ unit.getName() };
+					ss
+						<< "  " << symbol << str::VIndent(symbol_indent_postfix, symbol.size())
+						<< name << str::VIndent(name_indent_postfix, name.size())
+						<< unit.unitcf << ' ' << *Imperial.base
+						<< '\n';
+				}
+				if (!fallthrough) break;
+				[[fallthrough]];
+			}
+			default:break;
+			}
+			return os << ss.rdbuf();
+		}
+	};
 }
