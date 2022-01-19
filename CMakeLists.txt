@@ -12,7 +12,7 @@ if (DEFINED $ENV{GamebryoUnitConv_VERSION})
 else()
 	message(STATUS "Using AutoVersion")
 	include(AutoVersion)
-	GET_VERSION("${CMAKE_CURRENT_SOURCE_DIR}" GamebryoUnitConv_VERSION GamebryoUnitConv_VERSION_MAJOR GamebryoUnitConv_VERSION_MINOR GamebryoUnitConv_VERSION_PATCH)
+	GET_VERSION("GamebryoUnitConv" "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 # Create project
