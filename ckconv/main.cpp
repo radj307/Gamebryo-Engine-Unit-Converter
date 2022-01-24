@@ -4,6 +4,7 @@ using namespace ckconv;
 
 #include <math.hpp>
 #include <envpath.hpp>
+#include <hasPendingDataSTDIN.h>
 
 /**
  * @struct	Convert
@@ -93,35 +94,11 @@ public:
 	}
 };
 
-#ifndef OS_WIN
-/**
- * @brief		Check if the given read file descriptor has pending data.
- * @param fd	The target file descriptor. (STDIN = 0)
- * @param s		Timeout in seconds.
- * @param us	Additional timeout in nanoseconds.
- * @returns		bool
- *\n			true	There is pending input.
- *\n			false	There is no pending input.
- */
-INLINE bool hasPending(const int& fd)
-{
-	struct timespec timeout { 0L, 0L };
-	fd_set fds; // create a file descriptor set
-	FD_ZERO(&fds);
-	FD_SET(fd, &fds); // stdin file descriptor is 0
-	fflush(NULL); // flush input buffer
-	return pselect(fd + 1, &fds, nullptr, nullptr, &timeout, nullptr) == 1;
-}
-#else
-// Dummy function for windows that always returns false
-INLINE CONSTEXPR bool hasPending(const int& fd) { return false; }
-#endif
-
 /**
  * @brief	Read all available input from STDIN.
  * @returns	std::vector<std::string>
  */
-INLINE std::vector<std::string> read_all_stdin()
+INLINE std::vector<std::string> read_words_stdin()
 {
 	// lambda that gets the next word from STDIN
 	const auto& getNextWord{ [&]() -> std::string {
@@ -132,7 +109,7 @@ INLINE std::vector<std::string> read_all_stdin()
 	} };
 	std::vector<std::string> vec;
 	vec.reserve(24);
-	while (std::cin.good() && hasPending(0))
+	while (std::cin.good() && hasPendingDataSTDIN())
 		if (auto word{ getNextWord() }; !word.empty())
 			vec.emplace_back(std::move(word));
 	vec.shrink_to_fit();
@@ -158,23 +135,6 @@ INLINE std::vector<T> catvec(const std::vector<T>& fst, const std::vector<T>& sn
 	return vec;
 }
 
-/**
- * @brief		This function only exists because windows doesn't allow checking if STDIN has pending data.
- * @param args	Arguments
- * @returns		std::vector<std::string>
- */
-[[nodiscard]] INLINE std::vector<std::string> get_conversion_parameters(const opt::ParamsAPI2& args)
-{
-	#ifndef OS_WIN // if not using windows, read from stdin
-	return catvec(read_all_stdin(), args.typegetv_all<opt::Parameter>());
-	#else // Windows:
-	const auto params{ args.typegetv_all<opt::Parameter>() };
-	if (args.check<opt::Flag>('P'))
-		return catvec(read_all_stdin(), params);
-	else return params;
-	#endif
-}
-
 int main(const int argc, char** argv)
 {
 	int rc{ -1 };
@@ -184,11 +144,15 @@ int main(const int argc, char** argv)
 		// find the program's location
 		const auto [program_path, program_name] { env::PATH().resolve_split(argv[0]) };
 
+		std::vector<std::string> parameters{ args.typegetv_all<opt::Parameter>() };
+		if (hasPendingDataSTDIN())
+			parameters = catvec(parameters, read_words_stdin());
+
 		// Set the ini path
 		Global.ini_path = program_path / std::filesystem::path{ program_name }.replace_extension("ini");
 
 		// handle help argument
-		if ((args.empty() && !hasPending(0)) || args.check_any<opt::Flag, opt::Option>('h', "help")) {
+		if ((args.empty() && parameters.empty()) || args.check_any<opt::Flag, opt::Option>('h', "help")) {
 			write_help(std::cout, program_name.generic_string());
 			return 0;
 		}
@@ -230,29 +194,27 @@ int main(const int argc, char** argv)
 
 		handle_args(args);
 
-		const auto params{ get_conversion_parameters(args) };
-
 		// Hidden debug option to dump all parameters to STDOUT
 		if (args.check<opt::Option>("debug-dump-all")) {
-			for (auto& it : params)
+			for (auto& it : parameters)
 				std::cout << term::debug << '\"' << it << "\"\n";
 			return 0;
 		}
 
 		// get all parameters
-		if (params.empty())
+		if (parameters.empty())
 			throw make_exception("Nothing to do.");
 
 		// lambda to retrieve the current argument & the next 2 arguments as a string tuple. Does NOT check for out-of-range iterators!
-		const auto& getArgTuple{ [&params](decltype(params)::const_iterator& it) -> Convert::StrTuple {
+		const auto& getArgTuple{ [&parameters](auto&& it) -> Convert::StrTuple {
 			const auto first{ *it }; // these have to be defined in long form or operator++ causes them to be in the wrong order.
 			const auto second{ *++it };
 			const auto third{ *++it };
 			return{ first, second, third };
 		} };
 
-		for (auto it{ params.begin() }; it < params.end(); ++it)
-			if (std::distance(it, params.end()) > 2ull) // if there are at least 2 more arguments after this one
+		for (auto it{ parameters.begin() }; it < parameters.end(); ++it)
+			if (std::distance(it, parameters.end()) > 2ull) // if there are at least 2 more arguments after this one
 				std::cout << Convert(getArgTuple(it), Global.align_to_column) << '\n';
 
 		rc = 0;
