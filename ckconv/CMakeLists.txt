@@ -19,7 +19,7 @@ file(GLOB HEADERS
 include(ResourceMaker)
 
 # Create version header
-CREATE_VERSION_HEADER("ckconv" "${GamebryoUnitConv_VERSION_MAJOR}" "${GamebryoUnitConv_VERSION_MINOR}" "${GamebryoUnitConv_VERSION_PATCH}")
+CREATE_VERSION_HEADER_2("${CMAKE_CURRENT_SOURCE_DIR}/version.h" "ckconv" "${GamebryoUnitConv_VERSION_MAJOR}" "${GamebryoUnitConv_VERSION_MINOR}" "${GamebryoUnitConv_VERSION_PATCH}" "${GamebryoUnitConv_VERSION_EXTRA}")
 # Create versioninfo & icon .rc file
 CREATE_VERSION_RESOURCE("${CMAKE_CURRENT_BINARY_DIR}/ckconv.rc" "${GamebryoUnitConv_VERSION_MAJOR}" "${GamebryoUnitConv_VERSION_MINOR}" "${GamebryoUnitConv_VERSION_PATCH}" "radj307" "Converts between metric, imperial, and creation kit length units." "ckconv" "GPLv3" "ckconv.exe" "Gamebryo/CreationKit Engine Unit Converter")
 APPEND_ICON_RESOURCE("${CMAKE_CURRENT_BINARY_DIR}/ckconv.rc" "${CMAKE_CURRENT_SOURCE_DIR}/MAINICON.ico")

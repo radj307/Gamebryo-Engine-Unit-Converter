@@ -11,8 +11,8 @@ if (DEFINED $ENV{GamebryoUnitConv_VERSION})
 	AV_PARSE_TAG("${GamebryoUnitConv_VERSION}" GamebryoUnitConv_VERSION_MAJOR GamebryoUnitConv_VERSION_MINOR GamebryoUnitConv_VERSION_PATCH)
 else()
 	message(STATUS "Using AutoVersion")
-	include(AutoVersion)
-	GET_VERSION("GamebryoUnitConv" "${CMAKE_CURRENT_SOURCE_DIR}")
+	include(AutoVersion2)
+	GET_VERSION_2("GamebryoUnitConv" "${CMAKE_CURRENT_SOURCE_DIR}" MAJOR MINOR PATCH EXTRA)
 endif()
 
 # Create project
