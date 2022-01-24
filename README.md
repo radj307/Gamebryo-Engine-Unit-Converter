@@ -56,4 +56,3 @@
   Converting 5 picometers to units in standard notation, and response-only mode:  
   ![](https://i.imgur.com/HoykBM7.png)
   ![](https://i.imgur.com/fLj1yvU.png)
-  ![](https://i.imgur.com/9LTzbIz.png)
