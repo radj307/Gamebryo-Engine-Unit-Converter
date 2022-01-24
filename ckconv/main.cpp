@@ -135,6 +135,22 @@ INLINE std::vector<T> catvec(const std::vector<T>& fst, const std::vector<T>& sn
 	return vec;
 }
 
+INLINE std::filesystem::path getConfigDir(std::filesystem::path program_dir, std::filesystem::path program_name)
+{
+	std::string env_var_name{ str::toupper(std::filesystem::path(program_name).replace_extension().generic_string()) + "_CONFIG_DIR" };
+	if (const auto var{ env::getvar(env_var_name) }; var.has_value())
+		return var.value();
+
+	#ifdef OS_WIN
+	return (program_dir / program_name).replace_extension("ini");
+	#else
+	const auto home{ env::getvar("HOME") };
+	if (!home.has_value())
+		throw make_exception("Failed to retrieve a value for the $HOME variable!");
+	return home.value() + "/.config/ckconv/" + program_name.generic_string() + ".ini";
+	#endif
+}
+
 int main(const int argc, char** argv)
 {
 	int rc{ -1 };
@@ -149,7 +165,7 @@ int main(const int argc, char** argv)
 			parameters = catvec(read_words_stdin(), parameters);
 
 		// Set the ini path
-		Global.ini_path = program_path / std::filesystem::path{ program_name }.replace_extension("ini");
+		Global.ini_path = getConfigDir(program_path, program_name);
 
 		// handle help argument
 		if ((args.empty() && parameters.empty()) || args.check_any<opt::Flag, opt::Option>('h', "help")) {
