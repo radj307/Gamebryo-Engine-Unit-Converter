@@ -146,7 +146,7 @@ int main(const int argc, char** argv)
 
 		std::vector<std::string> parameters{ args.typegetv_all<opt::Parameter>() };
 		if (hasPendingDataSTDIN())
-			parameters = catvec(parameters, read_words_stdin());
+			parameters = catvec(read_words_stdin(), parameters);
 
 		// Set the ini path
 		Global.ini_path = program_path / std::filesystem::path{ program_name }.replace_extension("ini");
@@ -158,7 +158,9 @@ int main(const int argc, char** argv)
 		}
 		// handle version argument
 		else if (args.check_any<opt::Flag, opt::Option>('v', "version")) {
-			std::cout << program_name.generic_string() << " v" << ckconv_VERSION << std::endl;
+			if (!args.check_any<opt::Flag, opt::Option>('q', "quiet"))
+				std::cout << program_name.generic_string() << " v";
+			std::cout << ckconv_VERSION << std::endl;
 			return 0;
 		}
 		// set ini
@@ -167,7 +169,7 @@ int main(const int argc, char** argv)
 			write_settings_to_config();
 			return 0;
 		}
-		// units
+		// list units
 		else if (args.check_any<opt::Flag, opt::Option>('u', "units")) {
 			if (const auto& units{ args.typegetv_any<opt::Flag, opt::Option>('u', "units") }; units.has_value()) {
 				const auto s{ str::tolower(units.value()) };
