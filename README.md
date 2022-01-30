@@ -23,14 +23,15 @@ If you're new to using CLI programs, see the [beginners guide](https://github.co
   If you want to be able to use the program no matter your shell's current working directory, you'll need to place the executable in a location found in your `PATH` environment variable.  
   
   The program is small enough to embed within another executable, for an example see [this synthesis patcher](https://github.com/radj307/Metric-Units-Patcher).
+
+### Adding to PATH
+  #### Linux
+  Place the executable in `/usr/local/bin` to add to your path, or add `export PATH='$PATH;<PATH_TO_DIRECTORY>'` to the end of `~/.bashrc`
   
-  ### Linux
-  Place the executable in `/usr/local/bin` to add to your path.
-  
-  ### Windows
+  #### Windows
   [See Here](https://stackoverflow.com/a/9546345/8705305)
   
-  ### macOS
+  #### macOS
   I genuinely have no idea as I have never owned or used a mac, but I assume it's similar to Linux.
   
 ## Usage  
