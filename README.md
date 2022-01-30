@@ -2,12 +2,20 @@
 <p align="center"><img alt="GitHub tag (latest by date)" src="https://img.shields.io/github/v/tag/radj307/Gamebryo-Engine-Unit-Converter?color=ffffff&label=Current%20Version&logo=github&style=for-the-badge">&nbsp&nbsp<img alt="GitHub all releases" src="https://img.shields.io/github/downloads/radj307/Gamebryo-Engine-Unit-Converter/total?color=ffffff&logo=github&style=for-the-badge"></p>
   This is a commandline utility that converts between common length measurement units & Bethesda's arbitrary length measurement known as the _Unit_.  
 
-  Supports all units from the following measurement systems:
+- Units Supported
   - Metric
+    - Includes all metric prefixes from `pico-` to `tera-`
   - Imperial
+    - Includes all Imperial length units listed on [wikipedia](https://en.wikipedia.org/wiki/Imperial_units#Length).
   - Gamebryo / CreationKit Units
+    - Includes all metric prefixes from `pico-` to `tera-`
+- Cross-Platform
+  - Windows
+  - Linux
+  - macOS
+  
 
-  If you're new to using CLI programs, see the [guide](https://github.com/radj307/Gamebryo-Engine-Unit-Converter/wiki#detailed-usage-guide-for-less-experienced-terminal-users).
+If you're new to using CLI programs, see the [beginners guide](https://github.com/radj307/Gamebryo-Engine-Unit-Converter/wiki#detailed-usage-guide-for-less-experienced-terminal-users).
 
 ## Installation
   No formal installation is required, simply place the executable somewhere and call it from your preferred shell.
@@ -21,6 +29,9 @@
   
   ### Windows
   [See Here](https://stackoverflow.com/a/9546345/8705305)
+  
+  ### macOS
+  I genuinely have no idea as I have never owned or used a mac, but I assume it's similar to Linux.
   
 ## Usage  
   Use `ckconv -h` or `ckconv --help` to see a usage guide.  
