@@ -8,7 +8,7 @@
   - Imperial
     - Includes all Imperial length units listed on [wikipedia](https://en.wikipedia.org/wiki/Imperial_units#Length).
   - Gamebryo / CreationKit Units
-    - Includes all metric prefixes from `pico-` to `tera-` because who doesn't want to use hectounits
+    - Includes all metric prefixes from `pico-` to `tera-` because who doesn't want to use kilounits
 - Cross-Platform
   - Windows
   - Linux
