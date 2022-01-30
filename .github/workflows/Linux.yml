@@ -38,13 +38,13 @@ jobs:
 
     - name: Create Archive
       run:  |
-            cd ${{github.workspace}}/build/ARRCON
-            zip -T9 ARRCON-$(./ARRCON -vq)-Linux.zip ARRCON
+            cd ${{github.workspace}}/build/ckconv
+            zip -T9 ckconv-$(./ckconv -vq)-Linux.zip ckconv
       shell: bash
       
     - name: Upload Latest Artifact
       uses: actions/upload-artifact@v2
       with:
         name: latest-linux
-        path: ${{github.workspace}}/build/ARRCON/*.zip
+        path: ${{github.workspace}}/build/ckconv/*.zip
         retention-days: 2
