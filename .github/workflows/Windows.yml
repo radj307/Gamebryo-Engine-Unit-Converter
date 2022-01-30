@@ -33,13 +33,13 @@ jobs:
       
     - name: Create Release Archive
       run:  |
-            cd ${{github.workspace}}\build\ARRCON
-            Compress-Archive ARRCON.exe ARRCON-$(.\ARRCON.exe -vq)-Windows.zip
+            cd ${{github.workspace}}\build\ckconv
+            Compress-Archive ckconv.exe ckconv-$(.\ckconv.exe -vq)-Windows.zip
       shell: powershell
       
     - name: Upload Latest Artifact
       uses: actions/upload-artifact@v2
       with:
         name: latest-windows
-        path: ${{github.workspace}}/build/ARRCON/*.zip
+        path: ${{github.workspace}}/build/ckconv/*.zip
         retention-days: 2
