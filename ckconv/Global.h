@@ -2,6 +2,7 @@
 #include "version.h"
 
 #include <sysarch.h>
+#include <make_exception.hpp>
 #include <TermAPI.hpp>
 #include <palette.hpp>
 #include <ParamsAPI2.hpp>
@@ -19,6 +20,25 @@ using FmtFlag = std::_Iosb<int>::_Fmtflags;
 /// @brief	This is used to keep track of the number output notation.
 using FmtFlag = std::ios_base::fmtflags;
 #endif
+
+struct argument_except : public ex::except { argument_except(auto&& message) : ex::except(std::forward<decltype(message)>(message)) {} };
+template<typename... Ts>
+inline argument_except argument_exception(const std::string& argument, const Ts&... reason)
+{
+	return ex::make_custom_exception<argument_except>(
+		"Invalid Argument:    ", argument, '\n',
+		"        Reason:      ", reason..., '\n'
+	);
+}
+template<typename... Ts>
+inline argument_except argument_exception(const std::string& argument, const std::string& valid_typename, const Ts&... reason)
+{
+	return ex::make_custom_exception<argument_except>(
+		"Invalid Argument:    ", argument, '\n',
+		"        Reason:      ", reason..., '\n',
+		"        Valid Type:  ", valid_typename, '\n'
+	);
+}
 
 INLINE CONSTEXPR const FmtFlag* const FIXED{ &std::ios_base::fixed }, * SCIENTIFIC{ &std::ios_base::scientific };
 
@@ -85,19 +105,20 @@ namespace ckconv {
 			<< "  " << program_name << " [OPTIONS] [<INPUT_UNIT> <INPUT_VALUE> <OUTPUT_UNIT>]...\n"
 			<< '\n'
 			<< "OPTIONS:\n"
-			<< "  " << "-h  --help                     Show the help display and exit." << '\n'
-			<< "  " << "-v  --version                  Show the current version number and exit." << '\n'
-			<< "  " << "-u [system]  --units [system]  Displays a list of all of the recognized units, optionally from a single" << '\n'
-			<< "  " << "                               measurement system, then exit. By default, all systems are shown." << '\n'
-			<< "  " << "--standard  --fixed            Force standard notation." << '\n'
-			<< "  " << "--scientific  --sci            Force scientific notation." << '\n'
-			<< "  " << "-p <#>  --precision <#>        Force show at least <INT> number of digits after the decimal point." << '\n'
-			<< "  " << "-a <#>  --align-to <#>         Set the minimum number of characters before the equals sign, if quiet is not specified." << '\n'
-			<< "  " << "                               Does nothing if the quiet option is specified." << '\n'
-			<< "  " << "-q  --quiet                    Print only output values." << '\n'
-			<< "  " << "-n  --no-color                 Don't use color escape sequences." << '\n'
-			<< "  " << "--set-ini                      Create or overwrite the config with the current configuration, including options." << '\n'
-			<< "  " << "                               This is affected by other options like precision & no-color." << '\n'
+			<< "  -h            --help            Show the help display and exit." << '\n'
+			<< "  -v            --version         Show the current version number and exit." << '\n'
+			<< "  -u [system]   --units [system]  Displays a list of all of the recognized units, optionally from a single" << '\n'
+			<< "                                  measurement system, then exit. By default, all systems are shown." << '\n'
+			<< "  -f            --full-name       Use the full name instead of the official unit symbols when possible." << '\n'
+			<< "  --standard    --fixed           Force standard notation." << '\n'
+			<< "  --scientific  --sci             Force scientific notation." << '\n'
+			<< "  -p <#>        --precision <#>   Force show at least <INT> number of digits after the decimal point." << '\n'
+			<< "  -a <#>        --align-to <#>    Aligns output to <#> character columns." << '\n'
+			<< "                                  Does nothing if the quiet option is specified." << '\n'
+			<< "  -q            --quiet           Print only output values." << '\n'
+			<< "  -n            --no-color        Don't use color escape sequences." << '\n'
+			<< "                --set-ini         Create or overwrite the config with the current configuration, including options." << '\n'
+			<< "                                  This is affected by other options like precision & no-color." << '\n'
 			;
 	}
 	/**
@@ -113,12 +134,22 @@ namespace ckconv {
 			Global.notation = SCIENTIFIC;
 
 		// precision
-		if (const auto precision{ args.typegetv_any<opt::Flag, opt::Option>('p', "precision") }; precision.has_value())
-			Global.precision = str::stoll(precision.value());
+		if (const auto precision{ args.typegetv_any<opt::Flag, opt::Option>('p', "precision") }; precision.has_value()) {
+			const auto val{ precision.value() };
+			if (std::all_of(val.begin(), val.end(), isdigit))
+				Global.precision = str::stoll(val);
+			else throw argument_exception("precision", "Integer", val, " is not a valid precision value!");
+		}
 
 		// align-to
-		if (const auto alignment{ args.typegetv_any<opt::Flag, opt::Option>('a', "align-to") }; alignment.has_value())
-			Global.align_to_column = str::stoll(alignment.value());
+		if (const auto alignment{ args.typegetv_any<opt::Flag, opt::Option>('a', "align-to") }; alignment.has_value()) {
+			const auto val{ alignment.value() };
+			if (std::all_of(val.begin(), val.end(), isdigit))
+				Global.precision = str::stoll(val);
+			else throw argument_exception("align-to", "Integer", val, " is not a valid column!");
+		}
+
+		Global.use_full_unit_names = args.check_any<opt::Flag, opt::Option>('f', "full-name");
 
 		// quiet
 		Global.quiet = args.check_any<opt::Flag, opt::Option>('q', "quiet");
@@ -202,7 +233,7 @@ namespace ckconv {
 				else if constexpr (std::same_as<T, file::ini::Boolean> || std::same_as<T, std::monostate>)
 					return Global.precision;
 				else static_assert(var::false_v<T>, "Visitor cannot handle all potential type cases!");
-			}, precision.value());
+				}, precision.value());
 		}
 
 		// notation
