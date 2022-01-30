@@ -45,6 +45,7 @@ If you're new to using CLI programs, see the [beginners guide](https://github.co
   | `-v` `--version`                 | Show the current version number & exit.                                                              |  
   | `--standard`  `--fixed`          | Always use standard notation when printing numbers.                                                  |  
   | `--scientific`  `--sci`          | Always use scientific notation when printing numbers.                                                |  
+  | `-f`  `--full-name`              | Use full unit names instead of their official symbols. _Ex: `Kilometers` instead of `km`_
   | `-p <INT>`  `--precision <INT>`  | Override the number of digits to show after the decimal point. By default, precision is "as-needed". |  
   | `-a <INT>`  `--align-to <INT>`   | Set the number of characters _(from the left side of the screen)_ before printing output values & units. |
   | `-q` `--quiet`                   | Print only the resulting values of conversions, hide input values, units, and output units.          |  
