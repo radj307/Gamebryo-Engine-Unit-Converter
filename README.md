@@ -47,7 +47,7 @@ If you're new to using CLI programs, see the [beginners guide](https://github.co
   | `--scientific`  `--sci`          | Always use scientific notation when printing numbers.                                                |  
   | `-f`  `--full-name`              | Use full unit names instead of their official symbols. _Ex: `Kilometers` instead of `km`_
   | `-p <INT>`  `--precision <INT>`  | Override the number of digits to show after the decimal point. By default, precision is "as-needed". |  
-  | `-a <INT>`  `--align-to <INT>`   | Set the number of characters _(from the left side of the screen)_ before printing output values & units. |
+  | `-a <INT>`  `--align-to <INT>`   | Set the number of characters _(from the left side of the screen)_ before printing output values & units. Useful when converting many values at once. |
   | `-q` `--quiet`                   | Print only the resulting values of conversions, hide input values, units, and output units.          |  
   | `-n` `--no-color`                | Disable the usage of ANSI color escape sequences, effectively disabling the usage of all colors.     |  
   | `--reset-ini`                    | Create or overwrite the config file with the current configuration. This is sensitive to other options, allowing you to control the values written to the INI by including options that have a corresponding INI key. |  
