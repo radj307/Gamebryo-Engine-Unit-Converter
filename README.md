@@ -1,5 +1,5 @@
 <h1 align="center">Bethesda Engine Unit Converter</h1>
-<p align="center"><img alt="GitHub tag (latest by date)" src="https://img.shields.io/github/v/tag/radj307/Gamebryo-Engine-Unit-Converter?color=ffffff&label=Current%20Version&logo=github&style=for-the-badge">&nbsp&nbsp<img alt="GitHub all releases" src="https://img.shields.io/github/downloads/radj307/Gamebryo-Engine-Unit-Converter/total?color=ffffff&logo=github&style=for-the-badge"></p>
+<a href="https://github.com/radj307/Gamebryo-Engine-Unit-Converter/tags"><p align="center"><img alt="GitHub tag (latest by date)" src="https://img.shields.io/github/v/tag/radj307/Gamebryo-Engine-Unit-Converter?color=ffffff&label=Current%20Version&logo=github&style=for-the-badge"></a>&nbsp&nbsp<a href="https://github.com/radj307/Gamebryo-Engine-Unit-Converter/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/radj307/Gamebryo-Engine-Unit-Converter/total?color=ffffff&logo=github&style=for-the-badge"></p></a>
   
   
   
