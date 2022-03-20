@@ -215,7 +215,7 @@ int main(const int argc, char** argv)
 		// Hidden debug option to dump all parameters to STDOUT
 		if (args.check<opt::Option>("debug-dump-all")) {
 			for (auto& it : parameters)
-				std::cout << term::debug << '\"' << it << "\"\n";
+				std::cout << Global.palette.get_debug() << '\"' << it << "\"\n";
 			return 0;
 		}
 
@@ -237,9 +237,9 @@ int main(const int argc, char** argv)
 
 		rc = 0;
 	} catch (const std::exception& ex) {
-		std::cerr << term::error << ex.what() << std::endl;
+		std::cerr << Global.palette.get_error() << ex.what() << std::endl;
 	} catch (...) {
-		std::cerr << term::crit << "An undefined exception occurred!" << std::endl;
+		std::cerr << Global.palette.get_crit() << "An undefined exception occurred!" << std::endl;
 	}
 	return rc;
 }

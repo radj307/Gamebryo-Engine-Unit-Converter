@@ -1,50 +1,44 @@
 ﻿# GamebryoUnitConv/UnitConv
 cmake_minimum_required(VERSION 3.15)
 
-if (MSVC)
-	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
-
-# Create project
-project("ckconv" VERSION "${GamebryoUnitConv_VERSION}" LANGUAGES CXX)
-
-# Get the list of headers
+file(GLOB SRCS
+	RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+	CONFIGURE_DEPENDS
+	"*.c*"
+)
 file(GLOB HEADERS
 	RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
 	CONFIGURE_DEPENDS
 	"*.h*"
 )
 
-# Include modules
-include(ResourceMaker)
+include(VersionTag)
+MAKE_VERSION_HEADER("${CMAKE_CURRENT_SOURCE_DIR}/version.h" "ckconv" "${CKCONV_VERSION}")
 
-# Create version header
-CREATE_VERSION_HEADER_2("${CMAKE_CURRENT_SOURCE_DIR}/version.h" "ckconv" "${GamebryoUnitConv_VERSION_MAJOR}" "${GamebryoUnitConv_VERSION_MINOR}" "${GamebryoUnitConv_VERSION_PATCH}" "${GamebryoUnitConv_VERSION_EXTRA}")
-# Create versioninfo & icon .rc file
-CREATE_VERSION_RESOURCE("${CMAKE_CURRENT_BINARY_DIR}/ckconv.rc" "${GamebryoUnitConv_VERSION_MAJOR}" "${GamebryoUnitConv_VERSION_MINOR}" "${GamebryoUnitConv_VERSION_PATCH}" "radj307" "Converts between metric, imperial, and creation kit length units." "ckconv" "GPLv3" "ckconv.exe" "Gamebryo/CreationKit Engine Unit Converter")
-APPEND_ICON_RESOURCE("${CMAKE_CURRENT_BINARY_DIR}/ckconv.rc" "${CMAKE_CURRENT_SOURCE_DIR}/MAINICON.ico")
+if (WIN32)
+	include(ResourceMaker)
+	MAKE_STRINGRC_VERSIONINFO(ckconv_versioninfo "${CKCONV_VERSION}" "GPLv3" "radj307" "ckconv"  "CreationKit Unit Converter Utility, supports metric, imperial, gamebryo/creation-kit \"units\", and additionally supports metric prefixes for units, such as the \"kilounit\".")
+	MAKE_STRINGRC_ICON(ckconv_icon "${CMAKE_CURRENT_SOURCE_DIR}/resources/ckconv.ico")
+	MAKE_RESOURCE("${CMAKE_CURRENT_SOURCE_DIR}/resources/ckconv.rc" "${ckconv_versioninfo}" "${ckconv_icon}")
+endif()
 
 # Create executable
-add_executable(ckconv "main.cpp" "${CMAKE_CURRENT_BINARY_DIR}/ckconv.rc")
+add_executable(ckconv "${SRCS}" "${CMAKE_CURRENT_SOURCE_DIR}/resources/ckconv.rc")
 
 # Set properties
 set_property(TARGET ckconv PROPERTY CXX_STANDARD 20)
 set_property(TARGET ckconv PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET ckconv PROPERTY POSITION_INDEPENDENT_CODE ON)
 if (MSVC)
-	target_compile_options(ckconv PUBLIC "/Zc:__cplusplus")
+	target_compile_options(ckconv PUBLIC "/Zc:__cplusplus" "/Zc:preprocessor")
 endif()
 
 # Add headers
-include(PrependEach)
-PREPEND_EACH(HEADERS_ABS "${HEADERS}" "${CMAKE_CURRENT_SOURCE_DIR}")
-target_sources(ckconv PUBLIC 
-	"$<BUILD_INTERFACE:${HEADERS_ABS}>"
-	"$<INSTALL_INTERFACE:${HEADERS}>"
-)
+target_sources(ckconv PUBLIC "${HEADERS}")
 
 # Link dependencies
-target_link_libraries(ckconv PUBLIC TermAPI optlib filelib xlog)
+target_link_libraries(ckconv PUBLIC shared TermAPI optlib filelib)
 
 # Create installation targets
 include(PackageInstaller)
-INSTALL_EXECUTABLE(ckconv "${CMAKE_INSTALL_PREFIX}/bin/")
+INSTALL_EXECUTABLE(ckconv "${CMAKE_INSTALL_PREFIX}/bin")

@@ -66,12 +66,12 @@ namespace ckconv {
 	static struct {
 		///	@brief	Palette instance containing each of the keys from OUT. This is used to allow disabling color sequences program-wide.
 		term::palette<OUT> palette{
-			std::make_pair(OUT::INPUT_UNIT,			term::setcolor(color::white, color::format::BOLD)),
-			std::make_pair(OUT::INPUT_VALUE,		term::setcolor(color::green)),
-			std::make_pair(OUT::OUTPUT_UNIT,		term::setcolor(color::white, color::format::BOLD)),
-			std::make_pair(OUT::OUTPUT_VALUE,		term::setcolor(color::green)),
-			std::make_pair(OUT::EQUALS,				term::setcolor(color::white)),
-			std::make_pair(OUT::UNITS_SECTION_TEXT,	term::setcolor(color::intense_white)),
+			std::make_pair(OUT::INPUT_UNIT, term::setcolor(color::white, color::format::BOLD)),
+			std::make_pair(OUT::INPUT_VALUE, term::setcolor(color::green)),
+			std::make_pair(OUT::OUTPUT_UNIT, term::setcolor(color::white, color::format::BOLD)),
+			std::make_pair(OUT::OUTPUT_VALUE, term::setcolor(color::green)),
+			std::make_pair(OUT::EQUALS, term::setcolor(color::white)),
+			std::make_pair(OUT::UNITS_SECTION_TEXT, term::setcolor(color::intense_white)),
 		};
 
 
@@ -83,7 +83,6 @@ namespace ckconv {
 		std::streamsize align_to_column{ 8LL };
 		const FmtFlag* notation{ nullptr };
 		bool quiet{ false };
-		bool no_color{ false }; // this only exists to allow the --no-color option to influence --reset-ini
 		bool use_full_unit_names{ false };
 	} Global;
 
@@ -155,10 +154,7 @@ namespace ckconv {
 		Global.quiet = args.check_any<opt::Flag, opt::Option>('q', "quiet");
 
 		// no-color
-		if (args.check_any<opt::Flag, opt::Option>('n', "no-color")) {
-			Global.no_color = true;
-			Global.palette.setActive(false);
-		}
+		Global.palette.setActive(!args.check_any<opt::Flag, opt::Option>('n', "no-color"));
 	}
 
 	/**
@@ -170,31 +166,31 @@ namespace ckconv {
 		using section = file::ini::INIContainer::SectionContent;
 		using var = file::ini::VariableT;
 		if (file::INI(std::move(file::ini::INIContainer::Map{ {
+			{
+				std::string{ HEADER_GLOBAL }, section{
+					{ "version", file::ini::VariableT{ static_cast<file::ini::String>(ckconv_VERSION) } },
+			}
+			},
 				{
-					std::string{HEADER_GLOBAL}, section {
-						{ "version", file::ini::VariableT{ static_cast<file::ini::String>(ckconv_VERSION) } },
-					}
-				},
-				{
-					std::string{HEADER_OUTPUT}, section {
+					std::string{ HEADER_OUTPUT }, section{
 						{ "precision", var{ static_cast<file::ini::Integer>(Global.precision) } },
-						{ "notation", var{ []() -> std::string {
-								if (Global.notation != nullptr) {
-									if (Global.notation == FIXED)
-										return "fixed";
-									else if (Global.notation == SCIENTIFIC)
-										return "scientific";
-								}
-								return{};
-							}()
-						} },
-						{ "quiet", var{ Global.quiet } },
-						{ "no-color", var{ Global.no_color } },
-					}
+			{ "notation", var{ []() -> std::string {
+				if (Global.notation != nullptr) {
+					if (Global.notation == FIXED)
+						return "fixed";
+					else if (Global.notation == SCIENTIFIC)
+						return "scientific";
+				}
+				return{};
+			}()
+			} },
+			{ "quiet", var{ Global.quiet } },
+			{ "no-color", var{ !Global.palette.isActive() } },
+			}
 				},
 			},
 			})).write(Global.ini_path)) {
-			std::cout << (Global.no_color ? "" : term::msg) << "Successfully " << (is_new ? "created" : "reset") << " config: " << Global.ini_path << std::endl;
+			std::cout << Global.palette.get_msg() << "Successfully " << (is_new ? "created" : "reset") << " config: " << Global.ini_path << std::endl;
 		}
 		else throw make_exception("Failed to ", (is_new ? "create" : "reset"), " config: ", Global.ini_path);
 	}
@@ -248,10 +244,7 @@ namespace ckconv {
 		Global.quiet = ini.checkv(HEADER_OUTPUT, "quiet", true);
 
 		// no-color
-		if (ini.checkv(HEADER_OUTPUT, "no-color", true)) {
-			Global.no_color = true;
-			Global.palette.setActive(false);
-		}
+		Global.palette.setActive(!ini.checkv(HEADER_OUTPUT, "no-color", true));
 	}
 
 	inline std::ostream& configure_ostream(std::ostream& os)
